@@ -1,7 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import account from '@account-ui-test-host/locales/en-US/account';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@account-ui-test-host/di/keys';
 import ExternalAgentConnectionsSection from './ExternalAgentConnectionsSection.vue';
@@ -36,9 +36,13 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-function fixture(list: unknown[] = []) {
+function fixture(
+  list: unknown[] = [],
+  props: { summary?: boolean; view?: 'all' | 'oauth' | 'tokens' } = {},
+  capabilities: unknown = ok({ oauth: false }),
+) {
   const service = {
-    capabilities: vi.fn().mockResolvedValue(ok({ oauth: false })),
+    capabilities: vi.fn().mockResolvedValue(capabilities),
     listPats: vi.fn().mockResolvedValue(ok(list)),
     listConnections: vi.fn().mockResolvedValue(ok([])),
     createPat: vi.fn().mockResolvedValue(ok({ ...summary, secret: 'mfp_secret' })),
@@ -48,6 +52,7 @@ function fixture(list: unknown[] = []) {
     decideConsent: vi.fn(),
   };
   const wrapper = mount(ExternalAgentConnectionsSection, {
+    props,
     attachTo: document.body,
     global: {
       plugins: [
@@ -100,6 +105,37 @@ async function submit() {
 }
 
 describe('ExternalAgentConnectionsSection PAT issuing (#970)', () => {
+  it('keeps credentials and management actions off the summary and loads details only on the subpage', async () => {
+    const { wrapper, service } = fixture([summary], { summary: true });
+    await flushPromises();
+    expect(wrapper.text()).not.toContain(summary.prefix);
+    expect(wrapper.find('[data-testid="pat-create-open"]').exists()).toBe(false);
+    expect(service.listPats).not.toHaveBeenCalled();
+    expect(service.listConnections).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="account-connections-open"]').trigger('click');
+    expect(wrapper.emitted('open')).toEqual([['tokens']]);
+    wrapper.unmount();
+  });
+
+  it('hides the summary entry when the gateway capability is disabled', async () => {
+    const { wrapper } = fixture(
+      [],
+      { summary: true },
+      fail({ code: 'EAG_SERVICE_DISABLED', message: 'Disabled' }),
+    );
+    await flushPromises();
+    expect(wrapper.find('[data-testid="account-connections-open"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps OAuth apps and access tokens on separate subpages', async () => {
+    const { wrapper } = fixture([summary], { view: 'oauth' }, ok({ oauth: true }));
+    await flushPromises();
+    expect(wrapper.find('[data-testid="pat-create-open"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain(summary.prefix);
+    wrapper.unmount();
+  });
+
   it('opens the create form only after the create button is used and closes it again', async () => {
     const { wrapper, service } = fixture();
     await flushPromises();

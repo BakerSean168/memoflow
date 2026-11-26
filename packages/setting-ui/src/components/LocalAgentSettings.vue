@@ -480,7 +480,7 @@ onBeforeUnmount(stopPolling);
         </Button>
       </div>
     </header>
-    <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+    <div class="border-t border-border pt-5">
       <SettingsPropertyRow
         :label="t('setting.ai.displayName')"
         :description="t('setting.agentInstances.nameHint')"
@@ -536,7 +536,7 @@ onBeforeUnmount(stopPolling);
       <h4 class="px-3 text-xs font-medium text-muted-foreground">
         {{ t('setting.agentInstances.antigravityLoginTitle') }}
       </h4>
-      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+      <div class="border-t border-border pt-5">
         <p
           class="min-w-0 truncate text-xs leading-5 text-muted-foreground"
           role="status"
@@ -671,7 +671,7 @@ onBeforeUnmount(stopPolling);
       <h4 class="px-3 text-xs font-medium text-muted-foreground">
         {{ t('aiAssistant.local.runtime') }}
       </h4>
-      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+      <div class="border-t border-border pt-5">
         <SettingsPropertyRow
           :label="t('aiAssistant.local.executable')"
           :description="
@@ -712,7 +712,7 @@ onBeforeUnmount(stopPolling);
         /></SettingsPropertyRow>
       </div>
     </section>
-    <section class="space-y-3 rounded-xl border p-4">
+    <section class="space-y-3 border-t border-border pt-5">
       <h4 class="text-sm font-medium">{{ t('setting.permissions.native') }}</h4>
       <p class="text-xs text-muted-foreground">
         {{ t('setting.permissions.nativeHint') }}
@@ -747,7 +747,7 @@ onBeforeUnmount(stopPolling);
           ><RefreshCw class="mr-1.5 size-3" />{{ t('setting.ai.refreshModels') }}</Button
         >
       </div>
-      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+      <div class="border-t border-border pt-5">
         <p v-if="!models.length" class="text-xs leading-5 text-muted-foreground">
           {{ t('setting.ai.modelInventoryHint') }}
         </p>

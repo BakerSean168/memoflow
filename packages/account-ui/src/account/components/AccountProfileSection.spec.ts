@@ -142,6 +142,13 @@ const PassthroughStub = defineComponent({
   },
 });
 
+const DialogStub = defineComponent({
+  props: ['open'],
+  setup(props, { slots }) {
+    return () => (props.open ? h('div', slots.default?.()) : null);
+  },
+});
+
 const ButtonStub = defineComponent({
   name: 'ButtonStub',
   props: ['disabled'],
@@ -266,6 +273,10 @@ function mountSection(accountService: AccountClientPort, options: MountOptions =
           : {}),
       },
       stubs: {
+        Dialog: DialogStub,
+        DialogContent: PassthroughStub,
+        DialogTitle: PassthroughStub,
+        DialogDescription: PassthroughStub,
         Button: ButtonStub,
         Card: PassthroughStub,
         CardContent: PassthroughStub,
@@ -467,7 +478,8 @@ describe('AccountProfileSection', () => {
     expect(wrapper.find('#bio').exists()).toBe(false);
     expect(wrapper.find('[data-testid="account-profile-avatar"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="account-profile-save"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="account-local-password-open"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(true);
   });
 
@@ -483,6 +495,8 @@ describe('AccountProfileSection', () => {
     const wrapper = mountSection(accountService, { desktop: { invoke } });
     await flushPromises();
 
+    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
     const form = wrapper.get('[data-testid="account-local-password"]');
     await wrapper.get('[data-testid="account-local-password-current"]').setValue('old-password');
     await wrapper.get('[data-testid="account-local-password-new"]').setValue('account-password');
@@ -503,9 +517,35 @@ describe('AccountProfileSection', () => {
       currentPassword: 'old-password',
       newPassword: 'account-password',
     });
+    expect(wrapper.find('[data-testid="account-local-password-dialog"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
     expect(
       (wrapper.get('[data-testid="account-local-password-new"]').element as HTMLInputElement).value,
     ).toBe('');
+  });
+
+  it('clears local passwords on cancel without sending them to the bridge', async () => {
+    const invoke = vi.fn().mockResolvedValue({ ok: true, data: null });
+    const service = {
+      getMyProfile: vi
+        .fn()
+        .mockResolvedValue({ ok: true, data: { account: guestDto, cloudIdentity: null } }),
+    } as unknown as AccountClientPort;
+    const wrapper = mountSection(service, { desktop: { invoke } });
+    await flushPromises();
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
+    await wrapper.get('[data-testid="account-local-password-current"]').setValue('old-password');
+    await wrapper.get('[data-testid="account-local-password-new"]').setValue('new-password');
+    await wrapper.get('[data-testid="account-local-password-cancel"]').trigger('click');
+    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(false);
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, expect.anything());
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
+    for (const field of ['current', 'new', 'confirmation']) {
+      expect(
+        (wrapper.get(`[data-testid="account-local-password-${field}"]`).element as HTMLInputElement)
+          .value,
+      ).toBe('');
+    }
   });
 
   it('hides the local password card for a registered Profile', async () => {

@@ -962,6 +962,10 @@ export default {
     },
   },
   advanced: {
+    preferencesTitle: 'Preferences',
+    backupTitle: 'Data backup',
+    disclosureTitle: 'Personal data copy',
+
     title: 'Data Transfer',
     preferenceDataDescription:
       'Export or import only your appearance, language, and regional preferences using the V3 settings format.',

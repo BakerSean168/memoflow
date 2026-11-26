@@ -92,6 +92,35 @@ async function mountView(
 }
 
 describe('UserSettingsView embedded mode', () => {
+  it('shows the account subpage breadcrumb and resets it when switching sections', async () => {
+    const AccountSection = defineComponent({
+      props: ['page'],
+      emits: ['update:page'],
+      setup(_, { emit }) {
+        return () =>
+          h(
+            'button',
+            { 'data-testid': 'open-devices', onClick: () => emit('update:page', 'devices') },
+            'Devices',
+          );
+      },
+    });
+    const { wrapper, storeSpy } = await mountView(
+      '/settings',
+      { initialTab: 'account' },
+      { AccountSettingsSection: AccountSection },
+    );
+    await wrapper.get('[data-testid="open-devices"]').trigger('click');
+    expect(wrapper.get('[data-testid="settings-breadcrumb-subpage"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="settings-tab-shortcuts"]').trigger('click');
+    expect(wrapper.find('[data-testid="settings-breadcrumb-subpage"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="settings-tab-account"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.findComponent(AccountSection).props('page')).toBe('overview');
+    wrapper.unmount();
+    storeSpy.mockRestore();
+  });
+
   it('takes the section from initialTab, ignores route changes and closes by event', async () => {
     const { router, wrapper, replace, storeSpy } = await mountView('/settings?tab=appearance', {
       initialTab: 'updates',

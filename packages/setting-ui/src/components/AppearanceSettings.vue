@@ -1,9 +1,5 @@
 <template>
-  <SettingsSection
-    :title="t('setting.appearance.title')"
-    :description="t('setting.appearance.themeDescription')"
-    test-id="appearance-settings-card"
-  >
+  <SettingsSection :title="t('setting.appearance.title')" test-id="appearance-settings-card">
     <fieldset class="min-w-0 pb-6" data-testid="appearance-theme-row">
       <legend class="sr-only">{{ t('setting.appearance.theme') }}</legend>
       <div class="grid grid-cols-3 gap-2 sm:gap-3">
@@ -34,7 +30,6 @@
 
     <SettingsPropertyRow
       :label="t('setting.appearance.accentColor')"
-      :description="t('setting.appearance.accentColorDescription')"
       test-id="appearance-accent-row"
     >
       <div

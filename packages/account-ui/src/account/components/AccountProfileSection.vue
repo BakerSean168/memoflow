@@ -22,7 +22,9 @@ import {
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
 import { accountUiHost } from '../../account-ui-host';
-import { LockKeyhole, LogOut } from '@lucide/vue';
+import AccountProfileEditorDialog from './AccountProfileEditorDialog.vue';
+import LocalPasswordDialog from './LocalPasswordDialog.vue';
+import { LogOut } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { useAccount } from '../composables/useAccount';
 import { useAccountSignOut } from '../composables/useAccountSignOut';
@@ -31,20 +33,18 @@ import AccountAvatarUploader from './AccountAvatarUploader.vue';
 import AccountAutoEnterSection from './AccountAutoEnterSection.vue';
 import CloudAccountSecuritySection from './CloudAccountSecuritySection.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
-import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 
 withDefaults(defineProps<{ showProfile?: boolean }>(), { showProfile: true });
 
 const { t } = useI18n();
-const { SettingsDangerZone } = accountUiHost.components;
+const { SettingsSection } = accountUiHost.components;
 const { isDesktopSignOut, confirmSignOut, executeSignOut } = useAccountSignOut();
 const desktopBridge = inject(accountUiHost.DESKTOP_BRIDGE_KEY, null);
 const desktopAccess = inject(accountUiHost.DESKTOP_ACCESS_SNAPSHOT_KEY, ref(null));
 const authStore = useAuthenticationStore();
-const localCurrentPassword = ref('');
-const localPassword = ref('');
-const localPasswordConfirmation = ref('');
-const localPasswordBusy = ref(false);
+const localPasswordOpen = ref(false);
+const profileEditorOpen = ref(false);
+const page = defineModel<'overview' | 'devices'>('page', { default: 'overview' });
 
 const {
   currentAccount,
@@ -107,37 +107,6 @@ async function handleLogout() {
         fallbackKey: 'common.operationFailed',
       }),
     });
-  }
-}
-
-async function changeLocalPassword(): Promise<void> {
-  if (!desktopBridge) return;
-  if (localPassword.value.length < 8) {
-    toast.error(t('account.localPassword.tooShort'));
-    return;
-  }
-  if (localPassword.value !== localPasswordConfirmation.value) {
-    toast.error(t('account.localPassword.mismatch'));
-    return;
-  }
-  localPasswordBusy.value = true;
-  try {
-    const result = (await desktopBridge.invoke(ProfileAccessChannels.PASSWORD_SET, {
-      currentPassword: localCurrentPassword.value,
-      newPassword: localPassword.value,
-    })) as { ok?: boolean; error?: { message?: string } };
-    if (!result.ok) {
-      toast.error(result.error?.message ?? t('account.localPassword.failed'));
-      return;
-    }
-    localCurrentPassword.value = '';
-    localPassword.value = '';
-    localPasswordConfirmation.value = '';
-    toast.success(t('account.localPassword.saved'));
-  } catch {
-    toast.error(t('account.localPassword.failed'));
-  } finally {
-    localPasswordBusy.value = false;
   }
 }
 
@@ -240,96 +209,75 @@ onMounted(() => {
       </CardFooter>
     </Card>
 
-    <Card v-if="isLocalAccount" class="border-border/70">
-      <CardHeader>
-        <CardTitle class="flex items-center gap-2">
-          <LockKeyhole class="h-4 w-4" />
-          {{ t('account.localPassword.title') }}
-        </CardTitle>
-        <CardDescription>{{ t('account.localPassword.description') }}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          class="grid gap-3 sm:grid-cols-2"
-          data-testid="account-local-password"
-          @submit.prevent="changeLocalPassword"
-        >
-          <div class="space-y-2 sm:col-span-2">
-            <Label for="local-current-password">{{ t('account.password.currentPassword') }}</Label>
-            <Input
-              id="local-current-password"
-              v-model="localCurrentPassword"
-              data-testid="account-local-password-current"
-              type="password"
-              autocomplete="current-password"
-            />
-            <p class="text-xs text-muted-foreground">
-              {{ t('account.localPassword.rememberReset') }}
+    <CloudAccountSecuritySection v-model:page="page" :email="email">
+      <template #profile>
+        <div v-if="!showProfile" class="flex flex-wrap items-center justify-between gap-4 py-4">
+          <span class="text-sm font-medium">{{ t('account.profile.nickname') }}</span>
+          <div class="flex items-center gap-4">
+            <span data-testid="account-settings-nickname" class="text-sm text-muted-foreground">{{
+              currentAccount?.profile.nickname || (isLoading ? t('account.status.loading') : '—')
+            }}</span>
+            <Button
+              variant="secondary"
+              :disabled="!hasAccount || isLoading"
+              data-testid="account-settings-profile-edit"
+              @click="profileEditorOpen = true"
+              >{{ t('common.edit') }}</Button
+            >
+          </div>
+        </div>
+        <p v-if="!showProfile && error" role="alert" class="text-sm text-destructive">
+          {{ error }}
+        </p>
+      </template>
+      <template v-if="isLocalAccount || $slots.password" #password>
+        <div v-if="isLocalAccount" class="flex flex-wrap items-center justify-between gap-4 py-4">
+          <div class="min-w-0 flex-1 space-y-1">
+            <p class="text-sm font-medium">{{ t('account.localPassword.title') }}</p>
+            <p class="max-w-lg text-xs leading-5 text-muted-foreground">
+              {{ t('account.localPassword.description') }}
             </p>
           </div>
-          <div class="space-y-2">
-            <Label for="local-profile-password">{{ t('account.localPassword.newPassword') }}</Label>
-            <Input
-              id="local-profile-password"
-              v-model="localPassword"
-              data-testid="account-local-password-new"
-              type="password"
-              autocomplete="new-password"
-              :placeholder="t('account.localPassword.placeholder')"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="local-profile-password-confirmation">{{
-              t('account.localPassword.confirmPassword')
-            }}</Label>
-            <Input
-              id="local-profile-password-confirmation"
-              v-model="localPasswordConfirmation"
-              data-testid="account-local-password-confirmation"
-              type="password"
-              autocomplete="new-password"
-              :placeholder="t('account.localPassword.confirmPassword')"
-            />
-          </div>
-          <div class="flex justify-end sm:col-span-2">
-            <Button
-              type="submit"
-              data-testid="account-local-password-save"
-              :disabled="localPasswordBusy || !localPassword"
-            >
-              {{ t('account.localPassword.save') }}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
 
-    <AccountAutoEnterSection />
-
-    <CloudAccountSecuritySection v-if="!isGuest" :email="email" />
-
-    <!-- Destructive account actions stay explicit while sharing the Settings danger-zone grammar. -->
-    <SettingsDangerZone
-      v-if="authStore.isAuthenticated || isDesktopSignOut"
-      :title="isDesktopSignOut ? t('account.signOut.action') : t('account.actions.logout')"
-      :description="isDesktopSignOut ? t('account.signOut.hint') : t('account.logoutHint')"
-      test-id="account-logout-section"
-    >
-      <p v-if="!isDesktopSignOut" class="mt-2 text-xs leading-5 text-muted-foreground">
-        {{ t('account.logoutConfirm.description') }}
-      </p>
-
-      <template #actions>
-        <Button
-          data-testid="account-logout-button"
-          variant="destructive"
-          :disabled="isLoading"
-          @click="handleLogout"
-        >
-          <LogOut class="mr-2 h-4 w-4" />
-          {{ isDesktopSignOut ? t('account.signOut.action') : t('account.actions.logout') }}
-        </Button>
+          <Button
+            variant="outline"
+            data-testid="account-local-password-open"
+            @click="localPasswordOpen = true"
+          >
+            {{ t('account.localPassword.save') }}
+          </Button>
+        </div>
+        <slot name="password" />
       </template>
-    </SettingsDangerZone>
+      <template #preferences><AccountAutoEnterSection /></template>
+      <template #connections><slot name="connections" /></template>
+      <template #actions>
+        <!-- Keep the destructive action explicit without adding another container. -->
+        <SettingsSection
+          v-if="authStore.isAuthenticated || isDesktopSignOut"
+          :title="isDesktopSignOut ? t('account.signOut.action') : t('account.actions.logout')"
+          :description="isDesktopSignOut ? t('account.signOut.hint') : t('account.logoutHint')"
+          test-id="account-logout-section"
+        >
+          <p v-if="!isDesktopSignOut" class="mt-2 text-xs leading-5 text-muted-foreground">
+            {{ t('account.logoutConfirm.description') }}
+          </p>
+
+          <template #actions>
+            <Button
+              data-testid="account-logout-button"
+              variant="destructive"
+              :disabled="isLoading"
+              @click="handleLogout"
+            >
+              <LogOut class="mr-2 h-4 w-4" />
+              {{ isDesktopSignOut ? t('account.signOut.action') : t('account.actions.logout') }}
+            </Button>
+          </template>
+        </SettingsSection>
+      </template>
+    </CloudAccountSecuritySection>
+    <LocalPasswordDialog v-if="isLocalAccount" v-model:open="localPasswordOpen" />
+    <AccountProfileEditorDialog v-if="profileEditorOpen" v-model:open="profileEditorOpen" />
   </div>
 </template>

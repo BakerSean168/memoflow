@@ -702,7 +702,7 @@ export default {
       error: '操作失败，请重试。',
     },
     recheckProviders: '重新检查',
-    providerList: 'Providers',
+    providerList: 'AI 服务商',
     savedProvider: '已配置',
     enableProvider: '启用 {name}',
     displayName: '显示名称',
@@ -888,8 +888,12 @@ export default {
     },
   },
   advanced: {
+    preferencesTitle: '偏好设置',
+    backupTitle: '数据备份',
+    disclosureTitle: '个人数据副本',
+
     title: '数据迁移',
-    preferenceDataDescription: '仅使用 V3 设置格式导出或导入外观、语言与区域偏好。',
+    preferenceDataDescription: '导入或导出外观、语言和地区设置。',
     exportSettings: '导出偏好设置',
     importSettings: '导入偏好设置',
     exportPortableData: '导出数据备份',

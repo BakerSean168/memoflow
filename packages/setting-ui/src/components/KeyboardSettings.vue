@@ -211,9 +211,7 @@ onBeforeUnmount(stopRecording);
   <section class="space-y-6" data-testid="keyboard-settings">
     <header class="space-y-2">
       <h2 class="text-xl font-semibold tracking-tight">{{ t('setting.keyboard.title') }}</h2>
-      <p class="text-sm text-muted-foreground">
-        {{ t('setting.keyboard.description') }}
-      </p>
+
       <p class="text-xs text-muted-foreground">
         {{ t('setting.keyboard.hints') }}
       </p>
@@ -247,11 +245,11 @@ onBeforeUnmount(stopRecording);
     <p v-if="message" role="status" class="text-sm" data-testid="keyboard-settings-status">
       {{ message }}
     </p>
-    <div class="divide-y rounded-xl border">
+    <div class="divide-y divide-border">
       <div
         v-for="command in commands"
         :key="command.id"
-        class="flex flex-wrap items-center gap-3 px-4 py-3"
+        class="flex flex-wrap items-center gap-3 py-4"
         :data-testid="`shortcut-${command.id}`"
       >
         <div class="min-w-40 flex-1">

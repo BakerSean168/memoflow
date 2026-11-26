@@ -40,7 +40,7 @@ export default {
     revokeConfirmText: 'Revoke session',
   },
   externalAgents: {
-    sectionTitle: 'Connected apps / external agents',
+    sectionTitle: 'Connected apps',
     sectionDescription:
       'Manage the apps that can access your goals, tasks and routines. Revoking stops new access requests immediately.',
     retry: 'Retry',
@@ -111,6 +111,14 @@ export default {
     logout: 'Log out',
     saveProfile: 'Save Profile',
   },
+  settings: {
+    connections: 'Apps and connections',
+    information: 'Account information',
+    security: 'Password and security',
+    deviceCount: '{count} devices',
+    otherDevices: 'Other devices',
+    backToAccount: 'Back to account',
+  },
   security: {
     continue: 'Continue',
     title: 'Cloud account',
@@ -121,8 +129,9 @@ export default {
     sendConfirmation: 'Send confirmation email',
     emailSent:
       'Confirmation sent. Open the link in your new inbox. Keep using the old email until you confirm.',
-    sessions: 'Devices and sessions',
-    sessionsDescription: 'Revoke other sessions here. Use Sign out below for this device.',
+    sessions: 'Signed-in devices',
+    sessionsDescription:
+      'Review the devices signed in to your account. Revoke other sessions here, or return to your account to sign out of this device.',
     noSessions: 'No sessions.',
     unknownDevice: 'Unknown device',
     deviceClient: {
@@ -212,7 +221,9 @@ export default {
     editProfile: 'Edit Profile',
   },
   profileEditor: {
-    memberSince: 'Member since {date}',
+    bioLimitExceeded: 'Bio is limited to {limit} characters.',
+    memberSinceLabel: 'Member since',
+    memberSince: '{date}',
     memberSinceUnavailable: 'Join date unavailable',
     title: 'Edit profile',
     description: 'Your nickname is the primary display name and saves to the current account.',

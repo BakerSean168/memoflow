@@ -13,10 +13,7 @@ withDefaults(
 </script>
 
 <template>
-  <section
-    class="rounded-lg border border-destructive/25 bg-destructive/[0.04] p-4"
-    :data-testid="testId"
-  >
+  <section class="border-t border-border pt-6" :data-testid="testId">
     <div class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div class="min-w-0 space-y-1">
         <h2 class="text-sm font-semibold text-destructive">{{ title }}</h2>

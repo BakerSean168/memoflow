@@ -43,7 +43,9 @@ const i18n = createI18n({
           saved: 'Avatar saved',
         },
         profileEditor: {
-          memberSince: 'Member since {date}',
+          bioLimitExceeded: 'Bio is limited to {limit} characters.',
+          memberSinceLabel: 'Member since',
+          memberSince: '{date}',
           memberSinceUnavailable: 'Join date unavailable',
           title: 'Edit profile',
           description: 'Update your profile.',
@@ -276,17 +278,15 @@ describe('AccountProfileEditorDialog', () => {
     expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(true);
   });
 
-  it('shows the real join date and only exposes the bio counter on focus', async () => {
+  it('shows the real join date and keeps the bio counter hidden on focus', async () => {
     const { wrapper } = mountDialog(accountService());
     await flushPromises();
-    expect(wrapper.get('[data-testid="profile-editor-member-since"]').text()).toBe(
-      'Member since Jan 1, 1970',
-    );
+    expect(wrapper.get('[data-testid="profile-editor-member-since"]').text()).toBe('Jan 1, 1970');
     expect(wrapper.find('[data-testid="profile-editor-nickname-count"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="profile-editor-bio-count"]').exists()).toBe(false);
     const bio = wrapper.get('[data-testid="profile-editor-bio"]');
     await bio.trigger('focus');
-    expect(wrapper.get('[data-testid="profile-editor-bio-count"]').text()).toBe('12/500');
+    expect(wrapper.find('[data-testid="profile-editor-bio-count"]').exists()).toBe(false);
     await bio.trigger('blur');
     expect(wrapper.find('[data-testid="profile-editor-bio-count"]').exists()).toBe(false);
   });
@@ -371,6 +371,42 @@ describe('AccountProfileEditorDialog', () => {
     await flushPromises();
     expect(avatarSave).toHaveBeenCalledTimes(2);
     expect(wrapper.find('[data-testid="profile-editor-footer"]').exists()).toBe(false);
+  });
+
+  it('caps bio input and paste at 500 characters and reports only rejected excess', async () => {
+    const { wrapper } = mountDialog(accountService());
+    await flushPromises();
+    const bio = wrapper.get('[data-testid="profile-editor-bio"]');
+    await bio.setValue('A'.repeat(500));
+    expect(wrapper.find('[data-testid="profile-editor-bio-hint"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="profile-editor-bio-count"]').exists()).toBe(false);
+    await bio.setValue('A'.repeat(500) + 'too long');
+    expect(bio.element).toHaveProperty('value', 'A'.repeat(500));
+    expect(wrapper.get('[data-testid="profile-editor-bio-hint"]').text()).toBe(
+      'Bio is limited to 500 characters.',
+    );
+    expect(bio.attributes('aria-invalid')).toBe('true');
+    expect(wrapper.get('[data-testid="profile-editor-bio-count"]').text()).toBe('500/500');
+    await wrapper
+      .get('[data-testid="profile-editor-nickname"]')
+      .trigger('keydown', { key: 'Enter' });
+    await wrapper.get('[data-testid="profile-editor-reset"]').trigger('click');
+    expect(wrapper.find('[data-testid="profile-editor-bio-hint"]').exists()).toBe(false);
+    expect(bio.element).toHaveProperty('value', 'Existing bio');
+  });
+
+  it('buffers composing bio input and truncates excess when composition finishes', async () => {
+    const { wrapper } = mountDialog(accountService());
+    await flushPromises();
+    const bio = wrapper.get('[data-testid="profile-editor-bio"]');
+    await bio.setValue('A'.repeat(499));
+    await bio.trigger('compositionstart');
+    (bio.element as HTMLTextAreaElement).value = 'A'.repeat(499) + '你好';
+    await bio.trigger('input');
+    expect(wrapper.find('[data-testid="profile-editor-bio-hint"]').exists()).toBe(false);
+    await bio.trigger('compositionend');
+    expect(bio.element).toHaveProperty('value', 'A'.repeat(499) + '你');
+    expect(wrapper.get('[data-testid="profile-editor-bio-hint"]').attributes('role')).toBe('alert');
   });
 
   it('opens with inline persisted values and saves through the account service', async () => {

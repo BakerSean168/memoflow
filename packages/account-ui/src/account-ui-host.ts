@@ -60,7 +60,15 @@ export interface AccountUiHost extends PlatformRendererHost {
    */
   LOGOUT_HANDLER_KEY: InjectionKey<() => Promise<void>>;
 
-  components: Record<'SettingsSection' | 'SettingsDangerZone', Component>;
+  components: Record<
+    | 'SettingsSection'
+    | 'SettingsDangerZone'
+    | 'ProductDialogShell'
+    | 'ProductAutoTextarea'
+    | 'ProductInlineValidation',
+    Component
+  >;
+  useTransientFeedback(durationMs?: number): { visible: Ref<boolean>; show(): void; hide(): void };
 }
 
 // Bound once in the renderer composition root. Holds no user state: every function

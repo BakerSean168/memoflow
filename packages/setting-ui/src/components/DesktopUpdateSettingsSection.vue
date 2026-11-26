@@ -10,16 +10,7 @@ import {
   RefreshCw,
   RotateCw,
 } from '@lucide/vue';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Progress,
-} from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Progress } from '@memoflow/ui-vue-shadcn';
 import type {
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
@@ -303,40 +294,35 @@ onBeforeUnmount(() => {
   <section class="space-y-6" data-testid="desktop-update-settings-section">
     <header class="space-y-1">
       <h2 class="text-xl font-semibold tracking-tight">{{ t('setting.updates.title') }}</h2>
-      <p class="text-sm text-muted-foreground">{{ t('setting.updates.overviewDescription') }}</p>
     </header>
 
-    <Card>
-      <CardHeader class="pb-4">
+    <section class="space-y-6 border-b border-border pb-8">
+      <header>
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="space-y-1">
-            <CardTitle class="text-base">MemoFlow</CardTitle>
-            <CardDescription>
-              {{ t('setting.updates.versionLabel', { version: currentVersion }) }}
-            </CardDescription>
+            <h3 class="text-lg font-semibold">MemoFlow</h3>
           </div>
-          <Badge variant="outline">{{ channelLabel }}</Badge>
         </div>
-      </CardHeader>
+      </header>
 
-      <CardContent class="space-y-5">
+      <div class="space-y-5">
         <dl class="grid gap-3 text-sm sm:grid-cols-3">
-          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
+          <div class="space-y-1 py-2">
             <dt class="text-xs text-muted-foreground">{{ t('setting.updates.currentVersion') }}</dt>
             <dd class="mt-1 font-medium">{{ currentVersion }}</dd>
           </div>
-          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
+          <div class="space-y-1 py-2">
             <dt class="text-xs text-muted-foreground">{{ t('setting.updates.releaseChannel') }}</dt>
             <dd class="mt-1 font-medium">{{ channelLabel }}</dd>
           </div>
-          <div class="rounded-lg border border-border/70 bg-muted/20 px-3 py-2">
+          <div class="space-y-1 py-2">
             <dt class="text-xs text-muted-foreground">{{ t('setting.updates.updateOwner') }}</dt>
             <dd class="mt-1 font-medium">{{ ownerLabel }}</dd>
           </div>
         </dl>
 
         <div
-          class="rounded-xl border border-border bg-muted/10 p-4"
+          class="border-t border-border pt-6"
           data-testid="desktop-update-status"
           :data-state="presentation.kind"
         >
@@ -417,7 +403,7 @@ onBeforeUnmount(() => {
 
         <div
           v-if="presentation.release?.releaseNotes?.trim()"
-          class="min-w-0 rounded-lg border border-border/70 p-4"
+          class="min-w-0 border-t border-border pt-6"
         >
           <h3 class="text-sm font-medium">{{ t('setting.updates.releaseNotes') }}</h3>
           <ReleaseNotes
@@ -432,13 +418,13 @@ onBeforeUnmount(() => {
         <p v-if="lastCheckedAt" class="text-xs text-muted-foreground">
           {{ t('setting.updates.lastChecked', { time: lastCheckedAt }) }}
         </p>
-      </CardContent>
-    </Card>
-    <Card data-testid="desktop-update-troubleshooting">
-      <CardHeader class="pb-3">
-        <CardTitle class="text-sm">{{ t('setting.updates.troubleshooting.title') }}</CardTitle>
-      </CardHeader>
-      <CardContent class="space-y-3 text-sm">
+      </div>
+    </section>
+    <details data-testid="desktop-update-troubleshooting" class="group border-b border-border pb-6">
+      <summary class="cursor-pointer py-2 text-sm font-medium">
+        {{ t('setting.updates.troubleshooting.title') }}
+      </summary>
+      <div class="space-y-3 pt-4 text-sm">
         <p v-if="diagnosticsUnavailable" data-testid="desktop-update-diagnostics-unavailable">
           {{ t('setting.updates.troubleshooting.unavailable') }}
         </p>
@@ -529,7 +515,7 @@ onBeforeUnmount(() => {
             </div>
           </details>
         </template>
-      </CardContent>
-    </Card>
+      </div>
+    </details>
   </section>
 </template>

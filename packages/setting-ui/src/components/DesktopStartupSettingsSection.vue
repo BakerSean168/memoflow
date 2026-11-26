@@ -6,6 +6,7 @@ import type { DesktopStartupPatch, DesktopStartupSnapshot } from '@memoflow/desk
 import { settingUiHost } from '../setting-ui-host';
 
 const { t } = useI18n();
+const { SettingsSection, SettingsPropertyRow } = settingUiHost.components;
 const service = settingUiHost.useStrictInject(
   settingUiHost.DESKTOP_STARTUP_SERVICE_KEY,
   'DesktopStartupService',
@@ -58,22 +59,20 @@ onBeforeUnmount(() => unsubscribe?.());
 </script>
 
 <template>
-  <section class="space-y-6" data-testid="desktop-startup-settings-section">
-    <h2 class="text-xl font-semibold">{{ t('setting.startup.title') }}</h2>
+  <SettingsSection :title="t('setting.startup.title')" test-id="desktop-startup-settings-section">
     <p v-if="error" role="alert" class="text-sm text-destructive" data-testid="startup-error">
       {{ t('setting.startup.failure') }}
     </p>
     <p v-if="snapshot && !snapshot.autoLaunch.available" class="text-sm text-muted-foreground">
       {{ t('setting.startup.unavailable') }}
     </p>
-    <div
+    <SettingsPropertyRow
       v-for="key in ['autoLaunch', 'startHidden', 'closeToTray'] as const"
       :key="key"
-      class="flex items-center justify-between gap-4 rounded-lg border p-4"
+      :label="t(`setting.startup.${key}`)"
+      :html-for="`startup-${key}`"
+      layout="toggle"
     >
-      <label :for="`startup-${key}`" class="text-sm font-medium">{{
-        t(`setting.startup.${key}`)
-      }}</label>
       <Switch
         :id="`startup-${key}`"
         :data-testid="`startup-${key}`"
@@ -91,6 +90,6 @@ onBeforeUnmount(() => unsubscribe?.());
         "
         @update:model-value="update(key, $event)"
       />
-    </div>
-  </section>
+    </SettingsPropertyRow>
+  </SettingsSection>
 </template>

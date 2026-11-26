@@ -27,8 +27,17 @@ import {
   RadioGroupItem,
   Textarea,
 } from '@memoflow/ui-vue-shadcn';
-import { Copy, LoaderCircle } from '@lucide/vue';
+import { ChevronRight, Copy, LoaderCircle } from '@lucide/vue';
 import { accountUiHost } from '../../account-ui-host';
+
+const props = withDefaults(
+  defineProps<{ summary?: boolean; view?: 'all' | 'oauth' | 'tokens' }>(),
+  { summary: false, view: 'all' },
+);
+const emit = defineEmits<{ open: [view: 'oauth' | 'tokens'] }>();
+const summaryTrigger = ref<{ $el: HTMLButtonElement } | null>(null);
+defineExpose({ focus: () => summaryTrigger.value?.$el.focus() });
+const { SettingsSection } = accountUiHost.components;
 
 const injected = inject(accountUiHost.EXTERNAL_AGENT_SERVICE_KEY);
 if (!injected) throw new Error('External agent service is required');
@@ -135,6 +144,7 @@ async function load() {
       return;
     }
     oauthEnabled.value = capabilities.data.oauth;
+    if (props.summary) return;
     const patList = await service.listPats();
     if (patList.ok) pats.value = patList.data;
     else error.value = patList.error.code;
@@ -232,19 +242,46 @@ onMounted(load);
 </script>
 
 <template>
+  <SettingsSection v-if="visible && props.summary" :title="t('account.settings.connections')">
+    <Button
+      variant="ghost"
+      v-if="oauthEnabled"
+      type="button"
+      data-testid="account-oauth-connections-open"
+      class="flex h-auto w-full items-center justify-between gap-4 whitespace-normal rounded-md py-4 text-left text-sm font-normal hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      @click="emit('open', 'oauth')"
+    >
+      <span>{{ t('account.externalAgents.oauthTitle') }}</span
+      ><ChevronRight class="size-4 text-muted-foreground" aria-hidden="true" />
+    </Button>
+    <Button
+      variant="ghost"
+      ref="summaryTrigger"
+      type="button"
+      data-testid="account-connections-open"
+      class="flex h-auto w-full items-center justify-between gap-4 whitespace-normal rounded-md py-4 text-left text-sm font-normal hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      @click="emit('open', 'tokens')"
+    >
+      <span>{{ t('account.externalAgents.patTitle') }}</span
+      ><ChevronRight class="size-4 text-muted-foreground" aria-hidden="true" />
+    </Button>
+  </SettingsSection>
   <section
-    v-if="visible"
+    v-if="visible && !props.summary"
     class="space-y-5"
     aria-labelledby="external-agents-heading"
     :aria-busy="busy"
   >
     <header>
-      <h2 id="external-agents-heading" class="text-lg font-semibold">
-        {{ t('account.externalAgents.sectionTitle') }}
+      <h2 id="external-agents-heading" class="text-xl font-semibold tracking-tight">
+        {{
+          props.view === 'oauth'
+            ? t('account.externalAgents.oauthTitle')
+            : props.view === 'tokens'
+              ? t('account.externalAgents.patTitle')
+              : t('account.externalAgents.sectionTitle')
+        }}
       </h2>
-      <p class="mt-1 text-sm text-muted-foreground">
-        {{ t('account.externalAgents.sectionDescription') }}
-      </p>
     </header>
     <p v-if="error && !createOpen" role="alert" class="text-sm text-destructive">
       {{ t(`errors.${error}`) }}
@@ -252,21 +289,23 @@ onMounted(load);
         {{ t('account.externalAgents.retry') }}
       </Button>
     </p>
-    <div v-if="oauthEnabled" class="space-y-3">
-      <h3 class="font-medium">{{ t('account.externalAgents.oauthTitle') }}</h3>
+    <div v-if="oauthEnabled && props.view !== 'tokens'" class="space-y-3">
+      <h3 v-if="props.view === 'all'" class="font-medium">
+        {{ t('account.externalAgents.oauthTitle') }}
+      </h3>
       <p v-if="!connections.length && !busy" class="text-sm text-muted-foreground">
         {{ t('account.externalAgents.oauthEmpty') }}
       </p>
       <article
         v-for="connection in connections"
         :key="connection.id"
-        class="space-y-2 rounded-lg border p-4"
+        class="space-y-2 border-b border-border py-4 last:border-b-0"
       >
         <div class="flex items-center justify-between gap-3">
           <h4 class="font-medium">{{ connection.name }}</h4>
           <span class="text-xs text-muted-foreground">{{ status(connection) }}</span>
         </div>
-        <p class="break-all text-xs text-muted-foreground">{{ connection.clientId }}</p>
+
         <p class="text-sm">{{ connection.scopes.map(scopeName).join(' · ') }}</p>
         <p class="text-xs text-muted-foreground">
           {{
@@ -298,9 +337,11 @@ onMounted(load);
         >
       </article>
     </div>
-    <div class="space-y-3">
+    <div v-if="props.view !== 'oauth'" class="space-y-3">
       <div class="flex items-center justify-between gap-3">
-        <h3 class="font-medium">{{ t('account.externalAgents.patTitle') }}</h3>
+        <h3 v-if="props.view === 'all'" class="font-medium">
+          {{ t('account.externalAgents.patTitle') }}
+        </h3>
         <Button size="sm" :disabled="busy" data-testid="pat-create-open" @click="openCreate">
           {{ t('account.externalAgents.create') }}
         </Button>
@@ -308,7 +349,11 @@ onMounted(load);
       <p v-if="!livePats.length && !busy" class="text-sm text-muted-foreground">
         {{ t('account.externalAgents.patEmpty') }}
       </p>
-      <article v-for="pat in livePats" :key="pat.id" class="rounded-lg border p-4 text-sm">
+      <article
+        v-for="pat in livePats"
+        :key="pat.id"
+        class="border-b border-border py-4 text-sm last:border-b-0"
+      >
         <div class="flex items-center justify-between gap-3">
           <strong>{{ pat.name }}</strong>
         </div>
@@ -342,7 +387,7 @@ onMounted(load);
       </article>
     </div>
     <Dialog :open="createOpen" @update:open="handleCreateOpenChange">
-      <DialogContent data-testid="pat-create-dialog" class="sm:max-w-lg">
+      <DialogContent data-testid="pat-create-dialog" class="max-h-dvh overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{{ t('account.externalAgents.createDialogTitle') }}</DialogTitle>
           <DialogDescription>

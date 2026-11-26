@@ -161,9 +161,7 @@ export const Open: Story = {
     await expect(page.queryByTestId('profile-editor-footer')).not.toBeInTheDocument();
     await expect(page.queryByTestId('profile-editor-nickname-count')).not.toBeInTheDocument();
     await expect(page.queryByTestId('profile-editor-bio-count')).not.toBeInTheDocument();
-    await expect(page.getByTestId('profile-editor-member-since')).toHaveTextContent(
-      'Member since Jan 29, 2024',
-    );
+    await expect(page.getByTestId('profile-editor-member-since')).toHaveTextContent('Jan 29, 2024');
   },
 };
 
@@ -444,4 +442,59 @@ export const NarrowDirtyDialog: Story = {
   ...DirtyDraft,
   parameters: { layout: 'fullscreen' },
   render: () => renderEditor({ narrow: true }),
+};
+
+/** Focus changes, growing content and the save bar must stay inside a stable frame. */
+export const BioLimitAndStableFrame: Story = {
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const shell = await page.findByTestId('profile-editor-shell');
+    await Promise.all(shell.getAnimations().map((animation) => animation.finished));
+    const initial = shell.getBoundingClientRect();
+    const bio = page.getByTestId('profile-editor-bio') as HTMLTextAreaElement;
+    await userEvent.click(bio);
+    await expect(page.queryByTestId('profile-editor-bio-count')).not.toBeInTheDocument();
+    await expect(shell.getBoundingClientRect().height).toBe(initial.height);
+    await expect(shell.getBoundingClientRect().top).toBe(initial.top);
+    await userEvent.clear(bio);
+    await userEvent.type(bio, 'A'.repeat(500), { delay: 0 });
+    await expect(page.queryByTestId('profile-editor-bio-hint')).not.toBeInTheDocument();
+    await userEvent.type(bio, 'B');
+    await expect(bio).toHaveValue('A'.repeat(500));
+    await expect(page.getByTestId('profile-editor-bio-count')).toHaveTextContent('500/500');
+    await expect(page.getByTestId('profile-editor-bio-hint')).toHaveTextContent(
+      'Bio is limited to 500 characters.',
+    );
+    await userEvent.keyboard('{Enter}');
+    await expect(page.getByTestId('profile-editor-footer')).toBeInTheDocument();
+    await expect(shell.getBoundingClientRect().height).toBe(initial.height);
+    await expect(shell.getBoundingClientRect().top).toBe(initial.top);
+  },
+};
+
+/** Only the fields scroll: avatar, banner close control and save bar remain visible. */
+export const PinnedProfileHeader: Story = {
+  render: () => renderEditor({ account: createAccount({ bio: 'A line.\n'.repeat(60) }) }),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const shell = await page.findByTestId('profile-editor-shell');
+    await Promise.all(shell.getAnimations().map((animation) => animation.finished));
+    await userEvent.type(page.getByTestId('profile-editor-nickname'), 'x');
+    await userEvent.keyboard('{Enter}');
+    const avatar = page.getByTestId('profile-editor-avatar');
+    const close = page.getByTestId('profile-editor-close');
+    const footer = page.getByTestId('profile-editor-footer');
+    const before = [avatar, close, footer].map((element) => element.getBoundingClientRect().top);
+    const scroll = page.getByTestId('profile-editor-scroll');
+    await waitFor(() => expect(scroll.scrollHeight).toBeGreaterThan(scroll.clientHeight));
+    scroll.scrollTop = scroll.scrollHeight;
+    scroll.dispatchEvent(new Event('scroll'));
+    await waitFor(() => expect(scroll.scrollTop).toBeGreaterThan(0));
+    await expect(
+      [avatar, close, footer].map((element) => element.getBoundingClientRect().top),
+    ).toEqual(before);
+    await expect(
+      page.getByTestId('profile-editor-nickname').getBoundingClientRect().bottom,
+    ).toBeLessThan(scroll.getBoundingClientRect().top);
+  },
 };

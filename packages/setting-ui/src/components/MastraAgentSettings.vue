@@ -377,7 +377,7 @@ onBeforeUnmount(() => {
         </Button>
       </div>
     </header>
-    <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+    <div class="border-t border-border pt-5">
       <SettingsPropertyRow
         :label="t('setting.ai.displayName')"
         :description="t('setting.agentInstances.nameHint')"
@@ -412,9 +412,7 @@ onBeforeUnmount(() => {
       <h4 class="px-3 text-xs font-medium text-muted-foreground">
         {{ t('setting.agentInstances.connection') }}
       </h4>
-      <div
-        class="space-y-3 rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4"
-      >
+      <div class="space-y-3 border-t border-border pt-5">
         <SettingsPropertyRow
           :label="t('setting.agentInstances.endpoint')"
           :description="t('setting.agentInstances.endpointHint')"
@@ -491,9 +489,7 @@ onBeforeUnmount(() => {
           ><RefreshCw class="mr-1.5 size-3" />{{ t('setting.ai.refreshModels') }}</Button
         >
       </div>
-      <div
-        class="space-y-4 rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4"
-      >
+      <div class="space-y-4 border-t border-border pt-5">
         <SettingsPropertyRow
           :label="t('setting.agentInstances.defaultModel')"
           :description="t('setting.agentInstances.modelHint')"
@@ -576,7 +572,7 @@ onBeforeUnmount(() => {
     </section>
     <details
       v-if="providers.length"
-      class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-3"
+      class="border-t border-border pt-5"
       data-testid="ai-existing-connections"
     >
       <summary class="cursor-pointer text-xs text-muted-foreground">

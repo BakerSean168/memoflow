@@ -38,7 +38,7 @@ export default {
     revokeConfirmText: '撤销会话',
   },
   externalAgents: {
-    sectionTitle: '已连接的应用 / 外部 Agent',
+    sectionTitle: '已连接的应用',
     sectionDescription:
       '管理可访问你的 Goals、Tasks 和 Routines 的应用。撤销后，新的访问请求立即失效。',
     retry: '重试',
@@ -105,6 +105,14 @@ export default {
     logout: '退出登录',
     saveProfile: '保存资料',
   },
+  settings: {
+    connections: '应用与连接',
+    information: '账号信息',
+    security: '密码和安全中心',
+    deviceCount: '{count} 台设备',
+    otherDevices: '其他设备',
+    backToAccount: '返回账户',
+  },
   security: {
     continue: '继续',
     title: '云账户',
@@ -113,8 +121,9 @@ export default {
     newEmail: '新邮箱',
     sendConfirmation: '发送确认邮件',
     emailSent: '确认邮件已发送。请在邮件中打开确认链接；确认前仍使用旧邮箱登录。',
-    sessions: '已登录设备与会话',
-    sessionsDescription: '可撤销其他会话；当前设备请使用下方「退出账号」。',
+    sessions: '已登录的设备',
+    sessionsDescription:
+      '查看当前账号已登录的设备。可撤销其他设备的会话；如需退出当前设备，请返回账户页面。',
     noSessions: '暂无会话。',
     unknownDevice: '未知设备',
     deviceClient: {
@@ -200,7 +209,9 @@ export default {
     editProfile: '编辑资料',
   },
   profileEditor: {
-    memberSince: '加入于 {date}',
+    bioLimitExceeded: '简介最多可输入 {limit} 个字符。',
+    memberSinceLabel: '成员加入时间',
+    memberSince: '{date}',
     memberSinceUnavailable: '暂无账户创建时间',
     title: '编辑个人资料',
     description: '昵称就是你的唯一展示名，修改后会直接保存到当前账号。',

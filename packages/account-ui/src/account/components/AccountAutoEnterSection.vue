@@ -10,11 +10,6 @@
 import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Label,
   Select,
   SelectContent,
@@ -22,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@memoflow/ui-vue-shadcn';
-import { Rocket } from '@lucide/vue';
 import {
   ProfileAccessChannels,
   type ProfileAutoEnterCandidate,
@@ -31,6 +25,7 @@ import {
 import { accountUiHost } from '../../account-ui-host';
 
 const { t } = useI18n();
+const { SettingsSection } = accountUiHost.components;
 const desktopBridge = inject(accountUiHost.DESKTOP_BRIDGE_KEY, null);
 
 const OFF_VALUE = '__off__';
@@ -98,15 +93,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card v-if="desktopBridge" class="border-border/70" data-testid="account-auto-enter-section">
-    <CardHeader>
-      <CardTitle class="flex items-center gap-2">
-        <Rocket class="h-4 w-4" />
-        {{ t('account.autoEnter.title') }}
-      </CardTitle>
-      <CardDescription>{{ t('account.autoEnter.description') }}</CardDescription>
-    </CardHeader>
-    <CardContent class="space-y-3">
+  <SettingsSection
+    v-if="desktopBridge"
+    :title="t('account.autoEnter.title')"
+    :description="t('account.autoEnter.description')"
+    class="[&_h2]:text-xl"
+    test-id="account-auto-enter-section"
+  >
+    <div class="space-y-3">
       <div class="space-y-2">
         <Label for="auto-enter-account">{{ t('account.autoEnter.label') }}</Label>
         <Select
@@ -146,6 +140,6 @@ onMounted(() => {
           {{ t('account.autoEnter.unavailable') }}
         </p>
       </div>
-    </CardContent>
-  </Card>
+    </div>
+  </SettingsSection>
 </template>

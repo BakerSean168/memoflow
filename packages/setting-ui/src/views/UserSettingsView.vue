@@ -81,6 +81,7 @@ const contentWidth = ref(
 );
 const isNarrow = computed(() => contentWidth.value < SETTINGS_NARROW_VIEWPORT);
 const settingsContentRef = ref<HTMLElement | null>(null);
+const settingsScrollRef = ref<HTMLElement | null>(null);
 let settingsResizeObserver: ResizeObserver | null = null;
 
 type SettingsGroup =
@@ -120,6 +121,14 @@ function normalizeGroup(value: unknown): SettingsGroup {
   return GROUP_VALUES.includes(candidate) && isGroupAvailable(candidate) ? candidate : 'appearance';
 }
 
+const accountPage = ref<'overview' | 'devices' | 'applications' | 'tokens'>('overview');
+const accountPageLabel = computed(() =>
+  accountPage.value === 'devices'
+    ? t('account.security.sessions')
+    : accountPage.value === 'applications'
+      ? t('account.externalAgents.oauthTitle')
+      : t('account.externalAgents.patTitle'),
+);
 const activeTab = ref<SettingsGroup>(normalizeGroup(props.initialTab));
 const groups = computed(() =>
   GROUP_DEFINITIONS.filter((group) => isGroupAvailable(group.value)).map((group) => ({
@@ -131,8 +140,17 @@ const activeLabel = computed(
   () => groups.value.find((group) => group.value === activeTab.value)?.label ?? t('setting.title'),
 );
 
+watch(
+  [activeTab, accountPage],
+  () => {
+    if (settingsScrollRef.value) settingsScrollRef.value.scrollTop = 0;
+  },
+  { flush: 'post' },
+);
+
 function selectGroup(group: SettingsGroup | string): void {
   activeTab.value = normalizeGroup(group);
+  accountPage.value = 'overview';
   if (isNarrow.value) shellStore.setSettingsNavigationOpen(false);
 }
 
@@ -230,11 +248,26 @@ onBeforeUnmount(() => {
             <li aria-hidden="true" class="flex shrink-0 items-center text-muted-foreground/60">
               /
             </li>
-            <li aria-current="page" class="flex min-w-0 items-center font-medium">
+            <li
+              :aria-current="
+                activeTab === 'account' && accountPage !== 'overview' ? undefined : 'page'
+              "
+              class="flex min-w-0 items-center font-medium"
+            >
               <span class="truncate" data-testid="settings-breadcrumb-current">
                 {{ activeLabel }}
               </span>
             </li>
+            <template v-if="activeTab === 'account' && accountPage !== 'overview'">
+              <li aria-hidden="true" class="text-muted-foreground">/</li>
+              <li
+                aria-current="page"
+                class="truncate text-sm font-medium"
+                data-testid="settings-breadcrumb-subpage"
+              >
+                {{ accountPageLabel }}
+              </li>
+            </template>
           </ol>
         </nav>
 
@@ -267,6 +300,7 @@ onBeforeUnmount(() => {
       </header>
 
       <main
+        ref="settingsScrollRef"
         class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable"
         data-testid="settings-content-scroll"
       >
@@ -279,7 +313,10 @@ onBeforeUnmount(() => {
             <KeyboardSettings v-else-if="activeTab === 'shortcuts'" />
             <AISettings v-else-if="activeTab === 'ai'" />
             <NotificationSettings v-else-if="activeTab === 'notifications'" />
-            <AccountSettingsSection v-else-if="activeTab === 'account'" />
+            <AccountSettingsSection
+              v-else-if="activeTab === 'account'"
+              v-model:page="accountPage"
+            />
             <DataSettingsSection v-else-if="activeTab === 'data'" />
             <DesktopStartupSettingsSection v-else-if="activeTab === 'startup'" />
             <DesktopUpdateSettingsSection v-else-if="activeTab === 'updates'" />

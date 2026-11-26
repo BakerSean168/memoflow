@@ -268,16 +268,13 @@ onBeforeUnmount(() => {
   <section
     v-if="local"
     data-testid="ai-external-mcp-clients"
-    class="space-y-3 rounded-xl border border-[hsl(var(--border-subtle))] p-3 sm:p-4"
+    class="space-y-5 border-b border-border pb-8"
   >
     <header class="flex items-start justify-between gap-3">
       <div class="space-y-1">
-        <h3 class="text-[13px] font-semibold">
+        <h3 class="text-xl font-semibold tracking-tight">
           {{ t('setting.ai.localMcp.title') }}
         </h3>
-        <p class="text-[11px] leading-4 text-muted-foreground">
-          {{ t('setting.ai.localMcp.description') }}
-        </p>
       </div>
       <Button
         size="sm"
