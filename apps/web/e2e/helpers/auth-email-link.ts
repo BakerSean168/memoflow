@@ -8,6 +8,30 @@ export async function waitForCapturedEmailLink(
   kind: CapturedEmailKind,
   options?: { timeoutMs?: number; intervalMs?: number },
 ): Promise<string> {
+  const captured = await waitForCapturedEmail(email, kind, options);
+  if (typeof captured.url !== 'string') {
+    throw new Error(`Captured ${kind} message for ${email} has no link`);
+  }
+  return captured.url;
+}
+
+/** Account security codes travel as digits, not links; read them separately. */
+export async function waitForCapturedEmailCode(
+  email: string,
+  options?: { timeoutMs?: number; intervalMs?: number },
+): Promise<string> {
+  const captured = await waitForCapturedEmail(email, 'account-security-code', options);
+  if (typeof captured.code !== 'string') {
+    throw new Error(`Captured security code for ${email} has no code`);
+  }
+  return captured.code;
+}
+
+async function waitForCapturedEmail(
+  email: string,
+  kind: CapturedEmailKind | 'account-security-code',
+  options?: { timeoutMs?: number; intervalMs?: number },
+): Promise<{ url?: string; code?: string }> {
   const timeoutMs = options?.timeoutMs ?? TIMEOUT_CONFIG.API_REQUEST * 3;
   const intervalMs = options?.intervalMs ?? 250;
   const deadline = Date.now() + timeoutMs;
@@ -20,8 +44,9 @@ export async function waitForCapturedEmailLink(
     try {
       const response = await fetch(url);
       if (response.ok) {
-        const body = (await response.json()) as { data?: { url?: string } };
-        if (typeof body.data?.url === 'string') return body.data.url;
+        const body = (await response.json()) as { data?: { url?: string; code?: string } };
+        if (body.data && (typeof body.data.url === 'string' || typeof body.data.code === 'string'))
+          return body.data;
       } else if (response.status !== 404) {
         lastError = new Error(`HTTP ${response.status}`);
       }
@@ -32,7 +57,7 @@ export async function waitForCapturedEmailLink(
   }
 
   throw new Error(
-    `Timed out waiting for ${kind} link for ${email}: ${
+    `Timed out waiting for ${kind} message for ${email}: ${
       lastError instanceof Error ? lastError.message : String(lastError ?? 'no link')
     }`,
   );

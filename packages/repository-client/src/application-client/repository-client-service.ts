@@ -1,3 +1,5 @@
+import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
+import type { LocalVaultGitDiff } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository Client Service
@@ -17,6 +19,8 @@ import type {
   OpenLocalVaultInObsidianReq,
   ConfirmedLocalVaultWriteReq,
   ConfirmedLocalVaultWriteRes,
+  LocalVaultNoteWriteReq,
+  LocalVaultNoteWriteRes,
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,
   CreateKnowledgeRepositoryConnectionReq,
@@ -225,6 +229,10 @@ export class RepositoryClientService implements IRepositoryApiClient {
     return this.repositoryApi.listLocalVaultWrites();
   }
 
+  getLocalVaultGitChanges(): Promise<Result<LocalVaultGitChanges>> {
+    return this.repositoryApi.getLocalVaultGitChanges();
+  }
+
   scanLocalVault(): Promise<Result<ScanLocalVaultRes>> {
     return this.repositoryApi.scanLocalVault();
   }
@@ -245,6 +253,14 @@ export class RepositoryClientService implements IRepositoryApiClient {
     request: ConfirmedLocalVaultWriteReq,
   ): Promise<Result<ConfirmedLocalVaultWriteRes>> {
     return this.repositoryApi.writeConfirmedLocalVaultNote(request);
+  }
+
+  getLocalVaultGitDiff(relativePath: string): Promise<Result<LocalVaultGitDiff>> {
+    return this.repositoryApi.getLocalVaultGitDiff(relativePath);
+  }
+
+  writeLocalVaultNote(request: LocalVaultNoteWriteReq): Promise<Result<LocalVaultNoteWriteRes>> {
+    return this.repositoryApi.writeLocalVaultNote(request);
   }
 }
 

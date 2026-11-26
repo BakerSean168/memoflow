@@ -1,4 +1,6 @@
-import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
+import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
+import { readVaultGitChanges, readVaultGitDiff } from './local-vault-git';
+import type { LocalVaultGitDiff, LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,6 +20,8 @@ import type {
   LocalVaultHealthDTO,
   LocalVaultNoteDTO,
   LocalVaultNoteSummaryDTO,
+  LocalVaultNoteWriteReq,
+  LocalVaultNoteWriteRes,
   OpenLocalVaultInObsidianReq,
   ReadLocalVaultNoteReq,
   ScanLocalVaultRes,
@@ -105,16 +109,30 @@ interface VaultCatalog {
 interface WriteLedgerEntry {
   bindingId?: string;
   requestId: string;
-  proposalId: string;
-  proposalRevision: number;
+  /** Direct writes distinguish create from update; legacy entries are confirmed creates. */
+  operation?: 'create' | 'update';
+  proposalId?: string;
+  proposalRevision?: number;
   knowledgeDocumentId: string;
   relativePath: string;
+  /** sha256 of the exact bytes this request wrote, for replay verification. */
+  contentHash?: string;
+  createdAt: number;
+}
+
+interface WriteFailureEntry {
+  bindingId?: string;
+  requestId: string;
+  operation: 'create' | 'update';
+  relativePath: string;
+  code: string;
   createdAt: number;
 }
 
 interface WriteLedger {
   schemaVersion: 2;
   entries: WriteLedgerEntry[];
+  failures?: WriteFailureEntry[];
 }
 
 export interface LocalVaultPlatform {
@@ -146,6 +164,7 @@ export interface LocalVaultElectronPort {
   selectVault(request?: SelectLocalVaultReq): Promise<LocalVaultBindingSnapshotDTO | null>;
   detachVault(): Promise<void>;
   scanVault(): Promise<ScanLocalVaultRes>;
+  getGitChanges(): Promise<LocalVaultGitChanges>;
   listRecentWrites(): Promise<LocalVaultWriteReceipt[]>;
   readNote(request: ReadLocalVaultNoteReq): Promise<LocalVaultNoteDTO>;
   findNoteById(documentId: KnowledgeDocumentId): Promise<{
@@ -158,6 +177,13 @@ export interface LocalVaultElectronPort {
   ): Promise<SearchLocalVaultRes>;
   openInObsidian(request: OpenLocalVaultInObsidianReq): Promise<void>;
   writeConfirmedNote(request: ConfirmedLocalVaultWriteReq): Promise<ConfirmedLocalVaultWriteRes>;
+  /**
+   * Direct agent write. Creates a missing note or replaces an existing one only
+   * when the caller proved the exact pre-edit content hash. Idempotent by
+   * `requestId`.
+   */
+  writeNote(request: LocalVaultNoteWriteReq): Promise<LocalVaultNoteWriteRes>;
+  getGitDiff(relativePath: string): Promise<LocalVaultGitDiff>;
   inspectSyncContent(): Promise<KnowledgeRepositoryContentState>;
   dispose(): Promise<void>;
 }
@@ -254,6 +280,10 @@ function extractTitle(
   }
   const heading = markdownBody.match(/^#\s+(.+)$/m)?.[1]?.trim();
   return heading || path.basename(relativePath, path.extname(relativePath));
+}
+
+function hashContent(value: string): string {
+  return createHash('sha256').update(value).digest('hex');
 }
 
 function readStableKnowledgeDocumentId(
@@ -427,6 +457,21 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
         ];
       })
       .slice(0, 20);
+  }
+
+  async getGitChanges(): Promise<LocalVaultGitChanges> {
+    const scope = await this.captureScope();
+    const observation = await readVaultGitChanges(scope.root);
+    this.assertScope(scope);
+    return { bindingId: scope.binding.id, ...observation, observedAt: this.now() };
+  }
+
+  async getGitDiff(relativePathValue: string): Promise<LocalVaultGitDiff> {
+    const scope = await this.captureScope();
+    const relativePath = normalizeRelativeMarkdownPath(relativePathValue);
+    const observation = await readVaultGitDiff(scope.root, relativePath);
+    this.assertScope(scope);
+    return { relativePath, ...observation, observedAt: this.now() };
   }
 
   async scanVault(): Promise<ScanLocalVaultRes> {
@@ -690,6 +735,256 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     });
   }
 
+  async writeNote(request: LocalVaultNoteWriteReq): Promise<LocalVaultNoteWriteRes> {
+    const scope = await this.captureScope();
+    return this.runMutation(async () => {
+      this.assertScope(scope);
+      return this.writeNoteDirectInScope(scope, request);
+    });
+  }
+
+  /**
+   * Direct write path for authorized Desktop agents.
+   *
+   * The only trust boundary is the selected Vault scope: every path is
+   * normalized and re-checked after `realpath`, symlinked targets and parents
+   * are refused, and an existing note is only replaceable when the caller sent
+   * the sha256 of its exact pre-edit bytes. Successful requests and failures are
+   * appended to the same bounded ledger used by confirmed writes, keyed by
+   * `requestId`, so a retried tool call never creates a second note.
+   */
+  private async writeNoteDirectInScope(
+    scope: VaultReadScope,
+    request: LocalVaultNoteWriteReq,
+  ): Promise<LocalVaultNoteWriteRes> {
+    if (request.expectedBindingId && request.expectedBindingId !== scope.binding.id) {
+      throw new LocalVaultRuntimeError('CONFLICT', 'The target Vault is no longer selected');
+    }
+    const requestId = request.requestId.trim();
+    if (!requestId) {
+      throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'A write request id is required');
+    }
+    const relativePath = normalizeRelativeMarkdownPath(request.relativePath);
+    const root = scope.root;
+    const candidate = path.resolve(root, relativePath);
+    assertContained(root, candidate);
+
+    let existing: {
+      contentMarkdown: string;
+      contentHash: string;
+      knowledgeDocumentId: KnowledgeDocumentId | null;
+    } | null = null;
+    try {
+      const linkStat = await fs.promises.lstat(candidate);
+      if (linkStat.isSymbolicLink()) {
+        throw new LocalVaultRuntimeError('FORBIDDEN', 'Vault note target is a symbolic link');
+      }
+      if (!linkStat.isFile()) {
+        throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'Vault note target is not a file');
+      }
+      if (linkStat.size > MAX_NOTE_BYTES) {
+        throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'Vault note is too large to edit');
+      }
+      const canonicalPath = await fs.promises.realpath(candidate);
+      assertContained(root, canonicalPath);
+      const contentMarkdown = await fs.promises.readFile(canonicalPath, 'utf8');
+      this.assertScope(scope);
+      const parsed = matter(contentMarkdown, {});
+      existing = {
+        contentMarkdown,
+        contentHash: hashContent(contentMarkdown),
+        knowledgeDocumentId: readStableKnowledgeDocumentId(parsed.data as Record<string, unknown>),
+      };
+    } catch (error) {
+      if (!isMissing(error)) throw error;
+    }
+
+    const requested = matter(request.contentMarkdown, {});
+    const requestedFrontmatter = requested.data as Record<string, unknown>;
+    const requestedDocumentId = request.knowledgeDocumentId
+      ? KnowledgeDocumentIdSchema.parse(request.knowledgeDocumentId)
+      : null;
+    const embeddedDocumentId = requestedFrontmatter['memoflow_id'];
+    if (
+      embeddedDocumentId !== undefined &&
+      requestedDocumentId !== null &&
+      embeddedDocumentId !== requestedDocumentId
+    ) {
+      throw new LocalVaultRuntimeError(
+        'CONFLICT',
+        'Note content contains a different memoflow_id marker',
+      );
+    }
+    const knowledgeDocumentId =
+      existing?.knowledgeDocumentId ??
+      requestedDocumentId ??
+      (typeof embeddedDocumentId === 'string'
+        ? KnowledgeDocumentIdSchema.parse(embeddedDocumentId)
+        : null);
+    if (!knowledgeDocumentId) {
+      throw new LocalVaultRuntimeError(
+        'VALIDATION_ERROR',
+        'A knowledge document identity is required for a new note',
+      );
+    }
+    if (existing?.knowledgeDocumentId && requestedDocumentId !== existing.knowledgeDocumentId) {
+      if (requestedDocumentId !== null) {
+        throw new LocalVaultRuntimeError(
+          'CONFLICT',
+          'The existing note belongs to a different knowledge document',
+        );
+      }
+    }
+    const contentMarkdown = matter.stringify(
+      requested.content,
+      { ...requestedFrontmatter, memoflow_id: knowledgeDocumentId },
+      {},
+    );
+    const contentHash = hashContent(contentMarkdown);
+    const contentBytes = Buffer.byteLength(contentMarkdown, 'utf8');
+    if (contentBytes === 0 || contentBytes > MAX_WRITE_BYTES) {
+      throw new LocalVaultRuntimeError('VALIDATION_ERROR', 'Vault note content size is invalid');
+    }
+
+    const operation: 'create' | 'update' = existing ? 'update' : 'create';
+    const ledger = await this.loadLedger();
+    const replay = ledger.entries.find((entry) => entry.requestId === requestId);
+    if (replay) {
+      if (
+        replay.relativePath !== relativePath ||
+        (replay.contentHash !== undefined && replay.contentHash !== contentHash)
+      ) {
+        throw new LocalVaultRuntimeError(
+          'CONFLICT',
+          'Write request ID was reused for different content',
+        );
+      }
+      return {
+        note: structuredClone(await this.readNoteInScope(scope, { relativePath })),
+        created: false,
+      };
+    }
+
+    if (existing) {
+      if (!request.expectedContentHash) {
+        throw new LocalVaultRuntimeError(
+          'CONFLICT',
+          'Overwriting an existing note requires its expected content hash',
+        );
+      }
+      if (request.expectedContentHash !== existing.contentHash) {
+        throw new LocalVaultRuntimeError(
+          'CONFLICT',
+          'The note changed since it was read; reload before editing',
+        );
+      }
+    } else {
+      if (request.expectedContentHash) {
+        throw new LocalVaultRuntimeError(
+          'CONFLICT',
+          'The note no longer exists at the expected version',
+        );
+      }
+      // Absence must be authoritative: a UI scan may skip unreadable files.
+      await this.walkNotes(
+        scope,
+        (note) => {
+          if (note.knowledgeDocumentId === knowledgeDocumentId) {
+            throw new LocalVaultRuntimeError(
+              'CONFLICT',
+              'Knowledge document identity already exists in this Vault',
+            );
+          }
+        },
+        true,
+      );
+      await this.ensureSafeParent(root, path.dirname(candidate));
+    }
+    this.assertScope(scope);
+
+    try {
+      if (existing) {
+        await this.atomicReplace(candidate, contentMarkdown);
+      } else {
+        await this.exclusiveCreate(candidate, contentMarkdown);
+      }
+    } catch (error) {
+      await this.recordWriteFailure(ledger, {
+        bindingId: scope.binding.id,
+        requestId,
+        operation,
+        relativePath,
+        code: error instanceof LocalVaultRuntimeError ? error.code : 'INTERNAL_ERROR',
+        createdAt: this.now(),
+      });
+      throw error;
+    }
+
+    this.forgetNote(relativePath);
+    ledger.entries.push({
+      bindingId: scope.binding.id,
+      requestId,
+      operation,
+      knowledgeDocumentId,
+      relativePath,
+      contentHash,
+      createdAt: this.now(),
+    });
+    ledger.entries = ledger.entries.slice(-1000);
+    await writeJsonAtomically(this.options.writeLedgerFilePath, ledger);
+    return {
+      note: structuredClone(await this.readNoteInScope(scope, { relativePath })),
+      created: operation === 'create',
+    };
+  }
+
+  private async exclusiveCreate(candidate: string, contentMarkdown: string): Promise<void> {
+    let handle: fs.promises.FileHandle | null = null;
+    try {
+      handle = await fs.promises.open(candidate, 'wx', 0o600);
+      await handle.writeFile(contentMarkdown, 'utf8');
+      await handle.sync();
+    } catch (error) {
+      if (
+        error !== null &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error as NodeJS.ErrnoException).code === 'EEXIST'
+      ) {
+        throw new LocalVaultRuntimeError('CONFLICT', 'A Vault note already exists at this path');
+      }
+      throw error;
+    } finally {
+      await handle?.close();
+    }
+  }
+
+  /** Replace file bytes through a synced sibling temp file, never a partial in-place write. */
+  private async atomicReplace(candidate: string, contentMarkdown: string): Promise<void> {
+    const temporaryPath = `${candidate}.${process.pid}.${randomUUID()}.tmp`;
+    let handle: fs.promises.FileHandle | null = null;
+    try {
+      handle = await fs.promises.open(temporaryPath, 'wx', 0o600);
+      await handle.writeFile(contentMarkdown, 'utf8');
+      await handle.sync();
+      await handle.close();
+      handle = null;
+      await fs.promises.rename(temporaryPath, candidate);
+    } finally {
+      await handle?.close();
+      await fs.promises.rm(temporaryPath, { force: true }).catch(() => undefined);
+    }
+  }
+
+  private async recordWriteFailure(ledger: WriteLedger, entry: WriteFailureEntry): Promise<void> {
+    try {
+      ledger.failures = [...(ledger.failures ?? []), entry].slice(-200);
+      await writeJsonAtomically(this.options.writeLedgerFilePath, ledger);
+    } catch {
+      // Best effort: the original write error must remain the surfaced failure.
+    }
+  }
+
   private async writeNoteInScope(
     scope: VaultReadScope,
     request: ConfirmedLocalVaultWriteReq,
@@ -794,10 +1089,12 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     ledger.entries.push({
       bindingId: scope.binding.id,
       requestId: request.requestId,
+      operation: 'create',
       proposalId: request.proposalId,
       proposalRevision: request.proposalRevision,
       knowledgeDocumentId: knowledgeDocumentId,
       relativePath,
+      contentHash: hashContent(contentMarkdown),
       createdAt: this.now(),
     });
     ledger.entries = ledger.entries.slice(-1000);

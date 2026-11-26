@@ -3,7 +3,7 @@
  * 账户相关组件
  */
 
-export { default as AccountProfileSection } from './AccountProfileSection.vue';
+export { default as AccountSettingsComposition } from './AccountSettingsComposition.vue';
 export { default as AccountProfileEditorDialog } from './AccountProfileEditorDialog.vue';
 export { default as AccountAvatarUploader } from './AccountAvatarUploader.vue';
 export { default as CloudPasswordSection } from './CloudPasswordSection.vue';

@@ -5,28 +5,12 @@
     data-testid="knowledge-capture-workflow-panel"
   >
     <div class="space-y-2">
-      <p class="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-        {{ t('aiAssistant.chatPage.workflow.knowledgeCaptureAwaitingApprovalHint') }}
-      </p>
       <div class="flex flex-wrap gap-2">
         <span class="rounded-full border bg-muted px-3 py-1 text-xs text-muted-foreground">{{
           t('aiAssistant.chatPage.workflow.status.' + knowledgeCaptureRun.status)
         }}</span>
         <AIRuntimeUsageBadge :usage="knowledgeCaptureRun.usage" />
-        <span
-          v-if="reviewDraft"
-          class="rounded-full border bg-muted px-3 py-1 text-xs text-muted-foreground"
-          data-testid="knowledge-capture-workflow-revision"
-        >
-          rev {{ reviewDraft.revision }}
-        </span>
       </div>
-      <h2 v-if="reviewDraft" class="text-lg font-semibold text-foreground">
-        {{ reviewDraft.title }}
-      </h2>
-      <p v-if="reviewDraft" class="whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-        {{ reviewDraft.topic }}
-      </p>
     </div>
 
     <div
@@ -44,16 +28,6 @@
       <Button :disabled="busy" variant="outline" @click="$emit('cancel')">{{
         t('common.cancel')
       }}</Button>
-    </div>
-
-    <div v-if="reviewDraft?.tags.length" class="flex flex-wrap gap-2">
-      <span
-        v-for="tag in reviewDraft.tags"
-        :key="tag"
-        class="rounded-full border bg-muted px-3 py-1 text-xs text-muted-foreground"
-      >
-        {{ tag }}
-      </span>
     </div>
 
     <div
@@ -111,29 +85,10 @@
         {{ knowledgeCaptureRun.result.notePath || '—' }}
       </p>
     </div>
-
-    <div v-if="knowledgeCaptureRun.status === 'suspended' && reviewDraft" class="flex gap-2">
-      <Button
-        data-testid="knowledge-capture-open-native-review"
-        :disabled="busy"
-        @click="$emit('open-native-review')"
-      >
-        {{ t('repository.capture.openReview') }}
-      </Button>
-      <Button
-        variant="outline"
-        data-testid="knowledge-capture-agent-cancel-run"
-        :disabled="busy"
-        @click="$emit('cancel')"
-      >
-        {{ t('common.cancel') }}
-      </Button>
-    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { useI18n } from 'vue-i18n';
 import type { AIWorkflowExecutionFailure, AIWorkflowRunView } from '@memoflow/ai-contracts';
@@ -150,7 +105,7 @@ const failureDiagnostic = (failure: AIWorkflowExecutionFailure) =>
 function resultStatusLabel(status: 'success' | 'partial' | 'failed'): string {
   return t(`aiAssistant.chatPage.workflow.knowledgeCaptureResultStatus.${status}`);
 }
-const props = defineProps<{
+defineProps<{
   toolMode: WorkflowMode;
   knowledgeCaptureRun: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }> | null;
   busy?: boolean;
@@ -162,12 +117,5 @@ defineEmits<{
   cancel: [];
   retry: [];
   'cancel-remaining': [];
-  'open-native-review': [];
 }>();
-
-const reviewDraft = computed(() =>
-  props.knowledgeCaptureRun?.suspension?.type === 'knowledge_draft_review'
-    ? props.knowledgeCaptureRun.suspension.draft
-    : null,
-);
 </script>

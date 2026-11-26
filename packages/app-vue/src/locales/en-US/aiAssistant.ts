@@ -437,10 +437,6 @@ export default {
       taskLinkedGoalLabel: 'Link goal (optional)',
       taskLinkedGoalNone: 'No linked goal',
       linkedGoalFromContext: 'Goal linked from the current context',
-      knowledgeCaptureCollectingHint:
-        'Describe the knowledge topic in chat, then start the Knowledge Capture workflow. The reviewed note draft appears here.',
-      knowledgeCaptureAwaitingApprovalHint:
-        'Review the generated knowledge note draft, then approve to save it to the knowledge base.',
       status: {
         running: 'Running',
         suspended: 'Awaiting review',

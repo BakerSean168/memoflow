@@ -8,14 +8,14 @@ import {
   getAIWorkflowTerminalFailureMessage,
 } from './error';
 import type { KnowledgeCaptureWorkflowStage, UseAIKnowledgeCaptureOptions } from './types';
-import { useKnowledgeNativeReviewCoordinator } from './useKnowledgeNativeReviewCoordinator';
 
 /**
- * Native Repository projection for the durable knowledge.capture Mastra Workflow.
+ * Projection for the durable knowledge.capture Mastra Workflow.
  *
- * Repository owns the review language and validation. The browser/renderer never writes
- * Knowledge content: after owner review the authoritative draft is reconciled into Mastra,
- * and only workflow approval invokes the host-bound Repository/Local-Vault persistence port.
+ * #1097 retired the draft-review dialogue: once the planner produces a draft it
+ * is written directly to the owner-selected local Vault. This composable only
+ * projects status, clarification and failure recovery; it never confirms a
+ * draft, and the success path is reached only after the owner write succeeded.
  */
 export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
   const { t, locale } = useI18n();
@@ -25,26 +25,6 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
   const knowledgeCaptureStage = ref<KnowledgeCaptureWorkflowStage>('collect');
   const knowledgeCaptureLoading = ref(false);
   const knowledgeCaptureResuming = ref(false);
-
-  const reviewDraft = computed(() =>
-    knowledgeCaptureRun.value?.suspension?.type === 'knowledge_draft_review'
-      ? knowledgeCaptureRun.value.suspension.draft
-      : null,
-  );
-
-  const review = useKnowledgeNativeReviewCoordinator({
-    options,
-    knowledgeCaptureRun,
-    knowledgeCaptureResuming,
-    projectRun,
-    resume,
-  });
-  const {
-    openKnowledgeNativeReview,
-    retireNativeReview,
-    confirmKnowledgeCaptureRun,
-    cancelKnowledgeCaptureRun,
-  } = review;
 
   function projectClarificationToTimeline(
     run: Extract<AIWorkflowRunView, { kind: 'knowledge.capture' }>,
@@ -82,9 +62,8 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     });
   }
 
-  async function projectRun(run: AIWorkflowRunView | null, openNative = true): Promise<void> {
+  async function projectRun(run: AIWorkflowRunView | null): Promise<void> {
     if (!run || run.kind !== 'knowledge.capture') {
-      retireNativeReview();
       knowledgeCaptureRun.value = null;
       knowledgeCaptureStage.value = 'collect';
       return;
@@ -95,23 +74,16 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     if (run.status === 'suspended' && suspension?.type === 'clarification_required') {
       knowledgeCaptureStage.value = 'clarification';
       projectClarificationToTimeline(run);
-    } else if (run.status === 'suspended' && suspension?.type === 'knowledge_draft_review') {
-      knowledgeCaptureStage.value = 'confirm';
     } else if (run.status === 'suspended' && suspension?.type === 'recovery_required') {
-      retireNativeReview();
       knowledgeCaptureStage.value = 'execute';
     } else if (['completed', 'failed', 'cancelled'].includes(run.status)) {
       knowledgeCaptureStage.value = 'result';
       if (run.status === 'failed') projectFailureToTimeline(run);
-      retireNativeReview();
     } else {
       knowledgeCaptureStage.value = 'plan';
     }
 
     options.scrollMessagesToBottom();
-    if (openNative && run.suspension?.type === 'knowledge_draft_review') {
-      await review.project(run);
-    }
   }
 
   async function syncKnowledgeCaptureRun(runId: string): Promise<void> {
@@ -127,11 +99,6 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     () =>
       knowledgeCaptureRun.value?.status === 'suspended' &&
       knowledgeCaptureRun.value.suspension?.type === 'clarification_required',
-  );
-  const knowledgeCaptureWaitingForApproval = computed(
-    () =>
-      knowledgeCaptureRun.value?.status === 'suspended' &&
-      knowledgeCaptureRun.value.suspension?.type === 'knowledge_draft_review',
   );
   const knowledgeCaptureWaitingForExecution = computed(
     () =>
@@ -202,8 +169,11 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
         toast.error(getAIWorkflowTerminalFailureMessage(run.failure, t));
         return false;
       }
-      if (run.kind === 'knowledge.capture' && run.suspension?.type === 'knowledge_draft_review') {
-        await options.maybeRenameCurrentConversation(run.suspension.draft.title);
+      if (run.kind === 'knowledge.capture' && run.status === 'completed') {
+        if (run.result?.noteName) {
+          await options.maybeRenameCurrentConversation(run.result.noteName.replace(/\.md$/i, ''));
+        }
+        if (run.result?.noteId) await options.openCreatedNote?.(run.result.noteId);
       }
       return true;
     } catch (error) {
@@ -233,6 +203,24 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
       if (next.kind === 'knowledge.capture' && next.status === 'completed' && next.result?.noteId) {
         await options.openCreatedNote?.(next.result.noteId);
       }
+    } catch (error) {
+      toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
+    } finally {
+      knowledgeCaptureResuming.value = false;
+    }
+  }
+
+  async function cancelKnowledgeCaptureRun(): Promise<void> {
+    const run = knowledgeCaptureRun.value;
+    if (!run || knowledgeCaptureResuming.value) return;
+    if (run.status === 'suspended') {
+      await resume({ type: 'cancel' });
+      return;
+    }
+
+    knowledgeCaptureResuming.value = true;
+    try {
+      await projectRun(await options.workflowRuntime.cancel({ runId: run.runId }));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.errors.workflowExecutionFailed'));
     } finally {
@@ -276,10 +264,7 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
   const retryKnowledgeCaptureExecution = () => resume({ type: 'retry' });
   const cancelRemainingKnowledgeCaptureExecution = () => resume({ type: 'cancel_remaining' });
 
-  const completeKnowledgeCaptureRun = confirmKnowledgeCaptureRun;
-
   function resetKnowledgeCaptureLocalState(): void {
-    retireNativeReview();
     knowledgeCaptureRun.value = null;
     knowledgeCaptureStage.value = 'collect';
     knowledgeCaptureLoading.value = false;
@@ -292,24 +277,19 @@ export function useAIKnowledgeCapture(options: UseAIKnowledgeCaptureOptions) {
     knowledgeCaptureLoading,
     knowledgeCaptureResuming,
     canRunKnowledgeCapture,
-    knowledgeCaptureWaitingForApproval,
     knowledgeCaptureWaitingForClarification,
     knowledgeCaptureWaitingForExecution,
     canRetryKnowledgeCaptureExecution,
     canCancelRemainingKnowledgeCaptureExecution,
     knowledgeCaptureExecutionSummary,
     knowledgeCaptureExecutionRecovery,
-    reviewDraft,
     startKnowledgeCaptureRun,
     cancelKnowledgeCaptureRun,
-    completeKnowledgeCaptureRun,
     retryKnowledgeCaptureExecution,
     cancelRemainingKnowledgeCaptureExecution,
-    confirmKnowledgeCaptureRun,
     submitKnowledgeClarificationResponse,
     syncKnowledgeCaptureRun,
     resetKnowledgeCaptureLocalState,
     projectRun,
-    openKnowledgeNativeReview,
   };
 }

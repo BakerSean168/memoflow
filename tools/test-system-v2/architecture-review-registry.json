@@ -509,7 +509,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "f81f89bc967dd6aa7201b59fc6cf2c852e3338cc08e8f0a4ed2eec8ebcd0cbfd"
+      "sourceSha256": "3ecb70bea7cf4874ec0dd0a18308dd7b8fe651a135ccc160383dd9a2cb1e88c5"
     },
     {
       "path": "apps/desktop/src/main/runtime/compose-goal.surface.spec.ts",
@@ -875,7 +875,7 @@
         "status": "none-verified",
         "testFiles": []
       },
-      "sourceSha256": "ce5daee1e9cbaf6b363012fdad74199ea32aa0839debac47f3b952acda81bf84"
+      "sourceSha256": "d17fa73045aa36d738cfb186b36ebf7bddb04a8008bc6c9328e2cb2f7cd35eea"
     },
     {
       "path": "apps/web/e2e/authentication/auth-oauth-real.spec.ts",

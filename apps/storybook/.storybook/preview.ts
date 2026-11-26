@@ -10,8 +10,9 @@ import { installRoutineUiHost } from '../../../packages/app-vue/src/di/routine-u
 import { installScheduleUiHost } from '../../../packages/app-vue/src/di/schedule-ui-host';
 import { ACCENT_VALUES } from '../../../packages/setting-contracts/src/preferences/canonical';
 import { setup, type Decorator, type Preview } from '@storybook/vue3-vite';
+import { watchEffect } from 'vue';
 import { createPinia } from 'pinia';
-import { createI18n } from 'vue-i18n';
+import { createI18n, useI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { productionLocaleMessages } from '../../../packages/app-vue/src/locales/production-messages';
 import { installServerStateRuntime } from '../../../packages/app-vue/src/platform/server-state';
@@ -42,11 +43,46 @@ setup((app) => {
 // on the document root, so the toolbar only writes that attribute (#909).
 const withAccentTheme: Decorator = (story, context) => {
   document.documentElement.dataset.accent = context.globals.accent ?? 'brand-gold';
-  return story();
+  document.documentElement.classList.toggle('dark', context.globals.theme === 'dark');
+  document.documentElement.style.colorScheme = context.globals.theme === 'dark' ? 'dark' : 'light';
+  return {
+    components: { Story: story() },
+    setup() {
+      const { locale } = useI18n();
+      watchEffect(() => {
+        locale.value = context.globals.locale ?? 'en-US';
+      });
+      return {};
+    },
+    template: '<Story />',
+  };
 };
 
 const preview: Preview = {
+  initialGlobals: { theme: 'light', locale: 'en-US', accent: 'brand-gold' },
   globalTypes: {
+    theme: {
+      description: 'Application theme',
+      toolbar: {
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', title: 'Light' },
+          { value: 'dark', title: 'Dark' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+    locale: {
+      description: 'Application language',
+      toolbar: {
+        icon: 'globe',
+        items: [
+          { value: 'zh-CN', title: '简体中文' },
+          { value: 'en-US', title: 'English' },
+        ],
+        dynamicTitle: true,
+      },
+    },
     accent: {
       description: 'Accent token set',
       defaultValue: 'brand-gold',

@@ -240,7 +240,6 @@ export default {
     serviceLabel: 'model API service',
   },
   title: 'App Settings',
-  userSettings: 'User Settings',
   navSearch: {
     placeholder: 'Search settings',
     label: 'Search settings sections',
@@ -264,7 +263,6 @@ export default {
     startup: 'Startup & window',
     shortcuts: 'Keyboard shortcuts',
     appearance: 'Appearance & Language',
-    repository: 'Knowledge Repository',
     ai: 'AI',
     notifications: 'Notifications & Reminders',
     account: 'Account & Privacy',
@@ -676,34 +674,6 @@ export default {
     weekMonday: 'Monday',
     weekSaturday: 'Saturday',
   },
-  repository: {
-    imageEmbed: 'Image Embed',
-    embedMode: 'Embed Mode',
-    embedModeDescription: 'Default handling when inserting images into notes',
-    embedModePlaceholder: 'Select mode',
-    autoEmbedThreshold: 'Auto Embed Threshold',
-    autoEmbedThresholdDescription: 'Images smaller than this size will be auto-converted to Base64',
-    imageCompression: 'Image Compression',
-    enableCompression: 'Enable Image Compression',
-    enableCompressionDescription:
-      'Automatically compress images when embedding or uploading to reduce file size',
-    compressionQuality: 'Compression Quality',
-    compressionQualityDescription: 'Lower values produce smaller files but reduce image quality',
-    autoConvertWebP: 'Auto Convert to WebP',
-    autoConvertWebPDescription:
-      'WebP format is typically smaller than PNG/JPEG and supports transparency',
-    maxImageWidth: 'Max Image Width',
-    maxImageWidthDescription: 'Images wider than this will be automatically scaled down',
-    maxImageWidthPlaceholder: 'Select width',
-    embedModeLink: 'Link Reference (Recommended)',
-    embedModeBase64: 'Base64 Embed',
-    embedModeAuto: 'Auto (Embed small images)',
-    maxWidth800: '800px (Small)',
-    maxWidth1280: '1280px (Medium)',
-    maxWidth1920: '1920px (Large)',
-    maxWidth2560: '2560px (Extra Large)',
-    maxWidthNone: 'No limit',
-  },
   ai: {
     localMcp: {
       title: 'External MCP clients',
@@ -962,6 +932,10 @@ export default {
     },
   },
   advanced: {
+    preferencesTitle: 'Preferences',
+    backupTitle: 'Data backup',
+    disclosureTitle: 'Personal data copy',
+
     title: 'Data Transfer',
     preferenceDataDescription:
       'Export or import only your appearance, language, and regional preferences using the V3 settings format.',

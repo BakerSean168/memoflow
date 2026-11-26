@@ -75,7 +75,7 @@ describe('workflow conversation departure', () => {
     {
       mode: 'knowledge-capture',
       module: 'repository',
-      route: '/repository?dialog=knowledge-capture',
+      route: '/repository',
     },
   ] as const)(
     'integrates $mode with the real shell dirty/busy protocol',

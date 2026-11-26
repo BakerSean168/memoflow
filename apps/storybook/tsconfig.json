@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "paths": {
+      "@repository-ui-test-host/*": ["../../packages/app-vue/src/*"],
       "@goal-ui-test-host/*": ["../../packages/app-vue/src/*"],
       "@task-ui-test-host/*": ["../../packages/app-vue/src/*"],
       "@notification-ui-test-host/*": ["../../packages/app-vue/src/*"]
@@ -13,6 +14,9 @@
   },
   "include": [
     ".storybook/**/*.ts",
+    "../../packages/repository-ui/src/views/LocalVaultWorkspaceView.stories.ts",
+    "../../packages/app-vue/src/views/AccountSettingsSection.stories.ts",
+    "../../packages/app-vue/src/views/SettingsPages.stories.ts",
     "../../packages/app-vue/src/env.d.ts",
     "../../packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts",
     "../../packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts",

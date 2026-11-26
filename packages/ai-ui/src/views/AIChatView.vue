@@ -289,7 +289,6 @@
             @cancel="cancelKnowledgeCaptureRun"
             @retry="retryKnowledgeCaptureExecution"
             @cancel-remaining="cancelRemainingKnowledgeCaptureExecution"
-            @open-native-review="openKnowledgeNativeReview"
           />
         </template>
       </AIMessagePanel>
@@ -613,7 +612,6 @@ const {
   cancelKnowledgeCaptureRun,
   retryKnowledgeCaptureExecution,
   cancelRemainingKnowledgeCaptureExecution,
-  openKnowledgeNativeReview,
 } = knowledgeCaptureWorkflow;
 
 const { formatExecutionOutcome } = formatters;

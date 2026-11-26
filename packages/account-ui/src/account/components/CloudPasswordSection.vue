@@ -11,20 +11,26 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import {
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
   Input,
   Label,
-  Separator,
 } from '@memoflow/ui-vue-shadcn';
-import { Copy, KeyRound, Mail, RotateCcw, X } from '@lucide/vue';
+import { Copy, Mail, RotateCcw, X } from '@lucide/vue';
 import { usePassword } from '../../authentication/composables/usePassword';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
+import AccountEmailVerificationDialog from './AccountEmailVerificationDialog.vue';
 
 const { t } = useI18n();
+const changeOpen = ref(false);
+const verificationOpen = ref(false);
+const verificationToken = ref('');
+watch(changeOpen, (open) => {
+  changeForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' };
+  if (!open) verificationToken.value = '';
+});
 const store = useAuthenticationStore();
 const { isLoading: passwordLoading, changePassword, forgotPassword } = usePassword();
 
@@ -53,15 +59,24 @@ watch(
 );
 
 async function handleChangePassword() {
-  if (passwordMismatch.value) {
+  if (
+    passwordLoading.value ||
+    passwordMismatch.value ||
+    !changeForm.value.currentPassword ||
+    !changeForm.value.newPassword ||
+    !changeForm.value.confirmPassword ||
+    !verificationToken.value
+  ) {
     return;
   }
   const changed = await changePassword({
     currentPassword: changeForm.value.currentPassword,
     newPassword: changeForm.value.newPassword,
+    verificationToken: verificationToken.value,
   });
   if (changed) {
     changeForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' };
+    changeOpen.value = false;
   }
 }
 
@@ -77,7 +92,10 @@ async function handleRetry() {
     return;
   }
   if (current.operation === 'change-password') {
-    await handleChangePassword();
+    // A failed attempt may have consumed or expired the grant; always restart
+    // from the mailbox proof instead of retrying a stale token.
+    changeOpen.value = false;
+    verificationOpen.value = true;
     return;
   }
   await handleSendResetEmail();
@@ -133,15 +151,17 @@ onBeforeUnmount(clearRequestIdCopiedTimer);
 </script>
 
 <template>
-  <Card v-if="isAuthenticated" class="border-border/70">
-    <CardHeader>
-      <CardTitle class="flex items-center gap-2">
-        <KeyRound class="h-4 w-4" />
-        {{ t('account.password.title') }}
-      </CardTitle>
-      <CardDescription>{{ t('account.password.description') }}</CardDescription>
-    </CardHeader>
-    <CardContent class="space-y-6">
+  <div v-if="isAuthenticated">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <span class="text-sm font-medium">{{ t('account.password.title') }}</span>
+      <Button
+        variant="secondary"
+        data-testid="cloud-password-open"
+        @click="verificationOpen = true"
+        >{{ t('account.password.changePassword') }}</Button
+      >
+    </div>
+    <div class="space-y-6">
       <div
         v-if="receipt"
         role="alert"
@@ -210,84 +230,127 @@ onBeforeUnmount(clearRequestIdCopiedTimer);
         </div>
       </div>
 
-      <div class="space-y-3">
-        <h3 class="text-sm font-medium">{{ t('account.password.changeTitle') }}</h3>
-        <form class="grid gap-3 sm:grid-cols-2" @submit.prevent="handleChangePassword">
-          <div class="space-y-2 sm:col-span-2">
-            <Label for="cloud-current-password">{{ t('account.password.currentPassword') }}</Label>
-            <Input
-              id="cloud-current-password"
-              v-model="changeForm.currentPassword"
-              data-testid="cloud-password-current"
-              type="password"
-              autocomplete="current-password"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="cloud-new-password">{{ t('account.password.newPassword') }}</Label>
-            <Input
-              id="cloud-new-password"
-              v-model="changeForm.newPassword"
-              data-testid="cloud-password-new"
-              type="password"
-              autocomplete="new-password"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="cloud-confirm-password">{{ t('account.password.confirmPassword') }}</Label>
-            <Input
-              id="cloud-confirm-password"
-              v-model="changeForm.confirmPassword"
-              data-testid="cloud-password-confirm"
-              type="password"
-              autocomplete="new-password"
-            />
-          </div>
-          <p
-            v-if="passwordMismatch"
-            class="text-xs text-destructive sm:col-span-2"
-            data-testid="cloud-password-mismatch"
-          >
-            {{ t('account.password.passwordMismatch') }}
-          </p>
-          <div class="flex justify-end sm:col-span-2">
-            <Button
-              type="submit"
-              data-testid="cloud-password-change-button"
-              :disabled="passwordLoading"
-            >
-              {{ t('account.password.changePassword') }}
-            </Button>
-          </div>
-        </form>
-      </div>
-
-      <Separator />
-
-      <div class="space-y-3">
-        <h3 class="text-sm font-medium">{{ t('account.password.forgotTitle') }}</h3>
-        <p class="text-sm text-muted-foreground">{{ t('account.password.forgotDescription') }}</p>
-        <form
-          class="flex flex-col gap-3 sm:flex-row sm:items-end"
-          @submit.prevent="handleSendResetEmail"
+      <Dialog
+        :open="changeOpen"
+        @update:open="
+          (open) => {
+            if (!passwordLoading) changeOpen = open;
+          }
+        "
+      >
+        <DialogContent
+          class="max-h-dvh overflow-y-auto"
+          data-testid="cloud-password-dialog"
+          @interact-outside.prevent
         >
-          <div class="min-w-0 flex-1 space-y-2">
-            <p class="text-sm">{{ t('account.password.resetEmail') }}</p>
-            <p data-testid="cloud-password-reset-recipient" class="text-sm text-muted-foreground">
-              {{ maskedResetEmail }}
+          <DialogTitle>{{ t('account.password.changeTitle') }}</DialogTitle>
+          <DialogDescription>{{ t('account.password.description') }}</DialogDescription>
+          <p v-if="receipt" role="alert" class="text-sm text-destructive">{{ receipt.message }}</p>
+          <form class="space-y-4" @submit.prevent="handleChangePassword">
+            <div class="space-y-2 sm:col-span-2">
+              <Label for="cloud-current-password">{{
+                t('account.password.currentPassword')
+              }}</Label>
+              <Input
+                id="cloud-current-password"
+                v-model="changeForm.currentPassword"
+                data-testid="cloud-password-current"
+                :disabled="passwordLoading"
+                type="password"
+                autocomplete="current-password"
+              />
+            </div>
+            <div class="space-y-2">
+              <Label for="cloud-new-password">{{ t('account.password.newPassword') }}</Label>
+              <Input
+                id="cloud-new-password"
+                v-model="changeForm.newPassword"
+                data-testid="cloud-password-new"
+                :disabled="passwordLoading"
+                type="password"
+                autocomplete="new-password"
+              />
+            </div>
+            <div class="space-y-2">
+              <Label for="cloud-confirm-password">{{
+                t('account.password.confirmPassword')
+              }}</Label>
+              <Input
+                id="cloud-confirm-password"
+                v-model="changeForm.confirmPassword"
+                data-testid="cloud-password-confirm"
+                :disabled="passwordLoading"
+                type="password"
+                autocomplete="new-password"
+              />
+            </div>
+            <p
+              v-if="passwordMismatch"
+              class="text-xs text-destructive sm:col-span-2"
+              data-testid="cloud-password-mismatch"
+            >
+              {{ t('account.password.passwordMismatch') }}
             </p>
+            <div class="flex justify-end gap-2">
+              <Button
+                type="button"
+                data-testid="cloud-password-cancel"
+                variant="outline"
+                :disabled="passwordLoading"
+                @click="changeOpen = false"
+                >{{ t('common.cancel') }}</Button
+              >
+              <Button
+                type="submit"
+                data-testid="cloud-password-change-button"
+                :disabled="passwordLoading"
+              >
+                {{ t('account.password.changePassword') }}
+              </Button>
+            </div>
+          </form>
+          <div class="space-y-3">
+            <h3 class="text-sm font-medium">{{ t('account.password.forgotTitle') }}</h3>
+            <p class="text-sm text-muted-foreground">
+              {{ t('account.password.forgotDescription') }}
+            </p>
+            <form
+              class="flex flex-col gap-3 sm:flex-row sm:items-end"
+              @submit.prevent="handleSendResetEmail"
+            >
+              <div class="min-w-0 flex-1 space-y-2">
+                <p class="text-sm">{{ t('account.password.resetEmail') }}</p>
+                <p
+                  data-testid="cloud-password-reset-recipient"
+                  class="text-sm text-muted-foreground"
+                >
+                  {{ maskedResetEmail }}
+                </p>
+              </div>
+              <Button
+                type="submit"
+                variant="outline"
+                data-testid="cloud-password-forgot-button"
+                :disabled="passwordLoading"
+              >
+                <Mail class="mr-2 h-4 w-4" />
+                {{ t('account.password.sendResetEmail') }}
+              </Button>
+            </form>
           </div>
-          <Button
-            type="submit"
-            variant="outline"
-            data-testid="cloud-password-forgot-button"
-            :disabled="passwordLoading"
-          >
-            <Mail class="mr-2 h-4 w-4" />
-            {{ t('account.password.sendResetEmail') }}
-          </Button>
-        </form>
-      </div>
-    </CardContent>
-  </Card>
+        </DialogContent>
+      </Dialog>
+    </div>
+    <AccountEmailVerificationDialog
+      v-model:open="verificationOpen"
+      purpose="change-password"
+      :email="forgotEmail"
+      @verified="
+        (token) => {
+          verificationToken = token;
+          changeOpen = true;
+        }
+      "
+    />
+  </div>
 </template>

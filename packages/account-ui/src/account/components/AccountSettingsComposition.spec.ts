@@ -14,7 +14,7 @@ import {
   DESKTOP_BRIDGE_KEY,
 } from '@account-ui-test-host/di/keys';
 import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
-import AccountProfileSection from './AccountProfileSection.vue';
+import AccountSettingsComposition from './AccountSettingsComposition.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 
 vi.mock('../../authentication/composables/useSession', async () => {
@@ -40,18 +40,14 @@ const i18n = createI18n({
   locale: 'en-US',
   messages: {
     'en-US': {
-      common: { retry: 'Retry', cancel: 'Cancel' },
+      common: { retry: 'Retry', cancel: 'Cancel', edit: 'Edit' },
       errors: { NOT_FOUND: 'Account not found' },
       auth: { toast: { loggedOut: 'Logged out' } },
       account: {
-        center: 'Account',
-        description: 'Manage your account.',
-        guestLabel: 'Local guest',
-        emailVerified: 'Login email verified',
-        emailUnverified: 'Login email not verified',
         status: { loading: 'Loading profile...' },
-        actions: { saveProfile: 'Save', logout: 'Log out' },
+        actions: { logout: 'Log out' },
         localPassword: {
+          rememberReset: 'Changing your password turns off remember me.',
           title: 'Local account password',
           description: 'Local protection',
           newPassword: 'New password',
@@ -73,10 +69,9 @@ const i18n = createI18n({
           unavailableTarget: 'Credentials no longer available',
           failed: 'Could not save the setting',
         },
-        profile: { nickname: 'Nickname', avatarUrl: 'Avatar', bio: 'Bio' },
-        placeholder: { nickname: 'Nickname', avatarUrl: 'Avatar URL', bio: 'Bio' },
+        profile: { nickname: 'Nickname' },
+        settings: { information: 'Account information', security: 'Password and security' },
         logoutHint: 'Sign out of this device.',
-        toast: { loadFailed: 'Failed to load profile' },
         logoutConfirm: {
           title: 'Log out',
           description: 'Confirm logout.',
@@ -94,42 +89,6 @@ const i18n = createI18n({
             },
           },
         },
-        oauth: {
-          title: 'Sign-in methods',
-          description: 'Link GitHub for identity only.',
-          githubLinked: 'GitHub linked',
-          githubNotLinked: 'GitHub not linked',
-          bindGithub: 'Link GitHub',
-          unbindGithub: 'Unlink GitHub',
-          bindSuccess: 'linked',
-          unbindSuccess: 'unlinked',
-          bindFailed: 'bind failed',
-          unbindFailed: 'unbind failed',
-          githubUnavailable: 'unavailable',
-          serviceUnavailable: 'service unavailable',
-          alreadyLinked: 'already linked',
-          lastLoginPath: 'last path',
-          invalidState: 'invalid state',
-          unbindConfirmTitle: 'Unlink?',
-          unbindConfirmDescription: 'Confirm unlink',
-          unbindConfirmText: 'Unlink',
-          repoScopeHint: 'repo hint',
-        },
-        sessions: {
-          title: 'Devices & sessions',
-          description: 'Manage sessions',
-          loading: 'Loading sessions…',
-          empty: 'No active sessions',
-          current: 'This device',
-          lastActive: 'Last active',
-          revoke: 'Revoke',
-          refresh: 'Refresh',
-          unknownDevice: 'Unknown device',
-          cannotRevokeCurrent: 'Cannot revoke current',
-          revokeConfirmTitle: 'Revoke?',
-          revokeConfirmDescription: 'Need re-login',
-          revokeConfirmText: 'Revoke',
-        },
       },
     },
   },
@@ -139,6 +98,13 @@ const PassthroughStub = defineComponent({
   name: 'PassthroughStub',
   setup(_, { attrs, slots }) {
     return () => h('div', attrs, slots.default?.());
+  },
+});
+
+const DialogStub = defineComponent({
+  props: ['open'],
+  setup(props, { slots }) {
+    return () => (props.open ? h('div', slots.default?.()) : null);
   },
 });
 
@@ -178,22 +144,6 @@ const InputStub = defineComponent({
   },
 });
 
-const SwitchStub = defineComponent({
-  name: 'SwitchStub',
-  props: ['modelValue', 'disabled'],
-  emits: ['update:modelValue'],
-  setup(props, { attrs, emit }) {
-    return () =>
-      h('button', {
-        ...attrs,
-        type: 'button',
-        disabled: props.disabled,
-        'aria-checked': String(props.modelValue),
-        onClick: () => emit('update:modelValue', !props.modelValue),
-      });
-  },
-});
-
 interface MountOptions {
   cloudConnected?: boolean;
   logout?: () => Promise<void>;
@@ -219,7 +169,7 @@ function mountSection(accountService: AccountClientPort, options: MountOptions =
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
     });
   }
-  return mount(AccountProfileSection, {
+  return mount(AccountSettingsComposition, {
     global: {
       plugins: [pinia, i18n],
       provide: {
@@ -266,29 +216,19 @@ function mountSection(accountService: AccountClientPort, options: MountOptions =
           : {}),
       },
       stubs: {
+        Dialog: DialogStub,
+        DialogContent: PassthroughStub,
+        DialogTitle: PassthroughStub,
+        DialogDescription: PassthroughStub,
         Button: ButtonStub,
-        Card: PassthroughStub,
-        CardContent: PassthroughStub,
-        CardDescription: PassthroughStub,
-        CardFooter: PassthroughStub,
-        CardHeader: PassthroughStub,
-        CardTitle: PassthroughStub,
         Input: InputStub,
         Label: true,
-        Avatar: PassthroughStub,
-        AvatarFallback: PassthroughStub,
-        AvatarImage: true,
-        Separator: true,
-        Switch: SwitchStub,
         Select: PassthroughStub,
         SelectContent: PassthroughStub,
         SelectItem: PassthroughStub,
         SelectTrigger: PassthroughStub,
         SelectValue: true,
-        Rocket: true,
         LogOut: true,
-        GitBranch: true,
-        Link2Off: true,
       },
     },
   });
@@ -311,8 +251,8 @@ const guestDto = {
   closedAt: null,
 } as const;
 
-describe('AccountProfileSection', () => {
-  it('shows a retryable error instead of an endless loading state', async () => {
+describe('AccountSettingsComposition', () => {
+  it('shows a retryable profile error instead of an endless loading state', async () => {
     const getMyProfile = vi
       .fn()
       .mockResolvedValue(fail({ code: 'NOT_FOUND', message: 'Account not found' }));
@@ -328,9 +268,7 @@ describe('AccountProfileSection', () => {
     expect(wrapper.get('[data-testid="account-profile-error"]').text()).toContain(
       'Account not found',
     );
-    expect(wrapper.find('[data-testid="account-profile-loading"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="account-oauth-card"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="account-sessions-card"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="account-settings-nickname"]').text()).toBe('—');
 
     await wrapper.get('[data-testid="account-profile-retry"]').trigger('click');
     await flushPromises();
@@ -338,28 +276,24 @@ describe('AccountProfileSection', () => {
     expect(getMyProfile).toHaveBeenCalledTimes(2);
   });
 
-  it('lets a guest edit local Profile data without showing a sign-out action', async () => {
-    const accountService = {
-      getMyProfile: vi.fn().mockResolvedValue({
-        ok: true,
-        data: { account: guestDto, cloudIdentity: null },
-      }),
-      updateMyProfile: vi.fn().mockResolvedValue({
-        ok: true,
-        data: { account: guestDto, cloudIdentity: null },
-      }),
+  it('opens the profile editor instead of rendering an inline profile form', async () => {
+    const service = {
+      getMyProfile: vi
+        .fn()
+        .mockResolvedValue({ ok: true, data: { account: guestDto, cloudIdentity: null } }),
+      updateMyProfile: vi.fn(),
     } as unknown as AccountClientPort;
-
-    const wrapper = mountSection(accountService);
+    const wrapper = mountSection(service, { desktop: { invoke: vi.fn() } });
     await flushPromises();
 
-    expect(wrapper.get('#nickname').attributes('disabled')).not.toBe('true');
-    expect(wrapper.get('#bio').attributes('disabled')).not.toBe('true');
-    // Issue #858: the avatar URL input is gone; the avatar itself is the upload control.
-    expect(wrapper.find('#avatar').exists()).toBe(false);
-    expect(wrapper.get('[data-testid="account-profile-avatar"]').exists()).toBe(true);
-    expect(wrapper.text()).toContain('Local guest');
-    expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="account-settings-nickname"]').text()).toBe('Guest 4827');
+    expect(wrapper.find('#nickname').exists()).toBe(false);
+    expect(wrapper.find('#bio').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-profile-avatar"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-profile-save"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-settings-profile-edit"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="account-local-password-open"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(true);
   });
 
   it('asks the local-account confirmation and signs out once confirmed', async () => {
@@ -437,8 +371,6 @@ describe('AccountProfileSection', () => {
     const wrapper = mountSection(accountService, { logout, cloudConnected: true });
     await flushPromises();
 
-    expect(wrapper.text()).toContain('user@example.com');
-    expect(wrapper.text()).toContain('Login email verified');
     expect(wrapper.get('[data-testid="account-logout-button"]').text()).toContain('Log out');
 
     await wrapper.get('[data-testid="account-logout-button"]').trigger('click');
@@ -453,24 +385,6 @@ describe('AccountProfileSection', () => {
     expect(logout).toHaveBeenCalledOnce();
   });
 
-  it('removes every personal profile field in settings while preserving password and sign-out', async () => {
-    const service = {
-      getMyProfile: vi
-        .fn()
-        .mockResolvedValue({ ok: true, data: { account: guestDto, cloudIdentity: null } }),
-      updateMyProfile: vi.fn(),
-    } as unknown as AccountClientPort;
-    const wrapper = mountSection(service, { desktop: { invoke: vi.fn() } });
-    await wrapper.setProps({ showProfile: false });
-    await flushPromises();
-    expect(wrapper.find('[data-testid="account-profile-nickname"]').exists()).toBe(false);
-    expect(wrapper.find('#bio').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="account-profile-avatar"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="account-profile-save"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="account-logout-button"]').exists()).toBe(true);
-  });
-
   it('changes the local account password only when both entries match', async () => {
     const invoke = vi.fn().mockResolvedValue({ ok: true, data: null });
     const accountService = {
@@ -483,6 +397,8 @@ describe('AccountProfileSection', () => {
     const wrapper = mountSection(accountService, { desktop: { invoke } });
     await flushPromises();
 
+    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
     const form = wrapper.get('[data-testid="account-local-password"]');
     await wrapper.get('[data-testid="account-local-password-current"]').setValue('old-password');
     await wrapper.get('[data-testid="account-local-password-new"]').setValue('account-password');
@@ -503,9 +419,35 @@ describe('AccountProfileSection', () => {
       currentPassword: 'old-password',
       newPassword: 'account-password',
     });
+    expect(wrapper.find('[data-testid="account-local-password-dialog"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
     expect(
       (wrapper.get('[data-testid="account-local-password-new"]').element as HTMLInputElement).value,
     ).toBe('');
+  });
+
+  it('clears local passwords on cancel without sending them to the bridge', async () => {
+    const invoke = vi.fn().mockResolvedValue({ ok: true, data: null });
+    const service = {
+      getMyProfile: vi
+        .fn()
+        .mockResolvedValue({ ok: true, data: { account: guestDto, cloudIdentity: null } }),
+    } as unknown as AccountClientPort;
+    const wrapper = mountSection(service, { desktop: { invoke } });
+    await flushPromises();
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
+    await wrapper.get('[data-testid="account-local-password-current"]').setValue('old-password');
+    await wrapper.get('[data-testid="account-local-password-new"]').setValue('new-password');
+    await wrapper.get('[data-testid="account-local-password-cancel"]').trigger('click');
+    expect(wrapper.find('[data-testid="account-local-password"]').exists()).toBe(false);
+    expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.PASSWORD_SET, expect.anything());
+    await wrapper.get('[data-testid="account-local-password-open"]').trigger('click');
+    for (const field of ['current', 'new', 'confirmation']) {
+      expect(
+        (wrapper.get(`[data-testid="account-local-password-${field}"]`).element as HTMLInputElement)
+          .value,
+      ).toBe('');
+    }
   });
 
   it('hides the local password card for a registered Profile', async () => {

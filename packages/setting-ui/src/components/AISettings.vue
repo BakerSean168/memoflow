@@ -350,10 +350,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section data-testid="ai-settings-panel" class="space-y-4">
+  <section data-testid="ai-settings-panel" class="space-y-8">
     <header class="flex items-center justify-between gap-3 px-1">
       <div class="flex items-center gap-1">
-        <h2 class="text-sm font-medium text-muted-foreground">Providers</h2>
+        <h2 class="text-xl font-semibold tracking-tight">{{ t('setting.ai.providerList') }}</h2>
         <Button
           size="icon"
           variant="ghost"
@@ -385,7 +385,7 @@ onBeforeUnmount(() => {
     />
     <div
       v-if="instances.length"
-      class="grid min-h-[34rem] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] lg:grid-cols-[15.5rem_minmax(0,1fr)]"
+      class="grid min-h-[34rem] overflow-hidden border-b border-[hsl(var(--border-subtle))] lg:grid-cols-[15.5rem_minmax(0,1fr)]"
     >
       <TooltipProvider :delay-duration="300">
         <div
@@ -458,7 +458,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </TooltipProvider>
-      <div class="min-w-0 p-3 sm:p-4">
+      <div class="min-w-0 py-4 lg:pl-6">
         <MastraAgentSettings
           v-if="selected?.driver === 'mastra'"
           :key="selected.instanceId"

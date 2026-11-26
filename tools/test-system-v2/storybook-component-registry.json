@@ -670,10 +670,10 @@
       "status": "present"
     },
     {
-      "path": "packages/account-ui/src/account/components/AccountProfileSection.vue",
+      "path": "packages/account-ui/src/account/components/AccountSettingsComposition.vue",
       "package": "@memoflow/account-ui",
       "kind": "component",
-      "storyPath": "packages/account-ui/src/account/components/AccountProfileSection.stories.ts",
+      "storyPath": "packages/account-ui/src/account/components/AccountSettingsComposition.stories.ts",
       "status": "present"
     },
     {
@@ -1055,24 +1055,10 @@
       "status": "present"
     },
     {
-      "path": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.vue",
-      "package": "@memoflow/repository-ui",
-      "kind": "component",
-      "storyPath": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.stories.ts",
-      "status": "present"
-    },
-    {
       "path": "packages/repository-ui/src/views/LocalVaultWorkspaceView.vue",
       "package": "@memoflow/repository-ui",
       "kind": "component",
       "storyPath": "packages/repository-ui/src/views/LocalVaultWorkspaceView.stories.ts",
-      "status": "present"
-    },
-    {
-      "path": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue",
-      "package": "@memoflow/repository-ui",
-      "kind": "component",
-      "storyPath": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.stories.ts",
       "status": "present"
     },
     {

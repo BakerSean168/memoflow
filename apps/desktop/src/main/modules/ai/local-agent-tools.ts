@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import {
   LocalAgentToolBridge,
   LocalAgentRepository,
@@ -14,6 +14,7 @@ import {
   permissionOperationForTool,
   goalPanelSubmitOperationId,
   type IKnowledgeNotePersistencePort,
+  type IKnowledgeNoteWritePort,
   type LocalToolContext,
 } from '@memoflow/ai';
 import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/ports';
@@ -136,6 +137,8 @@ export interface DesktopLocalAgentToolsDomains {
   };
   /** Canonical confirmed-note write port; absent means drafts are unavailable. */
   readonly knowledgeNotes?: IKnowledgeNotePersistencePort;
+  /** Direct native write port; never advertised to external MCP clients. */
+  readonly knowledgeNoteWrites?: IKnowledgeNoteWritePort;
 }
 
 function isNotificationInbox(
@@ -267,6 +270,12 @@ function ownerResult<T>(result: Result<T>): T {
   if (result.ok) return result.data;
   const parsed = GatewayFailureCodeSchema.safeParse(result.error.code);
   throw new GatewayReadError(parsed.success ? parsed.data : 'INTERNAL_ERROR');
+}
+
+/** Deterministic, UUID-shaped document identity so a retried tool call is stable. */
+function deterministicKnowledgeDocumentId(key: string): string {
+  const hex = createHash('sha256').update(key).digest('hex').slice(0, 32);
+  return `kdoc_${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
 }
 /** Native-session authentication stays local; owner tool contracts match hosted MCP. */
 export function createDesktopLocalAgentTools(
@@ -646,6 +655,135 @@ export function createDesktopLocalAgentTools(
               ),
           );
         }
+      }
+      // Direct Vault writes are a native-session capability. External MCP
+      // clients keep the draft/deliver contract, so this retirement does not
+      // grant them unattended write access.
+      if (
+        domains?.knowledgeNoteWrites &&
+        context.origin !== 'client' &&
+        context.writeScopes.includes('knowledge:write')
+      ) {
+        const knowledgeNoteWrites = domains.knowledgeNoteWrites;
+        const noteResult = z.object({
+          created: z.boolean(),
+          note: z.object({
+            documentId: z.string(),
+            relativePath: z.string(),
+            title: z.string(),
+            contentHash: z.string(),
+          }),
+        });
+        const writeNote = async (
+          toolName: 'knowledge_note_create' | 'knowledge_note_update',
+          operationId: string,
+          input: {
+            relativePath: string;
+            contentMarkdown: string;
+            expectedContentHash?: string;
+          },
+          knowledgeDocumentId?: string,
+        ) => {
+          try {
+            const value = await context.executeAuthorized(operationId, toolName, async () => {
+              await context.authorize('knowledge:write');
+              const contentHash = createHash('sha256').update(input.contentMarkdown).digest('hex');
+              // The tool call request id is stable across transport retries, so
+              // an identical retry replays the durable write instead of
+              // appending a second note.
+              const requestId = `local-tool:${context.requestId}:${toolName}:${input.relativePath}:${contentHash}`;
+              const result = await context.track(() =>
+                knowledgeNoteWrites.writeKnowledgeNote({
+                  identityId: context.identityId,
+                  context,
+                  relativePath: input.relativePath,
+                  contentMarkdown: input.contentMarkdown,
+                  requestId,
+                  ...(input.expectedContentHash
+                    ? { expectedContentHash: input.expectedContentHash }
+                    : {}),
+                  ...(knowledgeDocumentId
+                    ? { knowledgeDocumentId: KnowledgeDocumentIdSchema.parse(knowledgeDocumentId) }
+                    : {}),
+                }),
+              );
+              const output = noteResult.parse({
+                created: result.created,
+                note: {
+                  documentId: result.note.id,
+                  relativePath: result.note.path,
+                  title: result.note.name,
+                  contentHash,
+                },
+              });
+              await context.authorize('knowledge:write');
+              return output;
+            });
+            return {
+              content: [{ type: 'text' as const, text: JSON.stringify(value) }],
+              structuredContent: value as Record<string, unknown>,
+            };
+          } catch (error) {
+            const parsedCode = GatewayFailureCodeSchema.safeParse(
+              error instanceof Error && 'code' in error ? error.code : undefined,
+            );
+            const code = parsedCode.success
+              ? parsedCode.data
+              : error instanceof z.ZodError
+                ? 'VALIDATION_ERROR'
+                : 'INTERNAL_ERROR';
+            return {
+              isError: true,
+              content: [{ type: 'text' as const, text: code }],
+              structuredContent: { error: { code } },
+            };
+          }
+        };
+        const noteWriteAnnotations = {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        };
+        server.registerTool(
+          'knowledge_note_create',
+          {
+            description:
+              'Create a Markdown note in the currently selected local Vault. The write happens immediately; an existing path or duplicate document identity is rejected instead of overwritten.',
+            inputSchema: z
+              .object({
+                relativePath: z.string().trim().min(1).max(1024),
+                contentMarkdown: z.string().min(1).max(400_000),
+              })
+              .strict(),
+            outputSchema: noteResult,
+            annotations: noteWriteAnnotations,
+          },
+          (input) => {
+            const contentHash = createHash('sha256').update(input.contentMarkdown).digest('hex');
+            const documentId = deterministicKnowledgeDocumentId(
+              `local-tool:${context.requestId}:knowledge_note_create:${input.relativePath}:${contentHash}`,
+            );
+            return writeNote('knowledge_note_create', 'knowledge.note.create', input, documentId);
+          },
+        );
+        server.registerTool(
+          'knowledge_note_update',
+          {
+            description:
+              'Replace an existing local Vault note. Requires the sha256 returned by a prior read; a stale hash or changed path is rejected and the file is replaced atomically.',
+            inputSchema: z
+              .object({
+                relativePath: z.string().trim().min(1).max(1024),
+                contentMarkdown: z.string().min(1).max(400_000),
+                expectedContentHash: z.string().regex(/^[a-f0-9]{64}$/),
+              })
+              .strict(),
+            outputSchema: noteResult,
+            annotations: noteWriteAnnotations,
+          },
+          (input) => writeNote('knowledge_note_update', 'knowledge.note.update', input),
+        );
       }
       // Local AI sessions are read through the bounded projection only; the
       // provider credential and permission tables have no tool surface.

@@ -30,12 +30,6 @@
       "reason": "Standalone focus window chrome; window and session actions use the window visual layer."
     },
     {
-      "path": "packages/account-ui/src/account/components/AccountAvatarUploader.vue",
-      "native": ["button", "file-input"],
-      "category": "custom-control",
-      "reason": "The avatar upload tile is the interaction surface; its file input is hidden and opened from that tile."
-    },
-    {
       "path": "packages/ai-ui/src/components/AIComposerControls.vue",
       "native": ["button", "input"],
       "category": "custom-control",
@@ -300,6 +294,10 @@
     {
       "path": "apps/web/src/auth/WebAuthView.vue",
       "native": ["button"]
+    },
+    {
+      "path": "packages/account-ui/src/account/components/AccountAvatarUploader.vue",
+      "native": ["button", "file-input"]
     },
     {
       "path": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",

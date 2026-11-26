@@ -408,7 +408,7 @@ export interface SettingUiHost extends PlatformRendererHost {
     | 'ReleaseNotes'
     | 'ProductSurfaceHeader'
     | 'AgentDriverIcon'
-    | 'AccountProfileSection'
+    | 'AccountSettingsComposition'
     | 'CloudPasswordSection'
     | 'ExternalAgentConnectionsSection',
     Component

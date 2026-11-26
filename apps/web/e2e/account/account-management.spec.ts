@@ -7,6 +7,7 @@ import {
   openAccountSettings,
   openProfileEditor,
 } from './account-settings.helpers';
+import { waitForCapturedEmailCode } from '../helpers/auth-email-link';
 
 test.describe('Account & Privacy settings', () => {
   test('[P1] renders account security without personal profile fields', async ({ page }) => {
@@ -17,7 +18,7 @@ test.describe('Account & Privacy settings', () => {
       email.replace(/^(.).*(@.*)$/, '$1***$2'),
     );
     await expect(page.getByTestId('account-profile-save')).toHaveCount(0);
-    await expect(page.getByTestId('cloud-password-current')).toBeVisible();
+    await expect(page.getByTestId('cloud-password-open')).toBeVisible();
     await expect(page.getByTestId('account-logout-button')).toBeVisible();
   });
 
@@ -46,10 +47,17 @@ test.describe('Account & Privacy settings', () => {
     });
   });
 
-  test('[P2] changes the cloud password through the account settings owner', async ({ page }) => {
-    await openAccountSettings(page);
+  test('[P2] changes the cloud password after verifying the current email', async ({ page }) => {
+    const { email } = await openAccountSettings(page);
 
     const nextPassword = 'NextTest123456!';
+    await page.getByTestId('cloud-password-open').click();
+    await expect(page.getByTestId('account-email-verification-dialog')).toBeVisible();
+    await page.getByTestId('account-verification-send').click();
+    await page.getByTestId('account-verification-code').fill(await waitForCapturedEmailCode(email));
+    await page.getByTestId('account-verification-verify').click();
+    await expect(page.getByTestId('cloud-password-dialog')).toBeVisible();
+
     await page.getByTestId('cloud-password-current').fill(ACCOUNT_TEST_PASSWORD);
     await page.getByTestId('cloud-password-new').fill(nextPassword);
     await page.getByTestId('cloud-password-confirm').fill(nextPassword);
@@ -57,15 +65,13 @@ test.describe('Account & Privacy settings', () => {
     const changeResponse = page.waitForResponse(
       (response) =>
         response.request().method() === 'POST' &&
-        new URL(response.url()).pathname.endsWith('/api/auth/change-password'),
+        new URL(response.url()).pathname.endsWith('/api/auth/account-security/change-password'),
       { timeout: TIMEOUT_CONFIG.API_REQUEST },
     );
     await page.getByTestId('cloud-password-change-button').click();
     expect((await changeResponse).ok()).toBe(true);
 
-    await expect(page.getByTestId('cloud-password-current')).toHaveValue('');
-    await expect(page.getByTestId('cloud-password-new')).toHaveValue('');
-    await expect(page.getByTestId('cloud-password-confirm')).toHaveValue('');
+    await expect(page.getByTestId('cloud-password-dialog')).toHaveCount(0);
     await expect(page.getByTestId('password-mutation-error')).toHaveCount(0);
   });
 

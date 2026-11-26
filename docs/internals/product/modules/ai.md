@@ -37,7 +37,7 @@ MastraAIRuntime
 
 - `goal.create`：clarify / draft / review / revise / approve；apply adapter 显式投影到 canonical Goal/KR contract（`initial/current/target`），旧 Goal/KR vocabulary 不进入 owner contract/persistence；
 - `task.create`：使用当前 recurrence、Shared Label、Goal Link 与 optional contribution contract；
-- `knowledge.capture`：结构化知识草稿，经确认后由 Repository owner port 持久化；
+- `knowledge.capture`：结构化知识草稿由 Repository owner port 直接写入当前 Vault；成功收据只在真实写盘后返回，失败进入可重试的 recovery；
 - workflow apply 使用稳定 entity/request identity，重试不会重复创建业务对象或 Label。
 
 ### 3.1 Native Surface Orchestration
@@ -56,7 +56,7 @@ Goal / Task / Knowledge native UI
 
 AI 对业务 UI 使用 typed semantic action，而不是 DOM selector/click/type 模拟。Owner surface 继续拥有 validation、dirty/unsaved guard 和 submit/cancel semantics。
 
-`draftRef / workflowRunId / revision / referenceMap` 等 internal identity 可以继续服务 restart/retry/recovery，但不再作为 normal user review UI 的字段。
+`draftRef / workflowRunId / revision / referenceMap` 等 internal identity 只服务 restart/retry/recovery。知识笔记不再有逐笔 review UI；Goal/Task 的原生审核 UX 不变。
 
 **2026-10-02 PVC-AI-8121:** `AIGoalDraftEditor` / `AITaskDraftEditor` 及其 visibility state 已删除。
 Goal/KR 使用 GoalDialog，完整 Task 使用 TaskPlanDialog，Knowledge 使用 Repository

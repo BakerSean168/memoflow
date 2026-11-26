@@ -88,6 +88,11 @@ export type {
   IKnowledgeNotePersistencePort,
 } from './knowledge-note-persistence.port';
 export type {
+  IKnowledgeNoteWritePort,
+  WriteKnowledgeNoteInput,
+  WriteKnowledgeNoteResult,
+} from './knowledge-note-write.port';
+export type {
   KnowledgeExpansionInput,
   KnowledgeExpansionResult,
   IKnowledgeQueryPort,

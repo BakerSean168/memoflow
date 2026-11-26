@@ -107,12 +107,13 @@
       "forbiddenPaths": [
         "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
         "packages/ai-ui/src/components/AIGoalDraftEditor.spec.ts",
-        "packages/ai-ui/src/components/AITaskDraftEditor.vue"
+        "packages/ai-ui/src/components/AITaskDraftEditor.vue",
+        "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.vue",
+        "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue"
       ],
       "requiredPaths": [
         "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
-        "packages/task-ui/src/components/dialogs/TaskPlanDialog.vue",
-        "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.vue"
+        "packages/task-ui/src/components/dialogs/TaskPlanDialog.vue"
       ]
     },
     {

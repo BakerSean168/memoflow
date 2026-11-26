@@ -70,7 +70,6 @@ export type TaskWorkflowStage =
 export type KnowledgeCaptureWorkflowStage =
   | 'collect'
   | 'clarification'
-  | 'confirm'
   | 'result'
   | 'plan'
   | 'execute';

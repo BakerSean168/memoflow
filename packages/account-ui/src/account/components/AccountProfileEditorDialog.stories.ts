@@ -4,13 +4,13 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { AccountClientPort } from '@memoflow/account-client';
 import type { AccountClientDTO } from '@memoflow/account-contracts';
-import { Toaster } from '@memoflow/ui-vue-shadcn';
+import { Button, Toaster } from '@memoflow/ui-vue-shadcn';
 import { useAccountStore } from '../stores/account-store';
 import { accountUiHost } from '../../account-ui-host';
 import type { AccountAvatarStore } from '../avatar/account-avatar-store';
 import AccountProfileEditorDialog from './AccountProfileEditorDialog.vue';
 
-const now = Date.now();
+const now = Date.UTC(2024, 0, 30, 12);
 
 const PNG_BASE64 =
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
@@ -49,6 +49,8 @@ function createService(account: AccountClientDTO, overrides: Partial<AccountClie
   let current = account;
   return {
     getMyProfile: async () => ok({ account: current, cloudIdentity: null }),
+    getMyAvatarMeta: async () => ok({ updatedAt: null }),
+    uploadMyAvatar: async () => ok({ updatedAt: now }),
     updateMyProfile: async (request: { nickname: string; bio: string | null }) => {
       current = {
         ...current,
@@ -100,7 +102,7 @@ const NARROW_DIALOG_STYLE =
 function renderEditor(options: EditorDoubleOptions = {}) {
   const account = options.account ?? createAccount();
   return {
-    components: { AccountProfileEditorDialog, Toaster },
+    components: { AccountProfileEditorDialog, Toaster, Button },
     setup() {
       // The account store is a Pinia singleton; each story must load its own
       // fixture instead of inheriting the previous story's account.
@@ -125,14 +127,14 @@ function renderEditor(options: EditorDoubleOptions = {}) {
     },
     template: `
       <div class="flex flex-col items-center gap-3">
-        <button
+        <Button
           type="button"
           data-testid="reopen-editor"
           class="rounded-md border px-2 py-1 text-xs"
           @click="open = true"
         >
           Reopen editor
-        </button>
+        </Button>
         <AccountProfileEditorDialog v-model:open="open" />
         <Toaster v-if="toaster" position="bottom-center" />
       </div>
@@ -153,7 +155,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** Default open: filled profile, flat field groups, no footer until an edit. */
-export const Open: Story = {};
+export const Open: Story = {
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    await expect(page.queryByTestId('profile-editor-footer')).not.toBeInTheDocument();
+    await expect(page.queryByTestId('profile-editor-nickname-count')).not.toBeInTheDocument();
+    await expect(page.queryByTestId('profile-editor-bio-count')).not.toBeInTheDocument();
+    await expect(page.getByTestId('profile-editor-member-since')).toHaveTextContent('Jan 29, 2024');
+  },
+};
 
 /** A brand-new account has no nickname or bio; the empty fields stay editable. */
 export const EmptyProfile: Story = {
@@ -201,6 +211,7 @@ export const NicknameTooShort: Story = {
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'A');
+    await userEvent.keyboard('{Enter}');
     await expect(page.getByTestId('profile-editor-nickname-hint')).toBeInTheDocument();
     await expect(page.getByTestId('profile-editor-nickname-count')).toHaveTextContent('1/20');
     await expect(page.getByTestId('profile-editor-save')).toBeDisabled();
@@ -234,6 +245,12 @@ export const AvatarUploading: Story = {
     const page = within(canvasElement.ownerDocument.body);
     const input = (await page.findByTestId('profile-editor-avatar-input')) as HTMLInputElement;
     await userEvent.upload(input, pngFile());
+    await waitFor(() =>
+      expect(page.getByTestId('profile-editor-avatar')).toHaveAttribute('aria-busy', 'false'),
+    );
+    await userEvent.click(page.getByTestId('profile-editor-nickname'));
+    await userEvent.keyboard('{Enter}');
+    await userEvent.click(page.getByTestId('profile-editor-save'));
     const helper = await page.findByTestId('profile-editor-avatar-helper');
     await waitFor(() => expect(helper).toHaveTextContent('Processing avatar...'));
     await expect(helper).toHaveAttribute('data-state', 'uploading');
@@ -266,6 +283,7 @@ export const DirtyDraft: Story = {
     const page = within(canvasElement.ownerDocument.body);
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.type(nickname, ' Updated');
+    await userEvent.keyboard('{Enter}');
     await waitFor(() => expect(page.getByTestId('profile-editor-footer')).toBeInTheDocument());
     await expect(page.getByTestId('profile-editor-prompt')).toBeInTheDocument();
     await expect(page.getByTestId('profile-editor-save')).toBeEnabled();
@@ -279,6 +297,7 @@ export const CloseGuardKeepsDraft: Story = {
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'Draft name');
+    await userEvent.keyboard('{Enter}');
     await userEvent.click(page.getByTestId('profile-editor-close'));
     const dialog = page.getByTestId('profile-editor-dialog');
     await waitFor(() => expect(dialog).toHaveAttribute('data-guard', 'alert'));
@@ -295,6 +314,7 @@ export const ResetDiscardsDraft: Story = {
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'Draft name');
+    await userEvent.keyboard('{Enter}');
     await userEvent.click(page.getByTestId('profile-editor-reset'));
     await waitFor(() =>
       expect(page.queryByTestId('profile-editor-footer')).not.toBeInTheDocument(),
@@ -310,6 +330,7 @@ export const ReopenStartsFromPersistedProfile: Story = {
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'Draft name');
+    await userEvent.keyboard('{Enter}');
     await userEvent.click(page.getByTestId('profile-editor-reset'));
     await userEvent.click(page.getByTestId('profile-editor-close'));
     await waitFor(() =>
@@ -335,6 +356,7 @@ export const SaveBusy: Story = {
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'Draft name');
+    await userEvent.keyboard('{Enter}');
     await userEvent.click(page.getByTestId('profile-editor-save'));
     await waitFor(() => expect(page.getByTestId('profile-editor-save')).toBeDisabled());
     await expect(page.getByTestId('profile-editor-status')).toHaveAttribute('data-phase', 'saving');
@@ -361,6 +383,7 @@ export const SaveError: Story = {
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'Draft name');
+    await userEvent.keyboard('{Enter}');
     await userEvent.click(page.getByTestId('profile-editor-save'));
     await waitFor(() =>
       expect(page.getByTestId('profile-editor-status')).toHaveAttribute('data-phase', 'error'),
@@ -382,6 +405,7 @@ export const SaveSuccess: Story = {
     const nickname = await page.findByTestId('profile-editor-nickname');
     await userEvent.clear(nickname);
     await userEvent.type(nickname, 'Updated Builder');
+    await userEvent.keyboard('{Enter}');
     await userEvent.click(page.getByTestId('profile-editor-save'));
     await waitFor(() =>
       expect(page.getByTestId('profile-editor-status')).toHaveAttribute('data-phase', 'success'),
@@ -397,4 +421,80 @@ export const SaveSuccess: Story = {
 export const NarrowDialog: Story = {
   parameters: { layout: 'fullscreen' },
   render: () => renderEditor({ narrow: true }),
+};
+
+/** A picked image is only a preview until Enter and Save; Reset restores it. */
+export const AvatarDraft: Story = {
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    await userEvent.upload(await page.findByTestId('profile-editor-avatar-input'), pngFile());
+    await waitFor(() =>
+      expect(page.getByTestId('profile-editor-avatar')).toHaveAttribute('aria-busy', 'false'),
+    );
+    await expect(page.queryByTestId('profile-editor-footer')).not.toBeInTheDocument();
+    await userEvent.click(page.getByTestId('profile-editor-nickname'));
+    await userEvent.keyboard('{Enter}');
+    await expect(page.getByTestId('profile-editor-save')).toBeEnabled();
+  },
+};
+
+export const NarrowDirtyDialog: Story = {
+  ...DirtyDraft,
+  parameters: { layout: 'fullscreen' },
+  render: () => renderEditor({ narrow: true }),
+};
+
+/** Focus changes, growing content and the save bar must stay inside a stable frame. */
+export const BioLimitAndStableFrame: Story = {
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const shell = await page.findByTestId('profile-editor-shell');
+    await Promise.all(shell.getAnimations().map((animation) => animation.finished));
+    const initial = shell.getBoundingClientRect();
+    const bio = page.getByTestId('profile-editor-bio') as HTMLTextAreaElement;
+    await userEvent.click(bio);
+    await expect(page.queryByTestId('profile-editor-bio-count')).not.toBeInTheDocument();
+    await expect(shell.getBoundingClientRect().height).toBe(initial.height);
+    await expect(shell.getBoundingClientRect().top).toBe(initial.top);
+    await userEvent.clear(bio);
+    await userEvent.type(bio, 'A'.repeat(500), { delay: 0 });
+    await expect(page.queryByTestId('profile-editor-bio-hint')).not.toBeInTheDocument();
+    await userEvent.type(bio, 'B');
+    await expect(bio).toHaveValue('A'.repeat(500));
+    await expect(page.getByTestId('profile-editor-bio-count')).toHaveTextContent('500/500');
+    await expect(page.getByTestId('profile-editor-bio-hint')).toHaveTextContent(
+      'Bio is limited to 500 characters.',
+    );
+    await userEvent.keyboard('{Enter}');
+    await expect(page.getByTestId('profile-editor-footer')).toBeInTheDocument();
+    await expect(shell.getBoundingClientRect().height).toBe(initial.height);
+    await expect(shell.getBoundingClientRect().top).toBe(initial.top);
+  },
+};
+
+/** Only the fields scroll: avatar, banner close control and save bar remain visible. */
+export const PinnedProfileHeader: Story = {
+  render: () => renderEditor({ account: createAccount({ bio: 'A line.\n'.repeat(60) }) }),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const shell = await page.findByTestId('profile-editor-shell');
+    await Promise.all(shell.getAnimations().map((animation) => animation.finished));
+    await userEvent.type(page.getByTestId('profile-editor-nickname'), 'x');
+    await userEvent.keyboard('{Enter}');
+    const avatar = page.getByTestId('profile-editor-avatar');
+    const close = page.getByTestId('profile-editor-close');
+    const footer = page.getByTestId('profile-editor-footer');
+    const before = [avatar, close, footer].map((element) => element.getBoundingClientRect().top);
+    const scroll = page.getByTestId('profile-editor-scroll');
+    await waitFor(() => expect(scroll.scrollHeight).toBeGreaterThan(scroll.clientHeight));
+    scroll.scrollTop = scroll.scrollHeight;
+    scroll.dispatchEvent(new Event('scroll'));
+    await waitFor(() => expect(scroll.scrollTop).toBeGreaterThan(0));
+    await expect(
+      [avatar, close, footer].map((element) => element.getBoundingClientRect().top),
+    ).toEqual(before);
+    await expect(
+      page.getByTestId('profile-editor-nickname').getBoundingClientRect().bottom,
+    ).toBeLessThan(scroll.getBoundingClientRect().top);
+  },
 };

@@ -2088,6 +2088,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/preload/allowed-channels.knowledge-workspace.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/preload/allowed-channels.sync-status.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2916,6 +2924,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-ui/src/account/components/AccountEmailVerificationDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account-ui/src/account/components/AccountProfileEditorDialog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2924,7 +2940,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/account-ui/src/account/components/AccountProfileSection.spec.ts",
+      "path": "packages/account-ui/src/account/components/AccountSettingsComposition.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account-ui/vitest.config.ts"
@@ -2965,14 +2981,6 @@
     },
     {
       "path": "packages/account-ui/src/account/composables/useAccountSignOut.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/account-ui/src/account/index.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account-ui/vitest.config.ts"
@@ -5420,6 +5428,16 @@
       ]
     },
     {
+      "path": "packages/app-vue/src/di/use-knowledge-business-links.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/AppShell.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5681,16 +5699,6 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/useAppShellStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -9350,15 +9358,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository-ui/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository-ui/src/composables/localAgentNoteReview.spec.ts",
+      "path": "packages/repository-ui/src/components/KnowledgeSourceConnections.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository-ui/vitest.config.ts"
@@ -9398,7 +9398,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.spec.ts",
+      "path": "packages/repository-ui/src/utils/local-vault-workspace.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository-ui/vitest.config.ts"
@@ -9463,6 +9463,14 @@
     },
     {
       "path": "packages/repository/src/electron/local-vault-external-editor.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository/src/electron/local-vault-git.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -13993,7 +14001,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 111
+      "fileCount": 112
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14294,14 +14302,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 8
+      "fileCount": 7
     },
     {
       "id": "packages/repository/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 32
+      "fileCount": 33
     },
     {
       "id": "packages/routine-client/vitest.config.ts",
@@ -14729,6 +14737,7 @@
       "packages/app-vue/src/components/shared/ModuleHeader.spec.ts",
       "packages/app-vue/src/components/shared/settings/SettingsPresentationPrimitives.spec.ts",
       "packages/app-vue/src/di/navigation.spec.ts",
+      "packages/app-vue/src/di/use-knowledge-business-links.spec.ts",
       "packages/app-vue/src/layouts/shell/AppShell.spec.ts",
       "packages/app-vue/src/layouts/shell/BusinessPanel.spec.ts",
       "packages/app-vue/src/layouts/shell/CloudConnectionDialog.spec.ts",
@@ -14756,7 +14765,6 @@
       "packages/app-vue/src/layouts/shell/sync-status-indicator.presentation.spec.ts",
       "packages/app-vue/src/layouts/shell/unverified-email-banner.spec.ts",
       "packages/app-vue/src/layouts/shell/useAppShellStore.spec.ts",
-      "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
       "packages/app-vue/src/layouts/shell/useNativeBusinessPanelBridge.spec.ts",
       "packages/app-vue/src/layouts/shell/usePanelWidth.spec.ts",
       "packages/app-vue/src/layouts/shell/useShellRouterSync.spec.ts",
@@ -15151,7 +15159,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1249,
+    "unit": 1250,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

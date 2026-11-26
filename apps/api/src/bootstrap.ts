@@ -123,7 +123,12 @@ export class ApiBootstrapper {
           app.get('/api/auth/test/last-email-link', (req, res) => {
             const email = typeof req.query.email === 'string' ? req.query.email.trim() : '';
             const kind = req.query.kind;
-            if (!email || (kind !== 'email-verification' && kind !== 'password-reset')) {
+            if (
+              !email ||
+              (kind !== 'email-verification' &&
+                kind !== 'password-reset' &&
+                kind !== 'account-security-code')
+            ) {
               res.status(400).json({ message: 'email and a valid kind are required' });
               return;
             }

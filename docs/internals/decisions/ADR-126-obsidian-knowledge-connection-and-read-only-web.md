@@ -5,14 +5,14 @@ tags:
   - obsidian
   - desktop
   - web
-description: 知识模块作为 Obsidian 连接和上下文边界，Desktop 本地确认写入，Web 严格只读
+description: 知识模块作为 Obsidian 连接和上下文边界，Desktop 授权直接写入，Web 严格只读
 created: 2026-11-21T00:00:00+08:00
-updated: 2026-11-21T00:00:00+08:00
+updated: 2026-11-26T00:00:00+08:00
 ---
 
 # ADR-126: Obsidian Knowledge Connection and Read-only Web
 
-**状态：** 已采纳（[#1051](https://github.com/BakerSean168/memoflow/issues/1051)）
+**状态：** 已采纳（[#1051](https://github.com/BakerSean168/memoflow/issues/1051)）；[#1097](https://github.com/BakerSean168/memoflow/issues/1097)（2026-11-26）修订 Desktop 逐笔审核写入部分
 
 **日期：** 2026-11-21
 
@@ -26,10 +26,10 @@ Obsidian 是笔记阅读、编辑和文件管理的核心。MemoFlow 重复实�
 
 ### 1. 一个宿主只有一个知识来源职责
 
-| 宿主    | 来源                          | MemoFlow 允许的操作                                               | 内容编辑与同步                                            |
-| ------- | ----------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------- |
-| Desktop | 当前 Profile 选择的本地 Vault | 连接、健康检查、只读上下文查询、Obsidian 跳转、确认后的新笔记写入 | 日常编辑和文件管理交给 Obsidian；同步由用户的外部工具负责 |
-| Web/API | GitHub 私有仓库默认分支投影   | 授权连接、断开、读取、上下文引用、派生投影刷新                    | 不创建、编辑、adopt 元数据或提交 Git 内容                 |
+| 宿主    | 来源                          | MemoFlow 允许的操作                                                      | 内容编辑与同步                                            |
+| ------- | ----------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------- |
+| Desktop | 当前 Profile 选择的本地 Vault | 连接、健康检查、只读上下文查询、Obsidian 跳转、会话授权下的直接创建/修改 | 日常编辑和文件管理交给 Obsidian；同步由用户的外部工具负责 |
+| Web/API | GitHub 私有仓库默认分支投影   | 授权连接、断开、读取、上下文引用、派生投影刷新                           | 不创建、编辑、adopt 元数据或提交 Git 内容                 |
 
 Desktop 不装配远端连接、首次对账、Git worker、自动提交、fetch/pull/rebase/push、resume/exit flush。升级不修改用户 Git 配置、历史、未提交变更或远端。旧服务端 binding 和收据可保留，但不能成为 Desktop 的隐式 fallback。
 
@@ -37,15 +37,30 @@ Web 的只读是宿主能力边界，不依赖按钮、请求 surface 或客户�
 
 GitHub installation token 显式请求 `contents: read` 和 `metadata: read`，即使旧 App installation 授予 write，也不继承写权限。App 管理后台的授权声明由部署者单独降权；代码不会冒充已修改外部 App 配置。
 
-### 2. 知识页面负责连接与交付信息
+### 2. Desktop 写入直接生效，不再逐笔审核
+
+用户在会话中授权 AI 之后，Desktop Agent 的 `knowledge_note_create` / `knowledge_note_update` 工具直接写入当前已解锁 Profile、已选 Vault。写入不弹出逐笔审核 Dialog；成功结果只在文件真实写入后返回，失败不会冒充成功。
+
+写入边界仍由 Repository owner 持有：
+
+- 创建要求目标不存在，修改要求调用方提供读取时的内容 SHA-256，过期版本返回 conflict；
+- 拒绝绝对路径、路径穿越、符号链接目标/父目录与跨 Vault 请求；
+- 更新通过同目录临时文件 + rename 原子替换，创建使用独占创建；
+- 同一 `requestId` 的重试只重放已成功写入，不产生重复笔记；失败记录在写账本中。
+
+取消、失败和重试都不重复写入。升级时，旧 `knowledge.capture` 挂起在 review 阶段的运行只能被取消：投影为 `cancelled`，任何 resume 命令都归档草稿而非执行它。Goal/Task 的原生审核与其他高影响操作审批不变；Goal 附属笔记写入走同一 owner 边界。
+
+Web UI、HTTP/API 与 Hosted MCP 不获得笔记写能力。外部 Local MCP 继续使用 draft → deliver 契约，本决策不会让它自动取得未授权写权限。
+
+### 3. 知识页面负责连接与交付信息
 
 知识页面移除全文预览、正文搜索框、文件树和文件管理，Settings 不再有独立知识仓库分类。旧 `/settings?tab=repository` 保留为到 `/repository` 的重定向，并保留安装回调参数。
 
-Desktop 页面展示绑定与健康、打开 Obsidian、重新选择/断开，以及当前 Vault 的 MemoFlow 成功写入记录。历史记录来自 confirmed-write ledger，按稳定文档 ID 解析现存路径，不能把整个 Vault 的最近文件冒充为 MemoFlow 写入。未保存草稿继续由原会话的审核流程持有。
+知识工作区是唯一的产品入口：Desktop 展示绑定与健康、打开 Obsidian、重新选择/断开、关联笔记，以及当前 Vault 的只读 Git 工作区状态和按路径查看的 Diff。工作区状态不构成 Git 同步能力，不启动 watcher 或修改索引、配置和提交；也不能把所有变更归因为 MemoFlow 或 AI 写入。业务关联按稳定文档 ID 解析现存路径；写入账本继续保留为交付事实。旧的独立知识投影页面已退休。
 
 Web 页面展示只读仓库连接与投影状态。已有笔记深链解析后提供 GitHub 原文链接，不重新引入正文预览。未连接或部署尚未配置 GitHub App 是中性可用性状态；认证失败、网络失败和已连接来源失效有各自可操作反馈。
 
-### 3. 临时上下文与稳定业务关系分开
+### 4. 临时上下文与稳定业务关系分开
 
 `@` 在用户输入期间查询整个知识来源，不在预载的最近二十条中筛选。Desktop 在一次补全交互内复用只读扫描，关闭后释放；Web 查询服务端投影，查询变化取消旧请求，过期响应不能覆盖新结果。
 
@@ -62,7 +77,7 @@ Mastra 在调用模型前装配知识证据；Native Agent 通过同一 MCP 知�
 
 Goal/Task 的持久关系继续要求 ADR-090 稳定身份；临时引用不转换成持久业务关系，扫描不会自动 adopt 或改写 frontmatter。
 
-### 4. 云端投影跟随当前默认分支
+### 5. 云端投影跟随当前默认分支
 
 历史 `RemoteHistoryFence` 不再决定只读来源是否可用。已验签 webhook 使用 payload 默认分支筛选入队；worker 再读取 live repository/HEAD。
 
@@ -75,5 +90,5 @@ Goal/Task 的持久关系继续要求 ADR-090 稳定身份；临时引用不转�
 - 本地尚未由外部同步工具推送的更改不会出现在 Web；页面明确表达这一边界。
 - Desktop 可离线使用本地 Vault，云端连接故障不影响本地交付。
 - 既有 Markdown、Git 仓库、历史收据和持久关系不做破坏性迁移。
-- MemoFlow 继续承担安全读取、上下文编排、草稿审核和幂等交付；Obsidian 承担笔记工作台。
+- MemoFlow 继续承担安全读取、上下文编排、授权写入和幂等交付；Obsidian 承担笔记工作台。
 - 本决策不扩展 Mobile 知识能力，也不新增 AI 自动写入权限。

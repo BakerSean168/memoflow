@@ -144,6 +144,34 @@ export const ConfirmedLocalVaultWriteResSchema = z.object({
 });
 export type ConfirmedLocalVaultWriteRes = z.infer<typeof ConfirmedLocalVaultWriteResSchema>;
 
+/**
+ * Direct agent write into the currently selected Vault.
+ *
+ * `expectedContentHash` is mandatory when a note already exists; without it a
+ * write never overwrites user content. New notes must not exist yet, which keeps
+ * create/overwrite conflicts explicit instead of silently replacing a file.
+ */
+export const LocalVaultNoteWriteReqSchema = z.object({
+  expectedBindingId: z.string().min(1).optional(),
+  relativePath: z.string(),
+  contentMarkdown: z.string(),
+  /** Stable idempotency key; a replay with the same content is a no-op. */
+  requestId: z.string().min(1),
+  /** sha256 of the exact file bytes the writer observed before editing. */
+  expectedContentHash: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .optional(),
+  knowledgeDocumentId: KnowledgeDocumentIdSchema.optional(),
+});
+export type LocalVaultNoteWriteReq = z.infer<typeof LocalVaultNoteWriteReqSchema>;
+
+export const LocalVaultNoteWriteResSchema = z.object({
+  note: LocalVaultNoteDTOSchema,
+  created: z.boolean(),
+});
+export type LocalVaultNoteWriteRes = z.infer<typeof LocalVaultNoteWriteResSchema>;
+
 /** Successful MemoFlow deliveries into the currently selected Vault. */
 export const LocalVaultWriteReceiptSchema = z.object({
   documentId: KnowledgeDocumentIdSchema,
@@ -152,3 +180,28 @@ export const LocalVaultWriteReceiptSchema = z.object({
   createdAt: z.number(),
 });
 export type LocalVaultWriteReceipt = z.infer<typeof LocalVaultWriteReceiptSchema>;
+
+/** Read-only Git observation, scoped to the currently selected local Vault. */
+export const LocalVaultGitChangeSchema = z.object({
+  relativePath: z.string(),
+  previousPath: z.string().optional(),
+  status: z.enum(['added', 'modified', 'deleted', 'renamed', 'conflicted']),
+});
+export type LocalVaultGitChange = z.infer<typeof LocalVaultGitChangeSchema>;
+export const LocalVaultGitChangesSchema = z.object({
+  bindingId: LocalVaultBindingClientDTOSchema.shape.id,
+  state: z.enum(['ready', 'not-repository', 'unavailable']),
+  changes: z.array(LocalVaultGitChangeSchema),
+  observedAt: z.number(),
+});
+export type LocalVaultGitChanges = z.infer<typeof LocalVaultGitChangesSchema>;
+
+/** Bounded unified diff for one vault-relative path (read-only observation). */
+export const LocalVaultGitDiffSchema = z.object({
+  relativePath: z.string(),
+  state: z.enum(['ready', 'not-repository', 'unavailable']),
+  patch: z.string(),
+  truncated: z.boolean(),
+  observedAt: z.number(),
+});
+export type LocalVaultGitDiff = z.infer<typeof LocalVaultGitDiffSchema>;

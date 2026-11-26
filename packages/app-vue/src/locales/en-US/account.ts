@@ -40,7 +40,7 @@ export default {
     revokeConfirmText: 'Revoke session',
   },
   externalAgents: {
-    sectionTitle: 'Connected apps / external agents',
+    sectionTitle: 'Connected apps',
     sectionDescription:
       'Manage the apps that can access your goals, tasks and routines. Revoking stops new access requests immediately.',
     retry: 'Retry',
@@ -100,20 +100,39 @@ export default {
       'This token was already created by an earlier submission, so its secret cannot be shown again. Revoke it and create a new one if you did not save it.',
   },
   title: 'Account',
-  center: 'Account Center',
-  description:
-    'Your nickname is the primary display name and will be saved to the current account.',
-  guestLabel: 'Local account',
-  emailVerified: 'Login email verified',
-  emailUnverified: 'Login email not verified',
   logoutHandlerUnavailable: 'The logout handler is currently unavailable',
   actions: {
     logout: 'Log out',
-    saveProfile: 'Save Profile',
+  },
+  verification: {
+    title: 'Verify your current email',
+    description:
+      'For your security, confirm ownership of {email} before changing your password or email.',
+    explain:
+      'We will send a 6-digit code to your current email. Enter it on the next step to continue.',
+    sendCode: 'Send code',
+    sending: 'Sending...',
+    codeLabel: 'Verification code',
+    codePlaceholder: '6-digit code',
+    codeHint: 'Enter the 6-digit code sent to {email}.',
+    resend: 'Resend code',
+    resendIn: 'Resend in {seconds}s',
+    verify: 'Verify',
+    verifying: 'Verifying...',
+    changeEmail: 'Use another email',
+    expired: 'That code expired. Send a new code to continue.',
+    sendNewCode: 'Send new code',
+  },
+  settings: {
+    connections: 'Apps and connections',
+    information: 'Account information',
+    security: 'Password and security',
+    deviceCount: '{count} devices',
+    otherDevices: 'Other devices',
+    backToAccount: 'Back to account',
   },
   security: {
     continue: 'Continue',
-    title: 'Cloud account',
     emailDescription:
       'The new email takes effect after confirmation. The old email then stops working for sign-in and receives a notification.',
     changeEmail: 'Change email',
@@ -121,8 +140,9 @@ export default {
     sendConfirmation: 'Send confirmation email',
     emailSent:
       'Confirmation sent. Open the link in your new inbox. Keep using the old email until you confirm.',
-    sessions: 'Devices and sessions',
-    sessionsDescription: 'Revoke other sessions here. Use Sign out below for this device.',
+    sessions: 'Signed-in devices',
+    sessionsDescription:
+      'Review the devices signed in to your account. Revoke other sessions here, or return to your account to sign out of this device.',
     noSessions: 'No sessions.',
     unknownDevice: 'Unknown device',
     deviceClient: {
@@ -200,18 +220,16 @@ export default {
     copiedRequestId: 'Copied',
   },
   profile: {
-    editTitle: 'Edit Profile',
     changeAvatar: 'Change Avatar',
     avatarRecommendation: 'Recommended: 200x200 pixels',
-    avatarUrl: 'Avatar URL',
     nickname: 'Nickname',
-    realName: 'Real Name',
     bio: 'Bio',
-    gender: 'Gender',
-    birthday: 'Birthday',
-    editProfile: 'Edit Profile',
   },
   profileEditor: {
+    bioLimitExceeded: 'Bio is limited to {limit} characters.',
+    memberSinceLabel: 'Member since',
+    memberSince: '{date}',
+    memberSinceUnavailable: 'Join date unavailable',
     title: 'Edit profile',
     description: 'Your nickname is the primary display name and saves to the current account.',
     nicknameHint: 'Nickname must be 2–20 characters.',
@@ -231,21 +249,10 @@ export default {
   },
   placeholder: {
     nickname: 'Enter nickname',
-    avatarUrl: 'https://... ',
-    realNameOptional: 'Real name (optional)',
     bio: 'Tell people a little about yourself',
-    gender: 'Select gender',
-    selectDate: 'Select date',
   },
   status: {
     loading: 'Loading account profile...',
-  },
-  gender: {
-    male: 'Male',
-    female: 'Female',
-    other: 'Other',
-    unspecified: 'Unspecified',
-    notSet: 'Not set',
   },
   toast: {
     loadProfileFailed: 'Failed to load profile',
@@ -253,7 +260,6 @@ export default {
     profileUpdated: 'Profile updated',
     updateProfileFailed: 'Failed to update profile',
     updateFailed: 'Update failed',
-    settingsUpdated: 'Settings updated',
     accountClosed: 'Account closed',
     closeAccountFailed: 'Failed to close account',
     closeFailed: 'Close failed',

@@ -1,162 +1,308 @@
 <template>
-  <main class="h-full overflow-auto bg-background" data-testid="local-vault-workspace">
-    <div class="mx-auto w-full max-w-3xl space-y-8 px-5 py-7 sm:px-8 sm:py-10">
-      <header class="space-y-2">
-        <p class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {{ t('repository.hub.desktopLabel') }}
-        </p>
-        <h1 class="text-xl font-semibold tracking-tight">{{ t('repository.hub.title') }}</h1>
-        <p class="max-w-xl text-sm leading-6 text-muted-foreground">
-          {{ t('repository.hub.desktopDescription') }}
-        </p>
-      </header>
-      <section class="rounded-xl border border-border/70 p-5" aria-labelledby="local-source-title">
-        <div class="flex items-center justify-between gap-3">
-          <h2 id="local-source-title" class="flex items-center gap-2 text-sm font-medium">
-            <FolderOpen class="h-4 w-4" />{{ t('repository.hub.localSource') }}
-          </h2>
-          <span
-            v-if="snapshot"
-            class="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground"
-            >{{ t(available ? 'repository.hub.connected' : 'repository.hub.needsAttention') }}</span
-          >
-        </div>
-        <p v-if="!loaded" class="mt-5 text-sm text-muted-foreground" role="status">
-          {{ t('common.loading') }}
-        </p>
-        <div v-else-if="!snapshot" class="mt-5 space-y-4" data-testid="local-vault-empty">
-          <p class="text-sm leading-6 text-muted-foreground">
-            {{ t('repository.hub.localEmpty') }}
-          </p>
-          <Button :disabled="busy" data-testid="local-vault-select" @click="select"
-            ><FolderOpen class="mr-2 h-4 w-4" />{{
-              t('repository.localVault.selectAction')
-            }}</Button
-          >
-        </div>
-        <div v-else class="mt-5 space-y-4">
-          <div class="space-y-1">
-            <p class="text-base font-medium">{{ snapshot.binding.displayName }}</p>
-            <p class="break-all text-xs leading-5 text-muted-foreground">
-              {{ snapshot.binding.rootPath }}
-            </p>
-          </div>
-          <p
-            v-if="!available"
-            class="text-sm leading-6 text-amber-700 dark:text-amber-400"
-            role="status"
-          >
-            {{ t('repository.hub.localUnavailable') }}
-          </p>
-          <div class="flex flex-wrap items-center gap-2">
+  <main
+    class="flex h-full min-h-0 flex-col bg-background text-foreground"
+    data-testid="local-vault-workspace"
+  >
+    <ModuleHeader data-testid="knowledge-workspace-toolbar">
+      <template #leading>
+        <Popover v-model:open="vaultMenuOpen">
+          <PopoverTrigger as-child>
             <Button
-              :disabled="busy || !available"
-              data-testid="local-vault-open-obsidian"
-              @click="openObsidian()"
-              ><ExternalLink class="mr-2 h-4 w-4" />{{ t('repository.hub.openObsidian') }}</Button
+              variant="ghost"
+              size="sm"
+              class="min-w-0 max-w-48 shrink gap-1.5 px-2"
+              data-testid="local-vault-menu"
+              :disabled="busy"
+              :title="snapshot?.binding.rootPath"
             >
+              <FolderOpen class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              <span class="min-w-0 truncate">{{
+                snapshot?.binding.displayName ?? t('repository.workspace.configure')
+              }}</span>
+              <ChevronDown class="size-3 shrink-0 text-muted-foreground" aria-hidden="true" />
+            </Button>
+          </PopoverTrigger>
+          <ProductPopoverSurface
+            recipe="property"
+            content-class="w-80 max-w-xs"
+            data-testid="local-vault-menu-content"
+          >
+            <div v-if="snapshot" class="space-y-1 border-b border-border pb-3">
+              <p class="text-sm font-medium">{{ snapshot.binding.displayName }}</p>
+              <p class="break-all text-xs leading-5 text-muted-foreground">
+                {{ snapshot.binding.rootPath }}
+              </p>
+            </div>
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
+              class="w-full justify-start"
               :disabled="busy"
-              :aria-label="t('repository.localVault.changeVault')"
-              :title="t('repository.localVault.changeVault')"
+              data-testid="local-vault-select"
               @click="select"
-              ><FolderOpen class="h-4 w-4"
-            /></Button>
+            >
+              <FolderOpen class="size-4" aria-hidden="true" />{{
+                t(
+                  snapshot
+                    ? 'repository.localVault.changeVault'
+                    : 'repository.localVault.selectAction',
+                )
+              }}
+            </Button>
             <Button
+              v-if="snapshot"
               variant="ghost"
-              size="icon"
-              :disabled="busy"
-              :aria-label="t('repository.hub.refresh')"
-              :title="t('repository.hub.refresh')"
-              @click="reload"
-              ><RefreshCw class="h-4 w-4" :class="{ 'animate-spin': busy }"
-            /></Button>
-            <Button
-              variant="ghost"
-              size="icon"
+              size="sm"
+              class="w-full justify-start text-destructive"
               :disabled="busy"
               data-testid="local-vault-detach"
-              :aria-label="t('repository.localVault.detach')"
-              :title="t('repository.localVault.detach')"
               @click="detach"
-              ><Unplug class="h-4 w-4"
-            /></Button>
-          </div>
-        </div>
-        <p v-if="error" class="mt-4 text-sm text-destructive" role="alert">{{ error }}</p>
-      </section>
-      <section class="space-y-3 px-1">
-        <h2 class="flex items-center gap-2 text-sm font-medium">
-          <AtSign class="h-4 w-4" />{{ t('repository.hub.contextTitle') }}
-        </h2>
-        <p class="text-sm leading-6 text-muted-foreground">
-          {{ t('repository.hub.contextDescription') }}
-        </p>
-        <p class="text-xs leading-5 text-muted-foreground">
-          {{ t('repository.hub.desktopSyncHint') }}
-        </p>
-      </section>
-      <section class="space-y-3 px-1" data-testid="local-vault-recent-writes">
-        <h2 class="flex items-center gap-2 text-sm font-medium">
-          <CheckCheck class="h-4 w-4" />{{ t('repository.hub.writesTitle') }}
-        </h2>
-        <p class="text-xs leading-5 text-muted-foreground">
-          {{ t('repository.hub.writesDescription') }}
+            >
+              <Unplug class="size-4" aria-hidden="true" />{{ t('repository.localVault.detach') }}
+            </Button>
+          </ProductPopoverSurface>
+        </Popover>
+        <ProductSingleSelectFilter
+          v-model="filter"
+          :options="filters"
+          :accessible-label="t('repository.workspace.filter')"
+          :disabled="!available"
+          test-id="knowledge-note-filter"
+          trigger-class="max-w-32"
+        />
+      </template>
+      <template #actions>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="size-8"
+          :disabled="busy"
+          :aria-label="t('repository.hub.refresh')"
+          :title="t('repository.hub.refresh')"
+          data-testid="local-vault-refresh"
+          @click="reload"
+        >
+          <RefreshCw class="size-4" :class="{ 'animate-spin': busy }" aria-hidden="true" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="h-8 gap-1.5 px-2"
+          :disabled="busy || !available"
+          data-testid="local-vault-open-obsidian"
+          :aria-label="t('repository.hub.openObsidian')"
+          :title="t('repository.hub.openObsidian')"
+          @click="openObsidian()"
+        >
+          <ExternalLink class="size-4" aria-hidden="true" /><span class="hidden sm:inline">{{
+            t('repository.hub.openObsidian')
+          }}</span>
+        </Button>
+      </template>
+    </ModuleHeader>
+    <section
+      class="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5"
+      data-testid="knowledge-workspace-content"
+      :aria-label="t('repository.hub.title')"
+      :aria-busy="busy"
+    >
+      <p v-if="error" role="alert" class="mb-4 text-sm text-destructive">{{ error }}</p>
+      <ProductSurfaceState
+        v-if="!loaded"
+        family="collection"
+        kind="loading"
+        :title="t('common.loading')"
+      />
+      <ProductSurfaceState
+        v-else-if="!snapshot && !error"
+        family="collection"
+        kind="empty"
+        :title="t('repository.workspace.unboundTitle')"
+        :description="t('repository.workspace.unboundDescription')"
+        test-id="local-vault-empty"
+      >
+        <template #icon><FolderOpen class="size-8 text-muted-foreground" /></template>
+        <template #actions
+          ><Button size="sm" data-testid="local-vault-configure" @click="select">{{
+            t('repository.localVault.selectAction')
+          }}</Button></template
+        >
+      </ProductSurfaceState>
+      <ProductSurfaceState
+        v-else-if="snapshot && !available"
+        family="collection"
+        kind="error"
+        :title="t('repository.hub.needsAttention')"
+        :description="t('repository.hub.localUnavailable')"
+      />
+      <template v-else-if="available">
+        <p v-if="linkError" role="alert" class="mb-4 text-xs text-destructive">
+          {{ t('repository.workspace.linksUnavailable') }}
         </p>
         <p
-          v-if="!receipts.length"
-          class="rounded-lg bg-muted/40 p-4 text-sm leading-6 text-muted-foreground"
+          v-if="gitError || git?.state === 'unavailable'"
+          role="status"
+          class="mb-4 text-xs text-muted-foreground"
         >
-          {{ t('repository.hub.writesEmpty') }}
+          {{ t('repository.workspace.gitUnavailable') }}
         </p>
-        <ul v-else class="divide-y divide-border/60">
-          <li v-for="receipt in receipts" :key="receipt.documentId">
+        <p
+          v-else-if="git?.state === 'not-repository'"
+          role="status"
+          class="mb-4 text-xs text-muted-foreground"
+        >
+          {{ t('repository.workspace.notGit') }}
+        </p>
+        <ProductSurfaceState
+          v-if="
+            !visibleRows.length && !error && !linkError && !gitError && git?.state !== 'unavailable'
+          "
+          family="collection"
+          kind="empty"
+          :title="t('repository.workspace.emptyTitle')"
+          :description="t('repository.workspace.emptyDescription')"
+          test-id="knowledge-notes-empty"
+        />
+        <TransitionGroup
+          v-else
+          name="vault-note"
+          tag="ul"
+          class="space-y-2"
+          data-testid="knowledge-note-list"
+        >
+          <li
+            v-for="row in visibleRows"
+            :key="row.relativePath"
+            class="group flex items-start gap-3 rounded-lg border border-border/60 px-3 py-3 transition-colors hover:bg-muted/30 motion-reduce:transition-none"
+            :data-note-path="row.relativePath"
+          >
+            <FileText class="mt-1 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <div class="min-w-0 flex-1 space-y-1.5">
+              <div class="flex flex-wrap items-center gap-2">
+                <h2
+                  class="min-w-0 break-words text-sm font-medium"
+                  :class="{
+                    'text-muted-foreground line-through': row.change?.status === 'deleted',
+                  }"
+                >
+                  {{ row.title }}
+                </h2>
+                <span
+                  v-if="row.change"
+                  class="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium transition-colors motion-reduce:transition-none"
+                  :class="tones[row.change.status]"
+                  :data-change-status="row.change.status"
+                >
+                  <GitBranch class="size-3" aria-hidden="true" />{{
+                    t(`repository.workspace.status.${row.change.status}`)
+                  }}
+                </span>
+              </div>
+              <p class="break-all text-xs leading-5 text-muted-foreground">
+                {{ row.relativePath }}
+              </p>
+              <p v-if="row.change?.previousPath" class="break-all text-xs text-muted-foreground">
+                {{ t('repository.workspace.renamedFrom', { path: row.change.previousPath }) }}
+              </p>
+              <div v-if="row.links.length" class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span
+                  v-for="link in row.links"
+                  :key="`${link.subjectType}:${link.subjectId}`"
+                  class="inline-flex min-w-0 items-center gap-1 text-xs text-muted-foreground"
+                  ><Link2 class="size-3 shrink-0" aria-hidden="true" />{{
+                    t('repository.workspace.goalLink', { title: link.title })
+                  }}</span
+                >
+              </div>
+              <div v-if="row.change">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  class="h-7 px-2 text-xs text-muted-foreground"
+                  :disabled="diffBusy && diffPath === row.relativePath"
+                  :aria-expanded="diffPath === row.relativePath"
+                  data-testid="knowledge-note-diff-toggle"
+                  @click="toggleDiff(row.relativePath)"
+                  >{{
+                    t(
+                      diffPath === row.relativePath && diff
+                        ? 'repository.workspace.hideDiff'
+                        : 'repository.workspace.showDiff',
+                    )
+                  }}</Button
+                >
+                <p
+                  v-if="diffPath === row.relativePath && diffError"
+                  role="status"
+                  class="text-xs text-muted-foreground"
+                >
+                  {{ t('repository.workspace.diffUnavailable') }}
+                </p>
+                <div
+                  v-else-if="diffPath === row.relativePath && diff"
+                  class="mt-2 rounded-md border border-border/60 bg-muted/20"
+                  data-testid="knowledge-note-diff"
+                >
+                  <pre class="max-h-80 overflow-auto p-3 text-xs leading-5">{{
+                    diff.patch || t('repository.workspace.emptyDiff')
+                  }}</pre>
+                  <p
+                    v-if="diff.truncated"
+                    class="border-t border-border/60 px-3 py-1.5 text-xs text-muted-foreground"
+                  >
+                    {{ t('repository.workspace.diffTruncated') }}
+                  </p>
+                </div>
+              </div>
+            </div>
             <Button
               variant="ghost"
-              class="flex h-auto w-full items-center gap-3 rounded-lg px-0 py-3 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              :disabled="!available"
-              @click="openObsidian(receipt.relativePath)"
-            >
-              <span class="min-w-0 flex-1"
-                ><span class="block truncate text-sm font-medium">{{ receipt.title }}</span
-                ><span class="block truncate text-xs text-muted-foreground">{{
-                  receipt.relativePath
-                }}</span></span
-              >
-              <time
-                class="shrink-0 text-xs text-muted-foreground"
-                :datetime="new Date(receipt.createdAt).toISOString()"
-                >{{ formatDate(receipt.createdAt) }}</time
-              ><ExternalLink class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            </Button>
+              size="icon"
+              class="size-8 shrink-0 text-muted-foreground hover:text-foreground"
+              :disabled="busy || row.change?.status === 'deleted'"
+              :aria-label="t('repository.workspace.openNote', { title: row.title })"
+              :title="
+                t(
+                  row.change?.status === 'deleted'
+                    ? 'repository.workspace.deletedNote'
+                    : 'repository.hub.openObsidian',
+                )
+              "
+              data-testid="knowledge-note-open"
+              @click="openObsidian(row.relativePath)"
+              ><ExternalLink class="size-4" aria-hidden="true"
+            /></Button>
           </li>
-        </ul>
-      </section>
-    </div>
-    <KnowledgeCaptureReviewDialog
-      :open="captureOpen"
-      :source-options="sourceOptions"
-      @update:open="captureOpenChange"
-    />
+        </TransitionGroup>
+      </template>
+    </section>
   </main>
 </template>
 <script setup lang="ts">
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { AtSign, CheckCheck, ExternalLink, FolderOpen, RefreshCw, Unplug } from '@lucide/vue';
-import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
+import {
+  ChevronDown,
+  ExternalLink,
+  FileText,
+  FolderOpen,
+  GitBranch,
+  Link2,
+  RefreshCw,
+  Unplug,
+} from '@lucide/vue';
+import { Button, Popover, PopoverTrigger, useConfirm } from '@memoflow/ui-vue-shadcn';
 import type {
   LocalVaultBindingSnapshotDTO,
-  LocalVaultWriteReceipt,
+  LocalVaultGitChanges,
+  LocalVaultNoteSummaryDTO,
 } from '@memoflow/repository-contracts';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
+import { buildVaultWorkspaceRows } from '../utils/local-vault-workspace';
+import type { KnowledgeBusinessLink } from '../repository-ui-host';
 import { repositoryUiHost } from '../repository-ui-host';
-import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
-import type { KnowledgeCaptureSourceOption } from '../composables/knowledgeCaptureNativeEditSession';
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const service = repositoryUiHost.useStrictInject(
@@ -164,7 +310,53 @@ const service = repositoryUiHost.useStrictInject(
   'RepositoryService',
 );
 const snapshot = ref<LocalVaultBindingSnapshotDTO | null>(null);
-const receipts = ref<LocalVaultWriteReceipt[]>([]);
+const notes = ref<LocalVaultNoteSummaryDTO[]>([]);
+const git = ref<LocalVaultGitChanges | null>(null);
+const links = ref<KnowledgeBusinessLink[]>([]);
+const gitError = ref(false);
+const linkError = ref(false);
+const filter = ref('all');
+const vaultMenuOpen = ref(false);
+const { ModuleHeader, ProductSingleSelectFilter, ProductPopoverSurface, ProductSurfaceState } =
+  repositoryUiHost.components;
+const readBusinessLinks = repositoryUiHost.useKnowledgeBusinessLinks();
+const rows = computed(() =>
+  buildVaultWorkspaceRows(notes.value, git.value?.changes ?? [], links.value),
+);
+const visibleRows = computed(() =>
+  rows.value.filter((row) =>
+    filter.value === 'linked'
+      ? row.links.length > 0
+      : filter.value === 'changes'
+        ? Boolean(row.change)
+        : true,
+  ),
+);
+const filters = computed(() => [
+  { value: 'all', label: t('repository.workspace.all'), count: rows.value.length },
+  {
+    value: 'linked',
+    label: t('repository.workspace.linked'),
+    count: rows.value.filter((row) => row.links.length).length,
+  },
+  {
+    value: 'changes',
+    label: t('repository.workspace.changes'),
+    count: rows.value.filter((row) => row.change).length,
+  },
+]);
+const tones = {
+  added: 'bg-success/10 text-success',
+  modified: 'bg-info/10 text-info',
+  deleted: 'bg-destructive/10 text-destructive',
+  renamed: 'bg-primary/10 text-primary',
+  conflicted: 'bg-warning/10 text-warning',
+};
+
+const diffPath = ref<string | null>(null);
+const diff = ref<{ patch: string; truncated: boolean } | null>(null);
+const diffBusy = ref(false);
+const diffError = ref(false);
 const loaded = ref(false);
 const busy = ref(false);
 const error = ref('');
@@ -172,26 +364,6 @@ const active = ref(true);
 let epoch = 0;
 let attemptedLink = '';
 const available = computed(() => snapshot.value?.health.state === 'Available');
-const captureOpen = computed(() => route.query.dialog === 'knowledge-capture');
-const sourceOptions = computed<KnowledgeCaptureSourceOption[]>(() =>
-  available.value && snapshot.value
-    ? [
-        {
-          key: 'local_vault',
-          label: snapshot.value.binding.displayName,
-          source: { kind: 'local_vault' },
-        },
-      ]
-    : [],
-);
-function formatDate(value: number) {
-  return new Intl.DateTimeFormat(locale.value, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(value);
-}
 async function action(work: () => Promise<void>) {
   if (busy.value || !active.value) return;
   const actionEpoch = epoch;
@@ -216,12 +388,47 @@ async function load() {
   const result = await service.getLocalVaultBinding();
   if (!result.ok) throw unwrapOrThrowError(result);
   if (readEpoch !== epoch || !active.value) return;
+  const changedBinding = snapshot.value?.binding.id !== result.data?.binding.id;
   snapshot.value = result.data;
-  receipts.value = [];
-  if (available.value) {
-    const writes = await service.listLocalVaultWrites();
-    if (!writes.ok) throw unwrapOrThrowError(writes);
-    if (readEpoch === epoch && active.value) receipts.value = writes.data;
+  if (changedBinding || !available.value) {
+    notes.value = [];
+    links.value = [];
+    git.value = null;
+  }
+  gitError.value = false;
+  linkError.value = false;
+  if (!available.value || !snapshot.value) return;
+  const binding = snapshot.value.binding;
+  const catalog = await service.scanLocalVault();
+  if (!catalog.ok) throw unwrapOrThrowError(catalog);
+  if (readEpoch !== epoch || !active.value) return;
+  if (catalog.data.binding.id !== binding.id)
+    throw new Error(t('repository.workspace.bindingChanged'));
+  const nextNotes = catalog.data.notes;
+  const documents = nextNotes.flatMap((note) =>
+    note.knowledgeDocumentId
+      ? [{ knowledgeSpaceId: binding.knowledgeSpaceId, documentId: note.knowledgeDocumentId }]
+      : [],
+  );
+  const [changes, business] = await Promise.allSettled([
+    service.getLocalVaultGitChanges().then(unwrapOrThrowError),
+    readBusinessLinks(documents),
+  ]);
+  if (readEpoch !== epoch || !active.value) return;
+  notes.value = nextNotes;
+  diffPath.value = null;
+  diff.value = null;
+  diffError.value = false;
+  if (changes.status === 'fulfilled' && changes.value.bindingId === binding.id)
+    git.value = changes.value;
+  else {
+    git.value = null;
+    gitError.value = true;
+  }
+  if (business.status === 'fulfilled') links.value = business.value;
+  else {
+    links.value = [];
+    linkError.value = true;
   }
 }
 function reload() {
@@ -229,6 +436,7 @@ function reload() {
   return action(load);
 }
 function select() {
+  vaultMenuOpen.value = false;
   return action(async () => {
     const result = await service.selectLocalVault();
     if (!result.ok) throw unwrapOrThrowError(result);
@@ -236,6 +444,7 @@ function select() {
   });
 }
 async function detach() {
+  vaultMenuOpen.value = false;
   if (
     !(await useConfirm({
       title: t('repository.localVault.detachTitle'),
@@ -251,18 +460,36 @@ async function detach() {
     await load();
   });
 }
+async function toggleDiff(relativePath: string) {
+  if (diffPath.value === relativePath && diff.value) {
+    diffPath.value = null;
+    diff.value = null;
+    diffError.value = false;
+    return;
+  }
+  diffPath.value = relativePath;
+  diff.value = null;
+  diffError.value = false;
+  diffBusy.value = true;
+  try {
+    const result = await service.getLocalVaultGitDiff(relativePath);
+    if (diffPath.value !== relativePath) return;
+    if (!result.ok || result.data.state !== 'ready') {
+      diffError.value = true;
+      return;
+    }
+    diff.value = { patch: result.data.patch, truncated: result.data.truncated };
+  } catch {
+    if (diffPath.value === relativePath) diffError.value = true;
+  } finally {
+    if (diffPath.value === relativePath) diffBusy.value = false;
+  }
+}
 function openObsidian(relativePath?: string) {
   return action(async () => {
     const result = await service.openLocalVaultInObsidian(relativePath ? { relativePath } : {});
     if (!result.ok) throw unwrapOrThrowError(result);
   });
-}
-async function captureOpenChange(open: boolean) {
-  if (open) return;
-  const query = { ...route.query };
-  delete query.dialog;
-  await router.replace({ name: 'repository', query });
-  await reload();
 }
 function currentLink() {
   return `${route.query.sourceBindingId ?? ''}:${route.query.notePath ?? ''}:${route.query.note ?? ''}`;
@@ -334,3 +561,25 @@ function deactivate() {
 onDeactivated(deactivate);
 onBeforeUnmount(deactivate);
 </script>
+
+<style scoped>
+.vault-note-enter-active,
+.vault-note-leave-active,
+.vault-note-move {
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+.vault-note-enter-from,
+.vault-note-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .vault-note-enter-active,
+  .vault-note-leave-active,
+  .vault-note-move {
+    transition: none;
+  }
+}
+</style>

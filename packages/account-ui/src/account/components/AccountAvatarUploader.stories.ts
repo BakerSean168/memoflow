@@ -42,6 +42,7 @@ function createAvatarStore(
 interface UploaderDoubleOptions {
   avatarUrl?: string | null;
   disabled?: boolean;
+  compact?: boolean;
   save?: AccountAvatarStore['save'];
 }
 
@@ -55,13 +56,19 @@ function renderUploader(options: UploaderDoubleOptions = {}) {
       const onUpdated = (url: string) => {
         avatarUrl.value = url;
       };
-      return { avatarUrl, onUpdated, disabled: options.disabled ?? false };
+      return {
+        avatarUrl,
+        onUpdated,
+        disabled: options.disabled ?? false,
+        compact: options.compact ?? false,
+      };
     },
     template: `
       <div class="p-6">
         <AccountAvatarUploader
           :avatar-url="avatarUrl"
           initials="AB"
+          :compact="compact"
           :disabled="disabled"
           @updated="onUpdated"
         />
@@ -149,4 +156,24 @@ export const Uploading: Story = {
     await expect(page.getByTestId('account-avatar-uploader')).toHaveAttribute('aria-busy', 'true');
     await expect(canvasElement.querySelector('.animate-spin')).not.toBeNull();
   },
+};
+
+/** Editor affordance: persistent camera badge, no recommendation in the resting state. */
+export const EditorAvatar: Story = {
+  render: () => renderUploader({ compact: true, avatarUrl: EXISTING_AVATAR }),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    await expect(page.queryByTestId('account-avatar-uploader-helper')).not.toBeInTheDocument();
+    await expect(page.getByTestId('account-avatar-uploader')).toHaveAccessibleName('Change Avatar');
+  },
+};
+
+export const EditorUploading: Story = {
+  ...Uploading,
+  render: () => renderUploader({ compact: true, save: () => new Promise(() => undefined) }),
+};
+
+export const EditorUploadError: Story = {
+  ...UploadError,
+  render: () => renderUploader({ compact: true, avatarUrl: EXISTING_AVATAR }),
 };

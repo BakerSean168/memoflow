@@ -171,6 +171,64 @@ describe('CloudAuthHttpClient', () => {
       expect.objectContaining({ body: JSON.stringify({ userCode: 'ABCD1234' }) }),
     );
   });
+  it('routes verification and password mutation through the account security endpoints', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse({
+          challengeId: '00000000-0000-4000-8000-000000000000',
+          retryAfterSeconds: 60,
+          expiresInSeconds: 600,
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ verificationToken: 'v'.repeat(43) }))
+      .mockResolvedValueOnce(jsonResponse({ status: true }));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = createCloudAuthHttpClient(undefined, { baseUrl: 'https://memo.test' });
+
+    await client.requestAccountVerification('change-email');
+    await client.verifyAccountVerification({
+      purpose: 'change-email',
+      challengeId: '00000000-0000-4000-8000-000000000000',
+      code: '123456',
+    });
+    await client.changePassword({
+      currentPassword: 'old-password',
+      newPassword: 'new-password',
+      verificationToken: 'v'.repeat(43),
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      'https://memo.test/api/auth/account-security/request-verification',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ purpose: 'change-email' }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://memo.test/api/auth/account-security/verify-email-code',
+      expect.objectContaining({
+        body: JSON.stringify({
+          purpose: 'change-email',
+          challengeId: '00000000-0000-4000-8000-000000000000',
+          code: '123456',
+        }),
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      'https://memo.test/api/auth/account-security/change-password',
+      expect.objectContaining({
+        body: JSON.stringify({
+          currentPassword: 'old-password',
+          newPassword: 'new-password',
+          verificationToken: 'v'.repeat(43),
+        }),
+      }),
+    );
+  });
 });
 
 describe('CloudAuthIpcClient', () => {
@@ -192,6 +250,40 @@ describe('CloudAuthIpcClient', () => {
     });
     expect(invoke).toHaveBeenNthCalledWith(4, CloudAuthChannels.CLOUD_CONNECTION_CANCEL, {
       attemptId: 'attempt-1',
+    });
+  });
+
+  it('forwards account security actions through the IPC channel', async () => {
+    const invoke = vi.fn().mockResolvedValue({ ok: true, data: undefined });
+    const client = createCloudAuthIpcClient({ invoke } as never);
+
+    await client.requestAccountVerification('change-password');
+    await client.verifyAccountVerification({
+      purpose: 'change-password',
+      challengeId: '00000000-0000-4000-8000-000000000000',
+      code: '123456',
+    });
+    await client.changePassword({
+      currentPassword: 'old-password',
+      newPassword: 'new-password',
+      verificationToken: 'v'.repeat(43),
+    });
+
+    expect(invoke).toHaveBeenNthCalledWith(1, CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'request-verification',
+      purpose: 'change-password',
+    });
+    expect(invoke).toHaveBeenNthCalledWith(2, CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'verify-email-code',
+      purpose: 'change-password',
+      challengeId: '00000000-0000-4000-8000-000000000000',
+      code: '123456',
+    });
+    expect(invoke).toHaveBeenNthCalledWith(3, CloudAuthChannels.ACCOUNT_SECURITY, {
+      action: 'change-password',
+      currentPassword: 'old-password',
+      newPassword: 'new-password',
+      verificationToken: 'v'.repeat(43),
     });
   });
 });

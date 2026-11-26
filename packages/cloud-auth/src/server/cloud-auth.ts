@@ -120,7 +120,7 @@ export function createCloudAuth(
   const databaseOverride = dependencies.database as BetterAuthOptions['database'] | undefined;
   const auth = betterAuth({
     appName: 'MemoFlow',
-    disabledPaths: ['/change-email'],
+    disabledPaths: ['/change-email', '/change-password'],
     baseURL: options.baseUrl,
     secret: options.secret,
     trustedOrigins: [...options.trustedOrigins],
@@ -238,7 +238,7 @@ export function createCloudAuth(
     },
     plugins: [
       bearer(),
-      accountSecurityPlugin(options.database),
+      accountSecurityPlugin(options.database, options.emailDelivery, options.secret),
       deviceAuthorization({
         expiresIn: '10m',
         interval: '5s',

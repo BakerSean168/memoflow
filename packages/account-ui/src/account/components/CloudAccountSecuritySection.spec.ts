@@ -31,6 +31,14 @@ function fixture(
   ]),
 ) {
   const service = {
+    requestAccountVerification: vi.fn().mockResolvedValue(
+      ok({
+        challengeId: '00000000-0000-4000-8000-000000000000',
+        retryAfterSeconds: 0,
+        expiresInSeconds: 600,
+      }),
+    ),
+    verifyAccountVerification: vi.fn().mockResolvedValue(ok({ verificationToken: 'v'.repeat(43) })),
     verifyAccountPassword: vi.fn().mockResolvedValue(ok(undefined)),
     requestEmailChange: vi.fn().mockResolvedValue(ok(undefined)),
     listAccountSessions: vi.fn().mockResolvedValue(sessionsResult),
@@ -62,6 +70,15 @@ async function input(testId: string, value: string) {
 function submit(testId: string) {
   (document.querySelector(`[data-testid="${testId}"]`) as HTMLButtonElement).click();
 }
+async function passEmailVerification(wrapper: ReturnType<typeof fixture>['wrapper']) {
+  await wrapper.get('[data-testid="account-change-email"]').trigger('click');
+  await flushPromises();
+  submit('account-verification-send');
+  await flushPromises();
+  await input('account-verification-code', '123456');
+  submit('account-verification-verify');
+  await flushPromises();
+}
 
 describe('CloudAccountSecuritySection', () => {
   it('masks the email, lists devices and revokes only the other session after confirmation', async () => {
@@ -69,6 +86,8 @@ describe('CloudAccountSecuritySection', () => {
     await flushPromises();
     expect(wrapper.text()).toContain('p***@example.com');
     expect(wrapper.text()).not.toContain('person@example.com');
+    expect(wrapper.find('[data-testid="account-sessions"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
     expect(wrapper.findAll('[data-testid="account-session-revoke"]')).toHaveLength(1);
     await wrapper.get('[data-testid="account-session-revoke"]').trigger('click');
     await flushPromises();
@@ -90,13 +109,27 @@ describe('CloudAccountSecuritySection', () => {
     expect(service.revokeAccountSession).toHaveBeenCalledWith('other');
     wrapper.unmount();
   });
+  it('navigates between the account overview and devices without losing the session count', async () => {
+    const { wrapper } = fixture();
+    await flushPromises();
+    expect(wrapper.get('[data-testid="account-devices-open"]').text()).toContain('2 devices');
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
+    expect(wrapper.find('[data-testid="account-information-section"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-devices-page"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="account-devices-back"]').trigger('click');
+    expect(wrapper.find('[data-testid="account-devices-page"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="account-information-section"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="account-devices-open"]').text()).toContain('2 devices');
+    wrapper.unmount();
+  });
   it('requires password recheck before asking for the new email and displays failures', async () => {
     const { wrapper, service } = fixture();
     service.verifyAccountPassword.mockResolvedValueOnce(
       fail({ code: 'INVALID_PASSWORD', message: 'Wrong password' }),
     );
-    await wrapper.get('[data-testid="account-change-email"]').trigger('click');
-    await flushPromises();
+    await passEmailVerification(wrapper);
+    expect(service.requestAccountVerification).toHaveBeenCalledWith('change-email');
+    expect(document.querySelector('[data-testid="account-email-dialog"]')).not.toBeNull();
     await input('account-email-password', 'wrong-password');
     submit('account-email-submit');
     await flushPromises();
@@ -111,6 +144,7 @@ describe('CloudAccountSecuritySection', () => {
     expect(service.requestEmailChange).toHaveBeenCalledWith({
       password: 'correct-password',
       newEmail: 'new@example.com',
+      verificationToken: 'v'.repeat(43),
     });
     expect(document.querySelector('[data-testid="account-email-sent"]')).not.toBeNull();
     wrapper.unmount();
@@ -163,6 +197,7 @@ describe('CloudAccountSecuritySection', () => {
       ]),
     );
     await flushPromises();
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
     expect(
       wrapper.findAll('[data-testid="account-session-device"]').map((node) => node.text()),
     ).toEqual(['MemoFlow Desktop · Windows', 'MemoFlow Desktop', 'Chrome · Windows']);
@@ -175,6 +210,8 @@ describe('CloudAccountSecuritySection', () => {
       fail({ code: 'ACCOUNT_SECURITY_FAILED', message: '服务返回异常，请稍后重试' }),
     );
     await flushPromises();
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
+    await flushPromises();
     expect(wrapper.get('[role="alert"]').text()).toContain('服务返回异常，请稍后重试');
     expect(document.querySelector('[data-testid="account-sessions-empty"]')).toBeNull();
     expect(document.querySelector('[data-testid="account-sessions"]')).toBeNull();
@@ -185,6 +222,7 @@ describe('CloudAccountSecuritySection', () => {
   it('shows the empty state without an error when a successful load returns no sessions', async () => {
     const { wrapper } = fixture(ok([]));
     await flushPromises();
+    await wrapper.get('[data-testid="account-devices-open"]').trigger('click');
     expect(document.querySelector('[data-testid="account-sessions-empty"]')).not.toBeNull();
     expect(wrapper.text()).toContain('No sessions.');
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);

@@ -1,16 +1,16 @@
 <template>
   <SettingsSection :title="t('setting.advanced.title')" test-id="data-transfer-actions">
     <SettingsPropertyRow
-      :label="t('setting.advanced.exportSettings')"
+      :label="t('setting.advanced.preferencesTitle')"
       :description="t('setting.advanced.preferenceDataDescription')"
-      layout="stacked"
+      layout="inline"
     >
-      <div class="grid grid-cols-1 gap-3 @2xl/panel:grid-cols-2">
-        <Button variant="outline" class="w-full" @click="emit('exportJSON')">
+      <div class="flex flex-wrap justify-end gap-2">
+        <Button variant="outline" @click="emit('exportJSON')">
           <Download class="mr-2 h-4 w-4" />
           {{ t('setting.advanced.exportSettings') }}
         </Button>
-        <Button variant="outline" class="w-full" @click="emit('import')">
+        <Button variant="outline" @click="emit('import')">
           <Upload class="mr-2 h-4 w-4" />
           {{ t('setting.advanced.importSettings') }}
         </Button>
@@ -19,18 +19,13 @@
 
     <SettingsPropertyRow
       v-if="dataPortabilityAvailable"
-      :label="t('setting.advanced.exportPortableData')"
+      :label="t('setting.advanced.backupTitle')"
       :description="t('setting.advanced.portableDataDescription')"
-      layout="stacked"
+      layout="inline"
       test-id="portable-data-scope"
     >
-      <div class="grid grid-cols-1 gap-3 @2xl/panel:grid-cols-2">
-        <Button
-          variant="outline"
-          class="w-full"
-          :disabled="exportingData"
-          @click="emit('exportAllData')"
-        >
+      <div class="flex flex-wrap justify-end gap-2">
+        <Button variant="outline" :disabled="exportingData" @click="emit('exportAllData')">
           <Download class="mr-2 h-4 w-4" />
           {{
             exportingData
@@ -38,12 +33,7 @@
               : t('setting.advanced.exportPortableData')
           }}
         </Button>
-        <Button
-          variant="outline"
-          class="w-full"
-          :disabled="importingData"
-          @click="emit('importAllData')"
-        >
+        <Button variant="outline" :disabled="importingData" @click="emit('importAllData')">
           <Upload class="mr-2 h-4 w-4" />
           {{
             importingData
@@ -56,14 +46,13 @@
 
     <SettingsPropertyRow
       v-if="serverDataDisclosureAvailable"
-      :label="t('setting.advanced.exportServerDataDisclosure')"
+      :label="t('setting.advanced.disclosureTitle')"
       :description="t('setting.advanced.serverDataDisclosureDescription')"
-      layout="stacked"
+      layout="inline"
       test-id="server-data-scope"
     >
       <Button
         variant="outline"
-        class="w-full"
         :disabled="exportingServerDataDisclosure"
         @click="emit('exportServerDataDisclosure')"
       >

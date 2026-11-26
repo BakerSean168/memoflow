@@ -14,12 +14,12 @@ withDefaults(
 
 <template>
   <section
-    class="border-b border-[hsl(var(--border-subtle)/0.72)] pb-6 last:border-b-0 last:pb-0"
+    class="border-b border-[hsl(var(--border-subtle)/0.72)] pb-8 last:border-b-0 last:pb-0"
     :data-testid="testId"
   >
-    <header class="mb-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <header class="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div class="min-w-0 space-y-1">
-        <h2 class="text-sm font-semibold tracking-tight text-foreground">{{ title }}</h2>
+        <h2 class="text-xl font-semibold tracking-tight text-foreground">{{ title }}</h2>
         <p v-if="description" class="max-w-2xl text-xs leading-5 text-muted-foreground">
           {{ description }}
         </p>

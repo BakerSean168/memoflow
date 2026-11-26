@@ -19,7 +19,7 @@ import {
 } from '../components/shared/settings';
 import AgentDriverIcon from '@memoflow/ai-ui/components/AgentDriverIcon.vue';
 import {
-  AccountProfileSection,
+  AccountSettingsComposition,
   CloudPasswordSection,
   ExternalAgentConnectionsSection,
 } from '@memoflow/account-ui';
@@ -112,7 +112,7 @@ export function installSettingUiHost(): void {
       ReleaseNotes,
       ProductSurfaceHeader,
       AgentDriverIcon,
-      AccountProfileSection,
+      AccountSettingsComposition,
       CloudPasswordSection,
       ExternalAgentConnectionsSection,
     },

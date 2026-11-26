@@ -133,7 +133,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="space-y-6" data-testid="user-preference-settings-section">
+  <section class="space-y-8" data-testid="user-preference-settings-section">
     <SettingsStatusBlock
       v-if="isLoading && !hasLoadedPreferences"
       kind="loading"

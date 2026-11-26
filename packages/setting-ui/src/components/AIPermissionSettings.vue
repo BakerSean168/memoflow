@@ -160,10 +160,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="space-y-4 border-t border-border/70 pt-6" data-testid="ai-permission-settings">
+  <section class="space-y-6" data-testid="ai-permission-settings">
     <header class="flex items-start justify-between gap-3">
       <div>
-        <h2 class="text-sm font-medium">Permissions</h2>
+        <h2 class="text-xl font-semibold tracking-tight">{{ t('setting.permissions.title') }}</h2>
         <p class="mt-1 text-xs leading-5 text-muted-foreground">
           {{ t('setting.permissions.description') }}
         </p>
@@ -231,10 +231,7 @@ onMounted(() => {
         </span>
       </div>
 
-      <details
-        class="group rounded-lg border border-border/70"
-        data-testid="ai-permission-overrides"
-      >
+      <details class="group border-b border-border" data-testid="ai-permission-overrides">
         <summary
           class="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-medium [&::-webkit-details-marker]:hidden"
         >
@@ -298,10 +295,7 @@ onMounted(() => {
         </div>
       </details>
 
-      <div
-        class="space-y-2 rounded-lg border border-border/70 px-3 py-3"
-        data-testid="ai-permission-high-risk"
-      >
+      <div class="space-y-2 border-b border-border py-4" data-testid="ai-permission-high-risk">
         <p class="text-sm font-medium">{{ t('setting.permissions.highRisk.title') }}</p>
         <p class="text-xs leading-5 text-muted-foreground">
           {{ t('setting.permissions.highRisk.description') }}
@@ -332,7 +326,7 @@ onMounted(() => {
 
       <details
         v-if="snapshot?.rules.length"
-        class="group rounded-lg border border-border/70"
+        class="group border-b border-border"
         data-testid="ai-permission-grants"
       >
         <summary
@@ -373,7 +367,7 @@ onMounted(() => {
 
       <details
         v-if="snapshot?.audit.length"
-        class="group rounded-lg border border-border/70"
+        class="group border-b border-border"
         data-testid="ai-permission-activity"
       >
         <summary
