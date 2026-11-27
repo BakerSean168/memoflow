@@ -11,6 +11,58 @@ import type { ConversationSummary } from './types';
 const MAX_IDS = 100;
 type AttentionItem = AssistantAttentionView;
 
+export interface ResolveSidebarRowStatusInput {
+  conversationId: string;
+  snapshot?: AssistantAttentionView | null;
+  localStatus?: ConversationAttentionStatus | null;
+  activeConversationId?: string | null;
+  loading?: boolean;
+  isVisible?: boolean;
+  acknowledgedRevision?: number;
+}
+
+/**
+ * Resolves the attention/status for a sidebar conversation row as a pure function.
+ * Reference: Sidebar.logic.ts resolveSidebarRowStatus (T3 Code).
+ */
+export function resolveSidebarRowStatus(
+  input: ResolveSidebarRowStatusInput,
+): ConversationAttentionStatus | null {
+  const {
+    conversationId,
+    snapshot,
+    localStatus,
+    activeConversationId,
+    loading = false,
+    isVisible = true,
+    acknowledgedRevision = 0,
+  } = input;
+
+  const isCurrentActive = Boolean(activeConversationId && activeConversationId === conversationId);
+
+  // In-progress foreground events outrank a lagging snapshot. Once the turn
+  // settles, the authoritative durable revision wins over old local state.
+  if (isCurrentActive && (loading || !snapshot) && localStatus) {
+    return localStatus;
+  }
+
+  if (!snapshot || snapshot.state === 'normal') {
+    return null;
+  }
+
+  if (snapshot.state === 'done') {
+    if (
+      snapshot.seenRevision >= snapshot.revision ||
+      acknowledgedRevision >= snapshot.revision ||
+      (isCurrentActive && isVisible)
+    ) {
+      return null;
+    }
+  }
+
+  return snapshot.state;
+}
+
 export function useDurableConversationAttention(input: {
   runtime: AssistantRuntimeClient;
   workspaceRuntime?: WorkflowRuntimeClient;
@@ -221,24 +273,26 @@ export function useDurableConversationAttention(input: {
 
   const statuses = computed<ConversationAttentionMap>(() => {
     const map: Record<string, ConversationAttentionStatus> = {};
-    for (const [id, snapshot] of Object.entries(snapshots.value)) {
-      if (snapshot.state === 'normal') continue;
-      if (
-        snapshot.state === 'done' &&
-        (snapshot.seenRevision >= snapshot.revision ||
-          (acknowledged.get(id) ?? 0) >= snapshot.revision ||
-          (id === input.activeConversationId.value && isVisible()))
-      )
-        continue;
-      map[id] = snapshot.state;
-    }
-    // Active foreground events outrank a lagging snapshot; after the run settles,
-    // the durable server revision takes precedence over stale local terminals.
-    for (const [id, state] of Object.entries(input.local.value)) {
-      // In-progress foreground events outrank a lagging snapshot. Once the turn
-      // settles, the authoritative durable revision wins over old local state.
-      if (id === input.activeConversationId.value && (input.loading.value || !snapshots.value[id]))
-        map[id] = state;
+    const visible = isVisible();
+    const activeId = input.activeConversationId.value;
+    const isLoading = input.loading.value;
+    const localMap = input.local.value;
+
+    const allIds = new Set<string>([...Object.keys(snapshots.value), ...Object.keys(localMap)]);
+
+    for (const id of allIds) {
+      const status = resolveSidebarRowStatus({
+        conversationId: id,
+        snapshot: snapshots.value[id],
+        localStatus: localMap[id],
+        activeConversationId: activeId,
+        loading: isLoading,
+        isVisible: visible,
+        acknowledgedRevision: acknowledged.get(id),
+      });
+      if (status) {
+        map[id] = status;
+      }
     }
     return map;
   });

@@ -101,10 +101,10 @@ identify the Pi coding agent integration and claims no endorsement.
 
 AFFiNE, Bitwarden, Notesnook, Anytype, AppFlowy, Steam Offline Mode, Electron safeStorage, and Joplin E2EE were used only as architecture and product-behavior references. No source code was copied from these projects in this rewrite.
 
-## T3 Code Composer
+## T3 Code Composer, Sidebar, and List Motion
 
-- Source: https://github.com/pingdotgg/t3code (revision f9b19a7f8).
-- Use: Adapted the custom atomic inline mention and attachment-path prompt patterns to MemoFlow Vue and native Agent runtime.
+- Source: https://github.com/pingdotgg/t3code (revisions f9b19a7f8 and 0b42e2e2febf51627d6c150be686c02d26ef2739, files `apps/web/src/components/Sidebar.motion.ts`, `apps/web/src/components/sidebar/SidebarThreadRow.tsx`, `apps/web/src/components/Sidebar.logic.ts`).
+- Use: Adapted the custom atomic inline mention and attachment-path prompt patterns, `createSidebarListMotion` DOM/WAAPI list animation logic, and `SidebarThreadRow` row layout / status resolution patterns to MemoFlow Vue composables and components (`packages/ai-ui/src/composables/sidebarListMotion.ts`, `packages/ai-ui/src/components/AIConversationSidebarRow.vue`, `packages/ai-ui/src/composables/useDurableConversationAttention.ts`).
 - License: MIT.
 
 ```text
