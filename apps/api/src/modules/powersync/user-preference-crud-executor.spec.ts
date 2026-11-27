@@ -53,7 +53,13 @@ describe('canonical preference PowerSync upload CAS', () => {
         identityId: 'identity-1',
         namespace: 'presentation',
         // Legacy payloads without an accent persist the canonical brand-gold default.
-        payload: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
+        payload: {
+          theme: 'dark',
+          language: 'zh-CN',
+          accent: 'brand-gold',
+          lightAccent: 'brand-gold',
+          darkAccent: 'brand-gold',
+        },
         revision: 1,
         createdAt: '2026-09-09T00:00:00.000Z',
         updatedAt: '2026-09-09T00:00:00.000Z',
@@ -64,6 +70,11 @@ describe('canonical preference PowerSync upload CAS', () => {
   it('round-trips an explicit accent through create and conflict read-back', async () => {
     const tx = createTx();
     const payload = { theme: 'light', language: 'zh-CN', accent: 'violet' };
+    const canonicalPayload = {
+      ...payload,
+      lightAccent: 'violet',
+      darkAccent: 'violet',
+    };
     tx.userPreferenceRecord.createMany.mockResolvedValue({ count: 0 });
     tx.userPreferenceRecord.findUnique.mockResolvedValue(preferenceRow({ id: 'winner', payload }));
 
@@ -78,7 +89,7 @@ describe('canonical preference PowerSync upload CAS', () => {
     });
     expect(tx.userPreferenceRecord.createMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ payload }),
+        data: expect.objectContaining({ payload: canonicalPayload }),
       }),
     );
   });
@@ -163,7 +174,13 @@ describe('canonical preference PowerSync upload CAS', () => {
     expect(tx.userPreferenceRecord.updateMany).toHaveBeenCalledWith({
       where: { id: 'pref-1', identityId: 'identity-1', revision: 1 },
       data: {
-        payload: { theme: 'light', language: 'zh-CN', accent: 'ocean-blue' },
+        payload: {
+          theme: 'light',
+          language: 'zh-CN',
+          accent: 'ocean-blue',
+          lightAccent: 'ocean-blue',
+          darkAccent: 'ocean-blue',
+        },
         revision: 2,
         updatedAt: '2026-09-09T00:01:00.000Z',
       },

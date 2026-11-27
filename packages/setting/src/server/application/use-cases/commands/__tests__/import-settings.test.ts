@@ -4,7 +4,13 @@ import type { PreferencePortableService } from '../../../../preferences/preferen
 import { ImportSettings } from '../import-settings';
 
 const profile: UserPreferenceProfile = {
-  presentation: { theme: 'dark', language: 'en-US', accent: 'brand-gold' },
+  presentation: {
+    theme: 'dark',
+    language: 'en-US',
+    accent: 'brand-gold',
+    lightAccent: 'brand-gold',
+    darkAccent: 'brand-gold',
+  },
   regional: {
     timeZone: 'Asia/Tokyo',
     dateStyle: 'long',
