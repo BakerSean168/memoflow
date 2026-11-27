@@ -766,3 +766,73 @@ it('accepts desktop native generic file attachments but preserves the builtin at
     AssistantRuntimeClientCommandSchema.safeParse({ ...command, surface: 'web' }).success,
   ).toBe(false);
 });
+
+it('accepts optional backward-compatible runTiming on assistant history messages', () => {
+  const baseMessage = {
+    id: 'message-1',
+    conversationId: 'conversation-1',
+    role: 'assistant' as const,
+    content: 'done',
+    createdAt: 1000,
+  };
+  expect(
+    AssistantRuntimeHistoryViewSchema.safeParse({
+      conversationId: 'conversation-1',
+      messages: [baseMessage],
+    }).success,
+  ).toBe(true);
+
+  const timed = AssistantRuntimeHistoryViewSchema.safeParse({
+    conversationId: 'conversation-1',
+    messages: [
+      {
+        ...baseMessage,
+        runTiming: {
+          runId: 'run-1',
+          startedAt: 1000,
+          completedAt: 5200,
+          pausedDurationMs: 200,
+        },
+      },
+    ],
+  });
+  expect(timed.success).toBe(true);
+  expect(timed.data?.messages[0]?.runTiming).toEqual({
+    runId: 'run-1',
+    startedAt: 1000,
+    completedAt: 5200,
+    pausedDurationMs: 200,
+  });
+
+  expect(
+    AssistantRuntimeHistoryViewSchema.safeParse({
+      conversationId: 'conversation-1',
+      messages: [
+        {
+          ...baseMessage,
+          runTiming: {
+            runId: 'run-1',
+            startedAt: null,
+            completedAt: null,
+          },
+        },
+      ],
+    }).success,
+  ).toBe(true);
+
+  expect(
+    AssistantRuntimeHistoryViewSchema.safeParse({
+      conversationId: 'conversation-1',
+      messages: [
+        {
+          ...baseMessage,
+          runTiming: {
+            runId: 'run-1',
+            startedAt: -1,
+            extraField: true,
+          },
+        },
+      ],
+    }).success,
+  ).toBe(false);
+});
