@@ -203,11 +203,13 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
       if (!silent) toast.error(t('aiAssistant.dialogs.chat.archiveBlocked'));
       return false;
     }
+    const requestedConversationId = chatConversationId.value;
     if (!(await conversation.setConversationStatus(id, 'Archived', silent)) || !sessionAlive)
       return false;
-    // The user may have typed or started a turn while persistence was in flight.
+    // The user may have typed, started a turn, or switched conversation while persistence was in flight.
     if (
       id === chatConversationId.value &&
+      requestedConversationId === id &&
       !chatLoading.value &&
       !chatMessage.value.length &&
       !composerAttachments.value.length &&

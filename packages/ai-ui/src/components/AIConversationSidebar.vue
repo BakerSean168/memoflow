@@ -71,137 +71,23 @@
     <div class="min-h-0 flex-1 overflow-y-auto p-2">
       <!-- 固定状态图标位于标题行末端；已查看的普通成功会话不渲染状态。 -->
       <TooltipProvider>
-        <ContextMenu v-for="item in visibleConversations" :key="item.id">
-          <ContextMenuTrigger as-child>
-            <!-- 预留：行尾右侧是悬浮操作区（状态图标），按钮 pr-24 为它让位，不属节奏间距。 -->
-            <div
-              class="group relative mb-1 flex min-h-9 items-center rounded-lg text-sm transition-colors"
-              :class="
-                activeConversationId === item.id
-                  ? 'bg-accent text-accent-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              "
-              data-testid="ai-sidebar-conversation-row"
-            >
-              <input
-                v-if="editingId === item.id"
-                :ref="(element) => (titleInput = element as HTMLInputElement | null)"
-                v-model="titleDraft"
-                maxlength="80"
-                class="m-1 min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm"
-                :aria-label="t('shell.conversation.rename')"
-                data-testid="conversation-title-input"
-                @keydown.enter.prevent="saveTitle"
-                @keydown.esc.prevent="editingId = null"
-                @blur="editingId = null"
-              />
-              <button
-                v-else
-                type="button"
-                @dblclick.stop="editTitle(item)"
-                class="flex h-9 min-w-0 w-full items-center rounded-lg py-2 pl-3 pr-24 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                :aria-label="item.name || t('common.untitled')"
-                @click="showingArchive ? $emit('restore', item.id) : $emit('select', item)"
-              >
-                <span class="block min-w-0 flex-1 truncate whitespace-nowrap">
-                  {{ item.name || t('common.untitled') }}
-                  <span class="ml-1 text-[10px] text-muted-foreground">{{
-                    item.runtimeKind === 'local_agent'
-                      ? item.driver
-                      : t('aiAssistant.local.builtin')
-                  }}</span>
-                </span>
-              </button>
-
-              <Tooltip v-if="conversationStatuses[item.id]">
-                <TooltipTrigger as-child>
-                  <button
-                    type="button"
-                    class="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    :aria-label="
-                      t(`aiAssistant.chatPage.sidebar.attention.${conversationStatuses[item.id]}`)
-                    "
-                    data-testid="ai-sidebar-conversation-status"
-                    @click.stop="$emit('select', item)"
-                  >
-                    <component
-                      :is="attentionIcon[conversationStatuses[item.id]!]"
-                      class="h-4 w-4 shrink-0"
-                      :class="attentionColor[conversationStatuses[item.id]!]"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" class="text-xs">
-                  {{ t(`aiAssistant.chatPage.sidebar.attention.${conversationStatuses[item.id]}`) }}
-                </TooltipContent>
-              </Tooltip>
-              <Button
-                variant="ghost"
-                size="icon"
-                :aria-label="
-                  t(showingArchive ? 'shell.conversation.restore' : 'shell.conversation.archive')
-                "
-                class="absolute right-16 top-1/2 h-7 w-7 -translate-y-1/2 opacity-0 transition-opacity focus-visible:opacity-100 group-hover:opacity-100"
-                :disabled="
-                  !showingArchive &&
-                  ['working', 'input', 'approval'].includes(conversationStatuses[item.id] ?? '')
-                "
-                @click.stop="showingArchive ? $emit('restore', item.id) : $emit('archive', item.id)"
-              >
-                <component :is="showingArchive ? ArchiveRestore : Archive" class="h-4 w-4" />
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    :aria-label="t('common.more')"
-                    class="absolute right-8 top-1/2 h-7 w-7 -translate-y-1/2"
-                    ><MoreHorizontal class="h-4 w-4"
-                  /></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent @close-auto-focus="focusTitleInput">
-                  <DropdownMenuItem @select="editTitle(item, true)">{{
-                    t('shell.conversation.rename')
-                  }}</DropdownMenuItem>
-                  <DropdownMenuItem
-                    :disabled="titleBusy?.[item.id]"
-                    @select="emit('regenerate-title', item.id)"
-                  >
-                    {{
-                      t(
-                        titleBusy?.[item.id]
-                          ? 'shell.conversation.generatingTitle'
-                          : 'shell.conversation.regenerateTitle',
-                      )
-                    }}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem class="text-destructive" @select="$emit('delete', item.id)">
-                    <Trash2 class="mr-2 h-4 w-4" />{{ t('common.delete') }}
-                  </DropdownMenuItem></DropdownMenuContent
-                >
-              </DropdownMenu>
-            </div>
-          </ContextMenuTrigger>
-          <ContextMenuContent @close-auto-focus="focusTitleInput">
-            <ContextMenuItem @select="editTitle(item, true)">{{
-              t('shell.conversation.rename')
-            }}</ContextMenuItem>
-            <ContextMenuItem
-              :disabled="titleBusy?.[item.id]"
-              @select="emit('regenerate-title', item.id)"
-            >
-              {{
-                t(
-                  titleBusy?.[item.id]
-                    ? 'shell.conversation.generatingTitle'
-                    : 'shell.conversation.regenerateTitle',
-                )
-              }}
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
+        <div ref="conversationListRef" class="relative flex flex-col" role="list">
+          <AIConversationSidebarRow
+            v-for="item in visibleConversations"
+            :key="item.id"
+            :conversation="item"
+            :active="activeConversationId === item.id"
+            :status="conversationStatuses[item.id] ?? null"
+            :showing-archive="showingArchive"
+            :title-busy="titleBusy?.[item.id]"
+            @select="$emit('select', $event)"
+            @archive="$emit('archive', $event)"
+            @restore="$emit('restore', $event)"
+            @delete="$emit('delete', $event)"
+            @rename="(id, name) => $emit('rename', id, name)"
+            @regenerate-title="$emit('regenerate-title', $event)"
+          />
+        </div>
       </TooltipProvider>
 
       <div
@@ -323,25 +209,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, nextTick, type Component } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { aiUiHost } from '../ai-ui-host';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
+import AIConversationSidebarRow from './AIConversationSidebarRow.vue';
+import { useSidebarListMotion } from '../composables/sidebarListMotion';
 import {
   ChevronDown,
   FileText,
-  CircleAlert,
-  CircleCheck,
-  LoaderCircle,
-  MessageCircleQuestion,
-  ShieldAlert,
   MoreHorizontal,
   Plus,
   RefreshCcw,
   Settings2,
   Target,
-  Trash2,
-  Archive,
-  ArchiveRestore,
   X,
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
@@ -350,23 +230,13 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  Tooltip,
-  TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
 } from '@memoflow/ui-vue-shadcn';
-import type {
-  ConversationAttentionMap,
-  ConversationAttentionStatus,
-} from '../composables/useConversationAttention';
+import type { ConversationAttentionMap } from '../composables/useConversationAttention';
 import type {
   AIWorkspaceRecentGoal,
   AIWorkspaceRecentKnowledgeNote,
@@ -417,49 +287,19 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const editingId = ref<string | null>(null);
-const titleDraft = ref('');
-const titleInput = ref<HTMLInputElement | null>(null);
-async function editTitle(item: ConversationSummary, fromMenu = false) {
-  editingId.value = item.id;
-  titleDraft.value = item.name;
-  if (fromMenu) return;
-  await nextTick();
-  titleInput.value?.focus();
-  titleInput.value?.select();
-}
-async function focusTitleInput(event: Event) {
-  if (!editingId.value) return;
-  event.preventDefault();
-  // Reka's modal focus trap has unmounted at close-auto-focus, so the editor can receive focus.
-  await nextTick();
-  titleInput.value?.focus();
-  titleInput.value?.select();
-}
-function saveTitle() {
-  if (!editingId.value || !titleDraft.value.trim()) return;
-  emit('rename', editingId.value, titleDraft.value);
-  editingId.value = null;
-}
+
 const showingArchive = ref(false);
 const visibleConversations = computed(() =>
   props.conversations.filter((item) => (item.status === 'Archived') === showingArchive.value),
 );
 
-const attentionIcon = {
-  failed: CircleAlert,
-  input: MessageCircleQuestion,
-  approval: ShieldAlert,
-  working: LoaderCircle,
-  done: CircleCheck,
-} satisfies Record<ConversationAttentionStatus, Component>;
-const attentionColor = {
-  failed: 'text-destructive',
-  input: 'text-primary',
-  approval: 'text-warning',
-  working: 'text-info',
-  done: 'text-success',
-} satisfies Record<ConversationAttentionStatus, string>;
+const conversationListRef = ref<HTMLElement | null>(null);
+const { update: updateListMotion } = useSidebarListMotion(conversationListRef);
+
+watch(showingArchive, () => {
+  // When switching between Active and Archived tabs, update without FLIP travel animation
+  updateListMotion(false);
+});
 
 // 折叠段默认收起（回溯/快捷入口非日常路径，§1-5）
 const recentGoalsOpen = ref(false);
