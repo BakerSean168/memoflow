@@ -86,6 +86,26 @@ function isFocusWindowHashRoute(path: string): boolean {
   return path === '/focus-window' || path.startsWith('/focus-window/');
 }
 
+async function loadBootstrap<T>(load: () => Promise<T>): Promise<T> {
+  if (!import.meta.env.DEV) {
+    return load();
+  }
+
+  const retryDelays = [300, 800, 1500];
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await load();
+    } catch (error) {
+      console.warn(`[DesktopRenderer] Bootstrap import attempt ${attempt}/4 failed`, error);
+      const delay = retryDelays[attempt - 1];
+      if (delay === undefined) {
+        throw error;
+      }
+      await new Promise<void>((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 async function startRenderer() {
   applyDocumentIcons({
     faviconHref: logoIco,
@@ -117,29 +137,33 @@ async function startRenderer() {
 
   const hashPath = getHashPath();
   if (hashPath === '/custom-notification' || hashPath.startsWith('/custom-notification/')) {
-    const { bootstrapCustomNotification } = await import('./bootstrap/custom-notification');
+    const { bootstrapCustomNotification } = await loadBootstrap(
+      () => import('./bootstrap/custom-notification'),
+    );
     await bootstrapCustomNotification();
     return;
   }
   if (isInterventionWindowHashRoute(hashPath)) {
-    const { bootstrapInterventionWindow } = await import('./bootstrap/intervention-window');
+    const { bootstrapInterventionWindow } = await loadBootstrap(
+      () => import('./bootstrap/intervention-window'),
+    );
     await bootstrapInterventionWindow();
     return;
   }
 
   if (isFocusWindowHashRoute(hashPath)) {
-    const { bootstrapFocusWindow } = await import('./bootstrap/focus-window');
+    const { bootstrapFocusWindow } = await loadBootstrap(() => import('./bootstrap/focus-window'));
     await bootstrapFocusWindow();
     return;
   }
 
   if (isProfileAccessHashRoute(hashPath)) {
-    const { bootstrapAuthApp } = await import('./bootstrap/auth');
+    const { bootstrapAuthApp } = await loadBootstrap(() => import('./bootstrap/auth'));
     await bootstrapAuthApp();
     return;
   }
 
-  const { bootstrapMainApp } = await import('./bootstrap/app');
+  const { bootstrapMainApp } = await loadBootstrap(() => import('./bootstrap/app'));
   await bootstrapMainApp();
 }
 
