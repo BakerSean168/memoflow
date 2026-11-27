@@ -1,14 +1,15 @@
-import { nextTick } from 'vue';
+import { nextTick, ref } from 'vue';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-  LocalGatewayAuditRecord,
   LocalMcpClient,
   LocalMcpClientCredential,
+  LocalMcpEndpoint,
 } from '@memoflow/ai-contracts';
 import { productionLocaleMessages } from '@setting-ui-test-host/locales/production-messages';
+import { SERVER_STATE_IDENTITY_SCOPE_KEY } from '@setting-ui-test-host/platform/server-state';
 import { settingUiHost } from '../setting-ui-host';
 
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));
@@ -48,21 +49,6 @@ const revokedClient: LocalMcpClient = {
   revokedAt: 42,
 };
 
-const auditEntry: LocalGatewayAuditRecord = {
-  id: 'audit-1',
-  version: '1',
-  at: 3,
-  connectionId: 'revoked-1',
-  origin: 'client',
-  tool: 'goal_search',
-  effect: 'read',
-  scopeDecision: 'allowed',
-  outcome: 'ok',
-  durationMs: 12,
-  requestId: 'request-1',
-  traceId: 'trace-1',
-};
-
 const writeText = vi.fn(async () => {});
 
 function element(id: string): HTMLElement | null {
@@ -87,9 +73,10 @@ async function settle(): Promise<void> {
 
 interface MountOptions {
   endpointError?: string;
+  endpoint?: LocalMcpEndpoint | null;
   clients?: LocalMcpClient[];
-  audit?: LocalGatewayAuditRecord[];
   listClients?: () => Promise<LocalMcpClient[]>;
+  getEndpoint?: () => Promise<LocalMcpEndpoint | null>;
 }
 
 function mountSection(options: MountOptions = {}) {
@@ -98,18 +85,22 @@ function mountSection(options: MountOptions = {}) {
     configurable: true,
     value: { writeText },
   });
+  const identityScope = ref('profile-a');
   const list = vi.fn(
     options.listClients ??
       (async () => options.clients ?? [existingClient, createdCredential.client]),
   );
   const port = {
-    getMcpEndpoint: vi.fn(async () => {
-      if (options.endpointError)
-        throw new ResultErrorException('private host diagnostics', options.endpointError);
-      return createdCredential.endpoint;
-    }),
+    getMcpEndpoint: vi.fn(
+      options.getEndpoint ??
+        (async () => {
+          if (options.endpointError)
+            throw new ResultErrorException('private host diagnostics', options.endpointError);
+          return options.endpoint === undefined ? createdCredential.endpoint : options.endpoint;
+        }),
+    ),
     listMcpClients: list,
-    listGatewayAudit: vi.fn(async () => options.audit ?? []),
+    listGatewayAudit: vi.fn(async () => []),
     createMcpClient: vi.fn(async () => createdCredential),
     revokeMcpClient: vi.fn(async (id: string) => ({ ...existingClient, id, revokedAt: 7 })),
   };
@@ -123,11 +114,14 @@ function mountSection(options: MountOptions = {}) {
           messages: productionLocaleMessages,
         }),
       ],
-      provide: { [settingUiHost.AI_LOCAL_AGENT_KEY as symbol]: port },
+      provide: {
+        [settingUiHost.AI_LOCAL_AGENT_KEY as symbol]: port,
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => identityScope.value,
+      },
     },
   });
   cleanups.push(() => wrapper.unmount());
-  return { wrapper, port };
+  return { wrapper, port, identityScope };
 }
 
 async function openCreatedCredential() {
@@ -283,19 +277,64 @@ describe('ExternalMcpClients', () => {
     expect(element('ai-external-mcp-revoked')).toBeNull();
   });
 
-  it('lists revoked clients and resolves their audit origin and effect', async () => {
-    const { wrapper } = mountSection({
+  it('lists revoked clients without querying or rendering recent tool calls', async () => {
+    const { wrapper, port } = mountSection({
       clients: [existingClient, revokedClient],
-      audit: [auditEntry],
     });
     await settle();
 
     expect(element('ai-external-mcp-revoked-client-revoked-1')).not.toBeNull();
     expect(wrapper.text()).toContain('Old CLI');
-    const audit = element('ai-external-mcp-audit')!;
-    expect(audit.textContent).toContain('goal_search');
-    expect(audit.textContent).toContain('Old CLI');
-    expect(element('ai-external-mcp-audit-effect-audit-1')?.textContent).toContain('Read');
+    expect(port.listGatewayAudit).not.toHaveBeenCalled();
+    expect(element('ai-external-mcp-audit')).toBeNull();
+  });
+
+  it('keeps discovery path inside collapsible technical details and emits open-activity', async () => {
+    const { wrapper } = mountSection({
+      endpoint: {
+        url: 'http://127.0.0.1:4123/mcp',
+        discoveryPath: '/home/demo/.memoflow/local-mcp.json',
+      },
+    });
+    await settle();
+
+    const details = element('ai-external-mcp-technical-details') as HTMLDetailsElement;
+    expect(details).not.toBeNull();
+    expect(details.open).toBe(false);
+    expect(element('ai-external-mcp-discovery-path')?.textContent).toBe(
+      '/home/demo/.memoflow/local-mcp.json',
+    );
+
+    element('ai-external-mcp-copy-discovery')!.click();
+    await settle();
+    expect(writeText).toHaveBeenCalledWith('/home/demo/.memoflow/local-mcp.json');
+
+    element('ai-external-mcp-open-activity')!.click();
+    await settle();
+    expect(wrapper.emitted('open-activity')).toHaveLength(1);
+  });
+
+  it('keeps endpoint visible when client list fails and drops stale responses on identity switch', async () => {
+    let resolveProfileAClients!: (clients: LocalMcpClient[]) => void;
+    const profileAPending = new Promise<LocalMcpClient[]>((resolve) => {
+      resolveProfileAClients = resolve;
+    });
+    const { wrapper, port, identityScope } = mountSection({
+      listClients: () => profileAPending,
+    });
+    await settle();
+
+    identityScope.value = 'profile-b';
+    port.listMcpClients.mockRejectedValueOnce(new Error('clients failed'));
+    await settle();
+
+    expect(element('ai-external-mcp-endpoint')?.textContent).toBe(createdCredential.endpoint.url);
+    expect(element('ai-external-mcp-error')).not.toBeNull();
+
+    // Late resolution from profile A must not overwrite profile B state.
+    resolveProfileAClients([existingClient]);
+    await settle();
+    expect(wrapper.text()).not.toContain('Existing CLI');
   });
 
   it('scopes copy feedback to one control and clears it after two seconds', async () => {

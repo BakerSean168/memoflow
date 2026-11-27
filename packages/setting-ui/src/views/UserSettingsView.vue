@@ -122,12 +122,23 @@ function normalizeGroup(value: unknown): SettingsGroup {
 }
 
 const accountPage = ref<'overview' | 'devices' | 'applications' | 'tokens'>('overview');
+const aiPage = ref<'overview' | 'mcp-clients' | 'permissions' | 'activity'>(
+  props.initialTab === 'ai-permissions' ? 'permissions' : 'overview',
+);
+const aiActivityTab = ref<'mcp' | 'permissions'>('mcp');
 const accountPageLabel = computed(() =>
   accountPage.value === 'devices'
     ? t('account.security.sessions')
     : accountPage.value === 'applications'
       ? t('account.externalAgents.oauthTitle')
       : t('account.externalAgents.patTitle'),
+);
+const aiPageLabel = computed(() =>
+  aiPage.value === 'mcp-clients'
+    ? t('setting.ai.localMcp.title')
+    : aiPage.value === 'permissions'
+      ? t('setting.permissions.title')
+      : t('setting.ai.activity.title'),
 );
 const activeTab = ref<SettingsGroup>(normalizeGroup(props.initialTab));
 const groups = computed(() =>
@@ -139,9 +150,18 @@ const groups = computed(() =>
 const activeLabel = computed(
   () => groups.value.find((group) => group.value === activeTab.value)?.label ?? t('setting.title'),
 );
+const activeSubpageLabel = computed(() => {
+  if (activeTab.value === 'account' && accountPage.value !== 'overview') {
+    return accountPageLabel.value;
+  }
+  if (activeTab.value === 'ai' && aiPage.value !== 'overview') {
+    return aiPageLabel.value;
+  }
+  return '';
+});
 
 watch(
-  [activeTab, accountPage],
+  [activeTab, accountPage, aiPage],
   () => {
     if (settingsScrollRef.value) settingsScrollRef.value.scrollTop = 0;
   },
@@ -151,6 +171,8 @@ watch(
 function selectGroup(group: SettingsGroup | string): void {
   activeTab.value = normalizeGroup(group);
   accountPage.value = 'overview';
+  aiPage.value = group === 'ai-permissions' ? 'permissions' : 'overview';
+  aiActivityTab.value = 'mcp';
   if (isNarrow.value) shellStore.setSettingsNavigationOpen(false);
 }
 
@@ -249,23 +271,21 @@ onBeforeUnmount(() => {
               /
             </li>
             <li
-              :aria-current="
-                activeTab === 'account' && accountPage !== 'overview' ? undefined : 'page'
-              "
+              :aria-current="activeSubpageLabel ? undefined : 'page'"
               class="flex min-w-0 items-center font-medium"
             >
               <span class="truncate" data-testid="settings-breadcrumb-current">
                 {{ activeLabel }}
               </span>
             </li>
-            <template v-if="activeTab === 'account' && accountPage !== 'overview'">
+            <template v-if="activeSubpageLabel">
               <li aria-hidden="true" class="text-muted-foreground">/</li>
               <li
                 aria-current="page"
                 class="truncate text-sm font-medium"
                 data-testid="settings-breadcrumb-subpage"
               >
-                {{ accountPageLabel }}
+                {{ activeSubpageLabel }}
               </li>
             </template>
           </ol>
@@ -311,7 +331,11 @@ onBeforeUnmount(() => {
           <div class="min-w-0 space-y-8">
             <UserPreferenceSettingsSection v-if="activeTab === 'appearance'" />
             <KeyboardSettings v-else-if="activeTab === 'shortcuts'" />
-            <AISettings v-else-if="activeTab === 'ai'" />
+            <AISettings
+              v-else-if="activeTab === 'ai'"
+              v-model:page="aiPage"
+              v-model:activity-tab="aiActivityTab"
+            />
             <NotificationSettings v-else-if="activeTab === 'notifications'" />
             <AccountSettingsSection
               v-else-if="activeTab === 'account'"
