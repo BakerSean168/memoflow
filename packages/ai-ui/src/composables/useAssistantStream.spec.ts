@@ -6,7 +6,8 @@ import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import { useAssistantStream } from './useAssistantStream';
-import { projectAgentActivity } from './agentActivity';
+import { computeRunElapsedMs, getItemRunTiming, projectAgentActivity } from './agentActivity';
+import { useConversationProjection } from './useConversationProjection';
 import type { ChatModelOption, ChatAskUserRequest, ChatItem } from './types';
 
 const toastMocks = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
@@ -407,5 +408,141 @@ describe('useAssistantStream ask_user lifecycle', () => {
     expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID, {
       preserveAcceptedDecision: true,
     });
+  });
+
+  it('captures server event run timing excluding approval pauses and preserves timing across history refresh', async () => {
+    const timeline = ref<ChatItem[]>([]);
+    const runtime = {
+      streamMessage: vi.fn(
+        async (
+          _command: unknown,
+          handlers: { onEvent?: (event: AssistantRuntimeEvent) => void },
+        ) => {
+          handlers.onEvent?.({ ...assistantRunStarted(), createdAt: 10_000, sequence: 1 });
+          // Duplicate started must not reset startedAt.
+          handlers.onEvent?.({ ...assistantRunStarted(), createdAt: 11_000, sequence: 2 });
+          handlers.onEvent?.({
+            ...assistantRunStarted(),
+            type: 'assistant.approval.required',
+            createdAt: 12_000,
+            sequence: 3,
+            data: {
+              toolCallId: 'tool-write',
+              toolName: 'routine_create',
+              category: 'edit',
+              risk: 'high',
+            },
+          });
+          handlers.onEvent?.({
+            ...assistantRunStarted(),
+            type: 'assistant.approval.resolved',
+            createdAt: 17_000,
+            sequence: 4,
+            data: {
+              toolCallId: 'tool-write',
+              resolution: 'approved',
+            },
+          });
+          handlers.onEvent?.({
+            ...assistantRunStarted(),
+            type: 'assistant.run.completed',
+            createdAt: 20_500,
+            sequence: 5,
+            data: {
+              content: 'Done!',
+              assistantMessageId: 'persisted-assistant-1',
+            },
+          });
+        },
+      ),
+      listMessages: vi.fn(async () => ({
+        conversationId: CONVERSATION_ID,
+        messages: [
+          {
+            id: 'persisted-user-1',
+            conversationId: CONVERSATION_ID,
+            role: 'user' as const,
+            content: 'hello',
+            attachments: [],
+            createdAt: 9_000,
+          },
+          {
+            id: 'persisted-assistant-1',
+            conversationId: CONVERSATION_ID,
+            role: 'assistant' as const,
+            content: 'Done!',
+            attachments: [],
+            createdAt: 20_500,
+          },
+        ],
+      })),
+      decideToolApproval: vi.fn(async () => true),
+      answerToolSuspension: vi.fn(async () => true),
+      listAskUserSuspensions: vi.fn(async () => []),
+    };
+
+    const options = {
+      service: {},
+      runtime,
+      usageRuntime: {
+        get: vi.fn(async () => ({ promptTokens: 1, completionTokens: 1, totalTokens: 2 })),
+      },
+      surface: 'web',
+      getDefaultConversationName: () => 'New chat',
+    } as unknown as Parameters<typeof useAssistantStream>[0]['options'];
+    const composer = {
+      composerAttachments: ref([]),
+      attachmentIntakePending: ref(false),
+      clearComposerTurnState: vi.fn(),
+      selectedEntities: vi.fn(() => []),
+    };
+
+    let projection!: ReturnType<typeof useConversationProjection>;
+    let stream!: ReturnType<typeof useAssistantStream>;
+    mount(
+      defineComponent({
+        setup() {
+          projection = useConversationProjection({
+            options,
+            abortActiveStream: () => stream.abortActiveStream(),
+            clearComposerContext: () => undefined,
+            startNewConversation: () => undefined,
+          });
+          projection.chatConversationId.value = CONVERSATION_ID;
+          stream = useAssistantStream({
+            options,
+            chatMessage: ref('hello'),
+            conversation: projection,
+            composer: composer as never,
+          });
+          return () => h('div');
+        },
+      }),
+      { global: { plugins: [i18n] } },
+    );
+
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    const liveAssistant = projection.chatTimeline.value.find(
+      (entry) => entry.role === 'assistant',
+    )!;
+    expect(computeRunElapsedMs(getItemRunTiming(liveAssistant))).toBe(5_500);
+
+    // Simulate switching away and back / refreshing history without backend runTiming persistence.
+    await projection.refreshRuntimeHistory(CONVERSATION_ID);
+    const reloadedAssistant = projection.chatTimeline.value.find(
+      (entry) => entry.id === 'persisted-assistant-1',
+    )!;
+    expect(computeRunElapsedMs(getItemRunTiming(reloadedAssistant))).toBe(5_500);
+  });
+
+  it('does not fabricate completion timing when a stream terminates unexpectedly', async () => {
+    const { timeline, runtime, stream } = createHarness();
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent?.({ ...assistantRunStarted(), createdAt: 5_000 });
+    });
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    const assistant = timeline.value.find((item) => item.role === 'assistant')!;
+    expect(assistant.status).toBe('interrupted');
+    expect(computeRunElapsedMs(getItemRunTiming(assistant))).toBeNull();
   });
 });

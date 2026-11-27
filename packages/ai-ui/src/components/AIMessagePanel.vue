@@ -13,55 +13,103 @@
       <!-- Message timeline -->
       <template v-if="timeline.length">
         <article
-          v-for="item in visibleTimeline"
-          :key="item.id"
-          class="flex w-full"
-          :class="item.role === 'user' ? 'justify-end' : 'justify-start'"
+          v-for="row in timelineRows"
+          :key="row.id"
+          class="flex w-full min-w-0"
+          :class="[
+            row.kind === 'user-message'
+              ? 'group/message flex-col items-end gap-1'
+              : 'justify-start',
+            row.kind === 'user-message' && row.groupedWithNext ? '-mb-3' : '',
+          ]"
         >
-          <div
-            v-if="item.role === 'user'"
-            class="max-w-[88%] rounded-[16px] rounded-br-[6px] bg-[hsl(var(--surface-raised))] px-3 py-2 text-[13.5px] leading-6 text-foreground @md/ai:max-w-[82%] @xl/ai:max-w-[78%]"
-            :class="aiUiHost.semanticElevationClass('raised')"
-          >
-            <div v-if="item.attachments?.length" class="mb-2 flex flex-wrap gap-1.5">
-              <span
-                v-for="(attachment, attachmentIndex) in item.attachments"
-                :key="`${item.id}:attachment:${attachmentIndex}`"
-                class="inline-flex max-w-[15rem] items-center gap-1.5 rounded-md bg-[hsl(var(--surface-overlay)/0.72)] px-2 py-1 text-[11px] leading-5 text-[hsl(var(--foreground-muted))]"
-                data-testid="ai-message-attachment"
-              >
-                <ImageIcon
-                  v-if="attachment.mediaType.startsWith('image/')"
-                  class="h-3.5 w-3.5 shrink-0"
-                />
-                <Paperclip v-else class="h-3.5 w-3.5 shrink-0" />
-                <span class="truncate">{{ attachment.filename || attachment.mediaType }}</span>
-              </span>
+          <template v-if="row.kind === 'user-message'">
+            <div
+              class="max-w-[80%] min-w-0 rounded-2xl bg-[hsl(var(--surface-raised))] px-3 py-2 text-[13.5px] leading-6 text-foreground"
+              :class="[
+                aiUiHost.semanticElevationClass('raised'),
+                row.groupedWithPrevious ? 'rounded-tr-md' : '',
+                row.groupedWithNext ? 'rounded-br-md' : '',
+              ]"
+            >
+              <div v-if="row.item.attachments?.length" class="mb-2 flex flex-wrap gap-1.5">
+                <span
+                  v-for="(attachment, attachmentIndex) in row.item.attachments"
+                  :key="`${row.id}:attachment:${attachmentIndex}`"
+                  class="inline-flex max-w-full items-center gap-1.5 rounded-md bg-[hsl(var(--surface-overlay)/0.72)] px-2 py-1 text-[11px] leading-5 text-[hsl(var(--foreground-muted))] sm:max-w-[15rem]"
+                  data-testid="ai-message-attachment"
+                >
+                  <ImageIcon
+                    v-if="attachment.mediaType.startsWith('image/')"
+                    class="h-3.5 w-3.5 shrink-0"
+                  />
+                  <Paperclip v-else class="h-3.5 w-3.5 shrink-0" />
+                  <span class="min-w-0 truncate">{{
+                    attachment.filename || attachment.mediaType
+                  }}</span>
+                </span>
+              </div>
+              <p v-if="row.item.content.trim()" class="whitespace-pre-wrap break-words">
+                {{ row.item.content }}
+              </p>
             </div>
-            <p v-if="item.content.trim()" class="whitespace-pre-wrap break-words">
-              {{ item.content }}
-            </p>
-          </div>
+            <div
+              v-if="row.item.content.trim()"
+              class="flex max-w-[80%] flex-wrap items-center justify-end gap-1 pe-1 transition-opacity duration-200 pointer-coarse:opacity-100 focus-within:opacity-100 group-hover/message:opacity-100"
+              :class="copiedMessageId === row.id ? 'opacity-100' : 'opacity-0'"
+            >
+              <Button
+                type="button"
+                variant="ghost"
+                class="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                :title="
+                  copiedMessageId === row.id
+                    ? t('aiAssistant.chatPage.message.copied')
+                    : t('aiAssistant.chatPage.message.copy')
+                "
+                :aria-label="
+                  copiedMessageId === row.id
+                    ? t('aiAssistant.chatPage.message.copied')
+                    : t('aiAssistant.chatPage.message.copy')
+                "
+                data-testid="ai-user-message-copy"
+                @click="copyMessage(row.id, row.item.content)"
+              >
+                <Check v-if="copiedMessageId === row.id" class="h-3.5 w-3.5" />
+                <Copy v-else class="h-3.5 w-3.5" />
+                <span>{{
+                  copiedMessageId === row.id
+                    ? t('aiAssistant.chatPage.message.copied')
+                    : t('aiAssistant.chatPage.message.copy')
+                }}</span>
+              </Button>
+            </div>
+          </template>
 
-          <div v-else class="flex w-full min-w-0 gap-3">
+          <div v-else class="flex w-full min-w-0 items-start gap-3">
             <div
               class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--surface-raised))] text-[hsl(var(--foreground-subtle))]"
               :class="aiUiHost.semanticElevationClass('inset')"
               aria-hidden="true"
             >
-              <MemoFlowAiIcon class="h-5 w-5" :active="isAgentActive(item)" />
+              <MemoFlowAiIcon class="h-5 w-5" :active="row.isActive" />
             </div>
-            <div class="group/message min-w-0 flex-1 pt-0.5">
+            <div class="group/message group/assistant min-w-0 flex-1 pt-0.5">
               <p
-                v-if="item.localAgentSource"
-                class="mb-2 text-xs text-muted-foreground"
+                v-if="row.localAgentSource"
+                class="mb-2 break-words text-xs text-muted-foreground"
                 data-testid="ai-message-native-model"
               >
-                {{ item.localAgentSource.modelId }}
+                {{ row.localAgentSource.modelId }}
               </p>
-              <AIActivityTimeline :item="item" />
+              <AIActivityTimeline
+                v-if="turnHasActivity(row)"
+                :turn="row"
+                @toggle-turn="toggleTurn"
+                @toggle-work-group="toggleWorkGroup"
+              />
               <section
-                v-for="approval in item.approvals ?? []"
+                v-for="approval in row.approvals"
                 :key="`${approval.runId}:${approval.toolCallId}`"
                 class="mb-3 min-w-0 rounded-xl border border-border p-3"
                 data-testid="ai-tool-approval"
@@ -111,18 +159,18 @@
                 </div>
               </section>
               <AILocalRequestCard
-                v-for="request in item.nativeRequests ?? []"
+                v-for="request in row.nativeRequests"
                 :key="request.request.requestId"
                 :request="request"
                 @respond="$emit('native-response', request, $event)"
               />
               <section
-                v-for="request in item.askUserRequests ?? []"
+                v-for="request in row.askUserRequests"
                 :key="`${request.runId}:${request.toolCallId}`"
                 class="mb-3 space-y-3 rounded-xl border p-3"
                 data-testid="ai-ask-user-request"
               >
-                <p class="text-sm font-medium">{{ request.question }}</p>
+                <p class="break-words text-sm font-medium">{{ request.question }}</p>
                 <p class="text-xs text-muted-foreground" role="status">
                   {{ t(`aiAssistant.local.${request.status}`) }}
                 </p>
@@ -192,96 +240,103 @@
                     :disabled="request.status !== 'pending'"
                     @update:model-value="askUserAnswers[request.toolCallId] = String($event)"
                   />
+                  <div class="flex flex-wrap gap-2">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      class="px-3"
+                      :disabled="request.status !== 'pending'"
+                      data-testid="ai-ask-user-submit"
+                    >
+                      {{ t('aiAssistant.local.answer') }}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="lg"
+                      class="px-3"
+                      :disabled="request.status !== 'pending'"
+                      data-testid="ai-ask-user-cancel"
+                      @click="$emit('ask-user-cancel', request)"
+                    >
+                      {{ t('aiAssistant.local.cancel') }}
+                    </Button>
+                  </div>
+                </form>
+              </section>
+              <template v-for="part in row.messages" :key="part.id">
+                <AIMessageContent
+                  v-if="part.item.content.trim()"
+                  :content="
+                    part.item.workflowInterruption
+                      ? getGoalWorkflowInterruptionMessage(part.item.workflowInterruption, t)
+                      : part.item.content
+                  "
+                  :muted="part.item.status === 'interrupted'"
+                  v-bind="
+                    part.item.status === 'interrupted'
+                      ? {
+                          role: 'status',
+                          'data-testid': 'ai-workflow-interruption',
+                        }
+                      : {}
+                  "
+                  :generating="part.item.status === 'generating'"
+                />
+                <p
+                  v-if="part.item.status === 'aborted' || part.item.status === 'error'"
+                  class="mt-2 break-words text-xs"
+                  :class="
+                    part.item.status === 'error' ? 'text-destructive' : 'text-muted-foreground'
+                  "
+                  :role="part.item.status === 'error' ? 'alert' : 'status'"
+                >
+                  {{ getMessageStatusLabel(part.item) }}
+                </p>
+                <div
+                  v-if="part.item.content.trim() && part.item.status !== 'generating'"
+                  class="mt-1.5 flex min-h-8 flex-wrap items-center gap-1 transition-opacity duration-200 pointer-coarse:opacity-100 focus-within:opacity-100 group-hover/assistant:opacity-100"
+                  :class="copiedMessageId === part.id ? 'opacity-100' : 'opacity-0'"
+                  data-testid="ai-message-actions"
+                >
                   <Button
-                    type="submit"
-                    size="lg"
-                    class="px-3"
-                    :disabled="request.status !== 'pending'"
-                    data-testid="ai-ask-user-submit"
+                    v-if="canSaveLocalNote"
+                    type="button"
+                    variant="ghost"
+                    class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    data-testid="ai-message-save-note"
+                    @click="$emit('save-local-note', part.item.content)"
                   >
-                    {{ t('aiAssistant.local.answer') }}
+                    <NotebookPen class="h-3.5 w-3.5" />
+                    {{ t('aiAssistant.local.saveNote') }}
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
-                    size="lg"
-                    class="px-3"
-                    :disabled="request.status !== 'pending'"
-                    data-testid="ai-ask-user-cancel"
-                    @click="$emit('ask-user-cancel', request)"
+                    variant="ghost"
+                    class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    :title="
+                      copiedMessageId === part.id
+                        ? t('aiAssistant.chatPage.message.copied')
+                        : t('aiAssistant.chatPage.message.copy')
+                    "
+                    :aria-label="
+                      copiedMessageId === part.id
+                        ? t('aiAssistant.chatPage.message.copied')
+                        : t('aiAssistant.chatPage.message.copy')
+                    "
+                    data-testid="ai-message-copy"
+                    @click="copyMessage(part.id, part.item.content)"
                   >
-                    {{ t('aiAssistant.local.cancel') }}
+                    <Check v-if="copiedMessageId === part.id" class="h-3.5 w-3.5" />
+                    <Copy v-else class="h-3.5 w-3.5" />
+                    <span>{{
+                      copiedMessageId === part.id
+                        ? t('aiAssistant.chatPage.message.copied')
+                        : t('aiAssistant.chatPage.message.copy')
+                    }}</span>
                   </Button>
-                </form>
-              </section>
-              <AIMessageContent
-                v-if="item.content.trim()"
-                :content="
-                  item.workflowInterruption
-                    ? getGoalWorkflowInterruptionMessage(item.workflowInterruption, t)
-                    : item.content
-                "
-                :muted="item.status === 'interrupted'"
-                v-bind="
-                  item.status === 'interrupted'
-                    ? {
-                        role: 'status',
-                        'data-testid': 'ai-workflow-interruption',
-                      }
-                    : {}
-                "
-                :generating="item.status === 'generating'"
-              />
-              <p
-                v-if="item.status === 'aborted' || item.status === 'error'"
-                class="mt-2 text-xs"
-                :class="item.status === 'error' ? 'text-destructive' : 'text-muted-foreground'"
-                :role="item.status === 'error' ? 'alert' : 'status'"
-              >
-                {{ getMessageStatusLabel(item) }}
-              </p>
-              <div
-                v-if="item.content.trim()"
-                class="mt-1.5 flex h-8 items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover/message:opacity-100"
-                data-testid="ai-message-actions"
-              >
-                <Button
-                  v-if="canSaveLocalNote && item.status !== 'generating'"
-                  type="button"
-                  variant="ghost"
-                  class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                  data-testid="ai-message-save-note"
-                  @click="$emit('save-local-note', item.content)"
-                >
-                  <NotebookPen class="h-3.5 w-3.5" />
-                  {{ t('aiAssistant.local.saveNote') }}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                  :title="
-                    copiedMessageId === item.id
-                      ? t('aiAssistant.chatPage.message.copied')
-                      : t('aiAssistant.chatPage.message.copy')
-                  "
-                  :aria-label="
-                    copiedMessageId === item.id
-                      ? t('aiAssistant.chatPage.message.copied')
-                      : t('aiAssistant.chatPage.message.copy')
-                  "
-                  data-testid="ai-message-copy"
-                  @click="copyMessage(item.id, item.content)"
-                >
-                  <Check v-if="copiedMessageId === item.id" class="h-3.5 w-3.5" />
-                  <Copy v-else class="h-3.5 w-3.5" />
-                  <span>{{
-                    copiedMessageId === item.id
-                      ? t('aiAssistant.chatPage.message.copied')
-                      : t('aiAssistant.chatPage.message.copy')
-                  }}</span>
-                </Button>
-              </div>
+                </div>
+              </template>
             </div>
           </div>
         </article>
@@ -458,7 +513,11 @@ import type { LocalAgentRequestResponse } from '@memoflow/ai-contracts';
 import AILocalRequestCard from './AILocalRequestCard.vue';
 import AIMessageContent from './AIMessageContent.vue';
 import AIActivityTimeline from './AIActivityTimeline.vue';
-import { isAgentActive } from '../composables/agentActivity';
+import {
+  deriveChatTimelineRows,
+  runTimingProjectionRevision,
+  type AssistantTurnTimelineRow,
+} from '../composables/agentActivity';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
   getToolLocaleKey,
@@ -566,21 +625,58 @@ function submitAskUser(request: ChatAskUserRequest) {
 }
 
 const { getMessageStatusLabel } = useAIFormatters();
-const visibleTimeline = computed(() =>
-  props.timeline.filter(
-    (item) =>
-      item.role === 'user' ||
-      item.content.trim() ||
-      item.status !== 'success' ||
-      item.attachments?.length ||
-      item.toolActivity ||
-      item.toolActivities?.length ||
-      item.approvals?.length ||
-      item.nativeActivity ||
-      item.nativeActivities?.length ||
-      item.nativeRequests?.length ||
-      item.askUserRequests?.length ||
-      item.workflowInterruption,
-  ),
-);
+const expandedTurnKeys = ref(new Set<string>());
+const collapsedTurnKeys = ref(new Set<string>());
+const expandedWorkGroupIds = ref(new Set<string>());
+const collapsedWorkGroupIds = ref(new Set<string>());
+
+function toggleTurn(turnKey: string, currentlyExpanded: boolean) {
+  const nextExpanded = new Set(expandedTurnKeys.value);
+  const nextCollapsed = new Set(collapsedTurnKeys.value);
+  if (currentlyExpanded) {
+    nextExpanded.delete(turnKey);
+    nextCollapsed.add(turnKey);
+  } else {
+    nextCollapsed.delete(turnKey);
+    nextExpanded.add(turnKey);
+  }
+  expandedTurnKeys.value = nextExpanded;
+  collapsedTurnKeys.value = nextCollapsed;
+}
+
+function toggleWorkGroup(groupId: string, currentlyExpanded: boolean) {
+  const nextExpanded = new Set(expandedWorkGroupIds.value);
+  const nextCollapsed = new Set(collapsedWorkGroupIds.value);
+  if (currentlyExpanded) {
+    nextExpanded.delete(groupId);
+    nextCollapsed.add(groupId);
+  } else {
+    nextCollapsed.delete(groupId);
+    nextExpanded.add(groupId);
+  }
+  expandedWorkGroupIds.value = nextExpanded;
+  collapsedWorkGroupIds.value = nextCollapsed;
+}
+
+function turnHasActivity(row: AssistantTurnTimelineRow): boolean {
+  return Boolean(
+    row.foldRow ||
+    row.workRows.length > 0 ||
+    row.isWaiting ||
+    row.status === 'failed' ||
+    row.status === 'interrupted' ||
+    row.hasFailedTool,
+  );
+}
+
+const timelineRows = computed(() => {
+  void runTimingProjectionRevision.value;
+  return deriveChatTimelineRows({
+    timeline: props.timeline,
+    expandedTurnKeys: expandedTurnKeys.value,
+    collapsedTurnKeys: collapsedTurnKeys.value,
+    expandedWorkGroupIds: expandedWorkGroupIds.value,
+    collapsedWorkGroupIds: collapsedWorkGroupIds.value,
+  });
+});
 </script>
