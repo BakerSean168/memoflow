@@ -6,6 +6,7 @@ import { fail, ok } from '@memoflow/transport-contracts/result';
 import { REPOSITORY_SERVICE_KEY } from '@repository-ui-test-host/di/keys';
 import repository from '@repository-ui-test-host/locales/en-US/repository';
 import { repositoryUiHost } from '../repository-ui-host';
+import type { KnowledgeBusinessLinks } from '../repository-ui-host';
 import LocalVaultWorkspaceView from './LocalVaultWorkspaceView.vue';
 const routerMocks = vi.hoisted(() => ({ replace: vi.fn(async () => undefined) }));
 const route = reactive({ name: 'repository', query: {} as Record<string, string> });
@@ -88,8 +89,19 @@ function service(state = 'Available') {
     openLocalVaultInObsidian: vi.fn(async () => ok(undefined)),
   };
 }
-function businessLinks(links: unknown[], failures: unknown[] = []) {
+function businessLinks(
+  links: KnowledgeBusinessLinks['links'],
+  failures: KnowledgeBusinessLinks['failures'] = [],
+) {
   return { links, failures };
+}
+function linksRead(
+  links: KnowledgeBusinessLinks['links'],
+  failures: KnowledgeBusinessLinks['failures'] = [],
+) {
+  const read = vi.fn(async () => businessLinks(links, failures));
+  vi.spyOn(repositoryUiHost, 'useKnowledgeBusinessLinks').mockReturnValue(read);
+  return read;
 }
 function options(api: ReturnType<typeof service>) {
   return {
@@ -112,21 +124,14 @@ beforeEach(() => {
   route.name = 'repository';
   route.query = {};
   vi.clearAllMocks();
-  const read = vi.fn(async () =>
-    Promise.resolve(
-      businessLinks([
-        {
-          documentId: 'document-1',
-          subjectType: 'goal',
-          subjectId: 'goal-1',
-          title: 'Build a calmer workspace',
-        },
-      ]),
-    ),
-  );
-  vi.spyOn(repositoryUiHost, 'useKnowledgeBusinessLinks').mockReturnValue(
-    read as unknown as typeof repositoryUiHost.useKnowledgeBusinessLinks,
-  );
+  linksRead([
+    {
+      documentId: 'document-1',
+      subjectType: 'goal',
+      subjectId: 'goal-1',
+      title: 'Build a calmer workspace',
+    },
+  ]);
 });
 afterEach(() => vi.restoreAllMocks());
 describe('Local Vault connection workspace', () => {
@@ -210,7 +215,7 @@ describe('Local Vault connection workspace', () => {
     expect(wrapper.findAll('[data-note-path]')).toHaveLength(1);
     expect(
       wrapper.get('[data-testid="knowledge-links-retry"]').attributes('disabled'),
-    ).toBeDefined();
+    ).toBeUndefined();
     wrapper.unmount();
   });
   it('retries only the business link read and recovers the notice', async () => {

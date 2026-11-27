@@ -54,7 +54,7 @@ export interface RepositoryUiHost extends PlatformRendererHost {
   };
   useKnowledgeBusinessLinks(): (
     documents: KnowledgeDocumentRef[],
-  ) => Promise<KnowledgeBusinessLink[]>;
+  ) => Promise<KnowledgeBusinessLinks>;
   stripMarkdownFrontmatter(source: string): string;
   renderSafeMarkdown(source: string): string;
   recentKnowledgeQueryKeys: {

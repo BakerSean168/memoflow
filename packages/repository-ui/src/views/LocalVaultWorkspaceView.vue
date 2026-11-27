@@ -414,7 +414,10 @@ async function load() {
     reportLinkFailures(linkFailures.value);
   }
 }
-function documentRefs(notes: LocalVaultNoteSummaryDTO[], binding: { knowledgeSpaceId: string }) {
+function documentRefs(
+  notes: LocalVaultNoteSummaryDTO[],
+  binding: Pick<LocalVaultBindingSnapshotDTO['binding'], 'knowledgeSpaceId'>,
+) {
   return notes.flatMap((note) =>
     note.knowledgeDocumentId
       ? [{ knowledgeSpaceId: binding.knowledgeSpaceId, documentId: note.knowledgeDocumentId }]

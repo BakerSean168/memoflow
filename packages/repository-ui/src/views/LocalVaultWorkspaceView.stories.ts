@@ -93,23 +93,26 @@ function installVaultPort(mode: Mode) {
     openLocalVaultInObsidian: async () => ok(undefined),
   } as never);
   const original = repositoryUiHost.useKnowledgeBusinessLinks;
-  repositoryUiHost.useKnowledgeBusinessLinks = () => async () =>
-    mode === 'empty'
-      ? []
-      : [
-          {
-            documentId: documentIds[0]!,
-            subjectType: 'goal',
-            subjectId: 'goal-knowledge',
-            title: '建立可持续的知识管理习惯',
-          },
-          {
-            documentId: documentIds[1]!,
-            subjectType: 'goal',
-            subjectId: 'goal-memoflow',
-            title: '优化 MemoFlow 工作流',
-          },
-        ];
+  repositoryUiHost.useKnowledgeBusinessLinks = () => async () => ({
+    links:
+      mode === 'empty'
+        ? []
+        : [
+            {
+              documentId: documentIds[0]!,
+              subjectType: 'goal',
+              subjectId: 'goal-knowledge',
+              title: '建立可持续的知识管理习惯',
+            },
+            {
+              documentId: documentIds[1]!,
+              subjectType: 'goal',
+              subjectId: 'goal-memoflow',
+              title: '优化 MemoFlow 工作流',
+            },
+          ],
+    failures: [],
+  });
   onBeforeUnmount(() => {
     repositoryUiHost.useKnowledgeBusinessLinks = original;
   });
