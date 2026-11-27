@@ -134,6 +134,53 @@ export type AssistantRuntimeApprovalCommand = z.infer<typeof AssistantRuntimeApp
 export const AssistantRuntimeApprovalResultSchema = z.object({ accepted: z.boolean() }).strict();
 export type AssistantRuntimeApprovalResult = z.infer<typeof AssistantRuntimeApprovalResultSchema>;
 
+/** One selectable option, mirroring Claude's AskUserQuestion option shape. */
+export const AssistantRuntimeAskUserOptionSchema = z
+  .object({
+    label: z.string().min(1).max(500),
+    description: z.string().max(1000).optional(),
+  })
+  .strict();
+export type AssistantRuntimeAskUserOption = z.infer<typeof AssistantRuntimeAskUserOptionSchema>;
+
+export const AssistantRuntimeAskUserSelectionModeSchema = z.enum(['single_select', 'multi_select']);
+export type AssistantRuntimeAskUserSelectionMode = z.infer<
+  typeof AssistantRuntimeAskUserSelectionModeSchema
+>;
+
+/**
+ * One AskUserQuestion prompt. `header` is the short chip label, `question` the
+ * full text (also the answer key), and `options` the 2-4 structured choices the
+ * runtime tool emits. The lower bound stays 1 so historical payloads that asked
+ * an open-ended question keep parsing.
+ */
+export const AssistantRuntimeAskUserQuestionSchema = z
+  .object({
+    header: z.string().trim().min(1).max(120),
+    question: z.string().trim().min(1).max(2000),
+    options: z.array(AssistantRuntimeAskUserOptionSchema).min(1).max(20).optional(),
+    selectionMode: AssistantRuntimeAskUserSelectionModeSchema.default('single_select'),
+  })
+  .strict();
+export type AssistantRuntimeAskUserQuestion = z.infer<typeof AssistantRuntimeAskUserQuestionSchema>;
+
+/**
+ * Answers keyed by question text, as Claude's AskUserQuestion receives them:
+ * a selected label or free text, and an array of labels for multi-select.
+ */
+export const AssistantRuntimeAskUserAnswerValueSchema = z.union([
+  z.string().max(4000),
+  z.array(z.string().min(1).max(500)).min(1).max(20),
+]);
+export type AssistantRuntimeAskUserAnswerValue = z.infer<
+  typeof AssistantRuntimeAskUserAnswerValueSchema
+>;
+export const AssistantRuntimeAskUserAnswersSchema = z.record(
+  z.string().min(1).max(2000),
+  AssistantRuntimeAskUserAnswerValueSchema,
+);
+export type AssistantRuntimeAskUserAnswers = z.infer<typeof AssistantRuntimeAskUserAnswersSchema>;
+
 export const AssistantRuntimeAskUserSuspensionSchema = z
   .object({
     approval: z
@@ -146,24 +193,48 @@ export const AssistantRuntimeAskUserSuspensionSchema = z
       .optional(),
     runId: z.string().min(1).max(512),
     toolCallId: z.string().min(1).max(512),
-    question: z.string().trim().min(1).max(2000),
-    options: z
-      .array(
-        z
-          .object({
-            label: z.string().min(1).max(500),
-            description: z.string().max(1000).optional(),
-          })
-          .strict(),
-      )
-      .max(20)
-      .optional(),
-    selectionMode: z.enum(['single_select', 'multi_select']).optional(),
+    /** Preferred shape: every question a single ask_user call carries (1-4). */
+    questions: z.array(AssistantRuntimeAskUserQuestionSchema).min(1).max(4).optional(),
+    /** Legacy single-question fields; parsed and normalized into `questions[0]`. */
+    question: z.string().trim().min(1).max(2000).optional(),
+    options: z.array(AssistantRuntimeAskUserOptionSchema).max(20).optional(),
+    selectionMode: AssistantRuntimeAskUserSelectionModeSchema.optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((suspension, context) => {
+    if (!suspension.questions?.length && !suspension.question) {
+      context.addIssue({
+        code: 'custom',
+        path: ['questions'],
+        message: 'Ask user suspension requires questions',
+      });
+    }
+  });
 export type AssistantRuntimeAskUserSuspension = z.infer<
   typeof AssistantRuntimeAskUserSuspensionSchema
 >;
+
+/**
+ * Read a suspension in the current shape. Legacy single-question projections
+ * become one question so clients never branch on the payload vintage.
+ */
+export function assistantRuntimeAskUserQuestions(
+  suspension: Pick<
+    AssistantRuntimeAskUserSuspension,
+    'questions' | 'question' | 'options' | 'selectionMode'
+  >,
+): AssistantRuntimeAskUserQuestion[] {
+  if (suspension.questions?.length) return suspension.questions;
+  if (!suspension.question) return [];
+  return [
+    {
+      header: 'Question 1',
+      question: suspension.question,
+      ...(suspension.options?.length ? { options: suspension.options } : {}),
+      selectionMode: suspension.selectionMode ?? 'single_select',
+    },
+  ];
+}
 export const AssistantRuntimeAskUserSuspensionsSchema = z
   .array(AssistantRuntimeAskUserSuspensionSchema)
   .max(100);
@@ -181,10 +252,30 @@ export const AssistantRuntimeToolAnswerCommandSchema = z
     conversationId: z.string().min(1).max(512),
     runId: z.string().min(1).max(512),
     toolCallId: z.string().min(1).max(512),
-    answer: z.union([z.string().max(4000), z.array(z.string().max(500)).min(1).max(20)]),
+    /** Legacy single answer; still accepted for one-question suspensions. */
+    answer: AssistantRuntimeAskUserAnswerValueSchema.optional(),
+    /** Preferred shape for multi-question suspensions, keyed by question text. */
+    answers: AssistantRuntimeAskUserAnswersSchema.optional(),
     identityId: z.never().optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((command, context) => {
+    if (command.action !== 'answer') return;
+    if (command.answers === undefined && command.answer === undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: ['answers'],
+        message: 'Answering requires answers or answer',
+      });
+    }
+    if (command.answers !== undefined && command.answer !== undefined) {
+      context.addIssue({
+        code: 'custom',
+        path: ['answers'],
+        message: 'Provide either answers or answer, not both',
+      });
+    }
+  });
 export type AssistantRuntimeToolAnswerCommand = z.infer<
   typeof AssistantRuntimeToolAnswerCommandSchema
 >;

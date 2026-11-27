@@ -1,5 +1,9 @@
 import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
-import { AssistantRuntimeClientCommandSchema, inspectGoalIntent } from '@memoflow/ai-contracts';
+import {
+  AssistantRuntimeClientCommandSchema,
+  assistantRuntimeAskUserQuestions,
+  inspectGoalIntent,
+} from '@memoflow/ai-contracts';
 import type {
   AssistantRuntimeEvent,
   AssistantRuntimeSelectedEntity,
@@ -251,6 +255,10 @@ export function useAssistantStream(input: {
     if (request.status !== 'pending' || !isVisibleAskUserRequest(request)) return;
     request.status = 'sending';
     request.errorMessage = undefined;
+    // Multi-question cards answer every question at once; single cards keep the
+    // legacy `answer` field so older projections stay unambiguous.
+    const answers =
+      answer !== null && typeof answer === 'object' && !Array.isArray(answer) ? answer : undefined;
     try {
       const accepted = await options.runtime.answerToolSuspension({
         type: 'tool_answer',
@@ -261,7 +269,7 @@ export function useAssistantStream(input: {
         conversationId: request.conversationId,
         runId: request.runId,
         toolCallId: request.toolCallId,
-        answer,
+        ...(answers ? { answers } : { answer: answer as string | string[] }),
       });
       if (!isVisibleAskUserRequest(request) || request.status !== 'sending') return;
       if (!accepted) {
@@ -269,6 +277,7 @@ export function useAssistantStream(input: {
         request.errorMessage = t('aiAssistant.chatPage.tools.stale');
         return;
       }
+      if (answers) request.answers = answers;
       request.status = 'answered';
       if (suspendedAskUserRunId.value === request.runId) suspendedAskUserRunId.value = null;
       await reconcileAskUserHistory(request.conversationId);
@@ -400,12 +409,20 @@ export function useAssistantStream(input: {
           );
           for (const suspended of pending) {
             if (suspended.runId !== event.runId || suspended.approval) continue;
+            const questions = assistantRuntimeAskUserQuestions(suspended);
+            const [question] = questions;
+            if (!question) continue;
             item.askUserRequests ??= [];
             if (
               !item.askUserRequests.some((request) => request.toolCallId === suspended.toolCallId)
             )
               item.askUserRequests.push({
-                ...suspended,
+                toolCallId: suspended.toolCallId,
+                runId: suspended.runId,
+                questions,
+                question: question.question,
+                ...(question.options?.length ? { options: question.options } : {}),
+                selectionMode: question.selectionMode,
                 conversationId: event.conversationId,
                 status: 'pending',
               });
@@ -417,11 +434,18 @@ export function useAssistantStream(input: {
     }
     if (event.type === 'assistant.ask_user.required') {
       item.askUserRequests ??= [];
+      const questions = assistantRuntimeAskUserQuestions(event.data);
+      const [question] = questions;
+      if (!question) return;
       if (!item.askUserRequests.some((request) => request.toolCallId === event.data.toolCallId))
         item.askUserRequests.push({
-          ...event.data,
-          conversationId: event.conversationId,
+          toolCallId: event.data.toolCallId,
           runId: event.runId,
+          questions,
+          question: question.question,
+          ...(question.options?.length ? { options: question.options } : {}),
+          selectionMode: question.selectionMode,
+          conversationId: event.conversationId,
           status: 'pending',
         });
       else {
@@ -440,7 +464,11 @@ export function useAssistantStream(input: {
       const request = item.askUserRequests?.find(
         (candidate) => candidate.toolCallId === event.data.toolCallId,
       );
-      if (request) request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
+      if (request) {
+        request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
+        if (event.data.questions?.length) request.questions = event.data.questions;
+        if (event.data.answers) request.answers = event.data.answers;
+      }
       if (suspendedAskUserRunId.value === event.runId) suspendedAskUserRunId.value = null;
       captureEventRunTiming(event, item);
       return;

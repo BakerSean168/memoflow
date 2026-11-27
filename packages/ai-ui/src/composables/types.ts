@@ -10,6 +10,8 @@ import type {
   LocalAgentRequest,
   LocalAgentActivity,
   AssistantRuntimeToolAnswerCommand,
+  AssistantRuntimeAskUserAnswers,
+  AssistantRuntimeAskUserQuestion,
   GoalPlanDraft,
   GoalWorkflowLiveAction,
   AIWorkflowTerminalFailure,
@@ -182,17 +184,26 @@ export type ChatNativeRequest = {
   errorMessage?: string;
 };
 
+export type ChatAskUserQuestion = AssistantRuntimeAskUserQuestion;
+
 export type ChatAskUserRequest = {
   toolCallId: string;
+  /** Mirror of `questions[0]`, kept for legacy payloads and single-question cards. */
   question: string;
   options?: { label: string; description?: string }[];
   selectionMode?: 'single_select' | 'multi_select';
+  /** Every question carried by the ask_user call, in order. */
+  questions?: ChatAskUserQuestion[];
+  /** Answers keyed by question text once the user has answered. */
+  answers?: AssistantRuntimeAskUserAnswers;
   conversationId: string;
   runId: string;
   status: 'pending' | 'sending' | 'answered' | 'expired';
   errorMessage?: string;
 };
-export type ChatAskUserAnswer = AssistantRuntimeToolAnswerCommand['answer'];
+export type ChatAskUserAnswer =
+  | AssistantRuntimeToolAnswerCommand['answer']
+  | AssistantRuntimeAskUserAnswers;
 
 export type ConversationSummary =
   | (ConversationListRes['data'][number] & { runtimeKind?: 'builtin' })

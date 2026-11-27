@@ -3,6 +3,7 @@ import {
   sanitizeConversationTitle,
   fallbackConversationTitle,
   AssistantRuntimeMessageViewSchema,
+  assistantRuntimeAskUserQuestions,
   type AIRuntimeUsage,
   type AssistantRuntimeChoice,
 } from '@memoflow/ai-contracts';
@@ -563,9 +564,17 @@ export function useConversationProjection(input: {
       if (
         !item.askUserRequests?.some((candidate) => candidate.toolCallId === suspension.toolCallId)
       ) {
+        const questions = assistantRuntimeAskUserQuestions(suspension);
+        const [question] = questions;
+        if (!question) continue;
         item.askUserRequests ??= [];
         item.askUserRequests.push({
-          ...suspension,
+          toolCallId: suspension.toolCallId,
+          runId: suspension.runId,
+          questions,
+          question: question.question,
+          ...(question.options?.length ? { options: question.options } : {}),
+          selectionMode: question.selectionMode,
           conversationId,
           status: 'pending',
         });

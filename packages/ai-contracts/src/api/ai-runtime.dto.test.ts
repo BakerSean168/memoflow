@@ -3,6 +3,7 @@ import {
   AssistantRuntimeClientCommandSchema,
   AssistantRuntimeEventSchema,
   AssistantRuntimeAskUserSuspensionsSchema,
+  assistantRuntimeAskUserQuestions,
   AssistantRuntimeHistoryClientRequestSchema,
   AssistantRuntimeHistoryViewSchema,
   AIWorkflowCancelClientRequestSchema,
@@ -460,6 +461,81 @@ describe('AI vNext runtime contracts', () => {
           toolCallId: 't',
           question: 'Choose',
           options: [{ label: 'A' }],
+        },
+      }).success,
+    ).toBe(true);
+  });
+
+  it('accepts multi-question suspensions and answers without breaking the single-question shape', () => {
+    const questions = [
+      {
+        header: 'Approach',
+        question: 'Which approach?',
+        options: [
+          { label: 'Simple', description: 'Fewer moving parts' },
+          { label: 'Safe', description: 'Keep the current setup' },
+        ],
+        selectionMode: 'single_select',
+      },
+      {
+        header: 'Scope',
+        question: 'Which areas?',
+        options: [{ label: 'Chat' }, { label: 'Timeline' }],
+        selectionMode: 'multi_select',
+      },
+    ];
+    const suspension = AssistantRuntimeAskUserSuspensionsSchema.safeParse([
+      { runId: 'r', toolCallId: 't', questions },
+    ]);
+    expect(suspension.success).toBe(true);
+    if (suspension.success) {
+      expect(assistantRuntimeAskUserQuestions(suspension.data[0]!)).toEqual(questions);
+    }
+    expect(
+      assistantRuntimeAskUserQuestions({
+        runId: 'r',
+        toolCallId: 't',
+        question: 'Legacy question',
+        options: [{ label: 'A' }],
+      }),
+    ).toEqual([
+      {
+        header: 'Question 1',
+        question: 'Legacy question',
+        options: [{ label: 'A' }],
+        selectionMode: 'single_select',
+      },
+    ]);
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        type: 'tool_answer',
+        conversationId: 'c',
+        runId: 'r',
+        toolCallId: 't',
+        answers: { 'Which approach?': 'Simple', 'Which areas?': ['Chat', 'Timeline'] },
+      }).success,
+    ).toBe(true);
+    expect(
+      AssistantRuntimeClientCommandSchema.safeParse({
+        type: 'tool_answer',
+        conversationId: 'c',
+        runId: 'r',
+        toolCallId: 't',
+      }).success,
+    ).toBe(false);
+    expect(
+      AssistantRuntimeEventSchema.safeParse({
+        eventId: 'r:2',
+        runId: 'r',
+        conversationId: 'c',
+        sequence: 2,
+        createdAt: 1,
+        type: 'assistant.ask_user.resolved',
+        data: {
+          toolCallId: 't',
+          resolution: 'answered',
+          questions,
+          answers: { 'Which approach?': 'Simple', 'Which areas?': ['Chat'] },
         },
       }).success,
     ).toBe(true);

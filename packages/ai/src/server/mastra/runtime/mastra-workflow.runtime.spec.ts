@@ -994,7 +994,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     await expect(
       first.runtime.answerToolSuspension({
         context: context('identity-a', 'answer'),
-        command: { ...command, answer: 'not-an-option' },
+        // A single-select question takes one label, never an array.
+        command: { ...command, answer: ['A'] },
       }),
     ).resolves.toBe(false);
     await expect(
@@ -1103,7 +1104,15 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
                   toolName: fixtureCalls === 0 ? 'ask_user' : 'routine_create',
                   input: JSON.stringify(
                     fixtureCalls++ === 0
-                      ? { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }
+                      ? {
+                          questions: [
+                            {
+                              header: 'Choice',
+                              question: 'Pick one',
+                              options: [{ label: 'A' }, { label: 'B' }],
+                            },
+                          ],
+                        }
                       : {
                           name: 'Private routine',
                           trigger: {
@@ -1223,7 +1232,15 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
                     toolName: step === 0 ? 'ask_user' : 'routine_create',
                     input: JSON.stringify(
                       step === 0
-                        ? { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }
+                        ? {
+                            questions: [
+                              {
+                                header: 'Choice',
+                                question: 'Pick one',
+                                options: [{ label: 'A' }, { label: 'B' }],
+                              },
+                            ],
+                          }
                         : {
                             name: 'Private routine',
                             trigger: {
