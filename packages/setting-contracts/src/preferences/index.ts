@@ -1,9 +1,11 @@
 /** Canonical Setting preferences: presentation/regional + preferences@3 portability. */
 export {
+  ACCENT_PALETTES,
   ACCENT_VALUES,
   AccentSchema,
   DateStyleSchema,
   DEFAULT_USER_PREFERENCE_PROFILE,
+  getAccentColor,
   LocaleIdSchema,
   PREFERENCE_NAMESPACES,
   PREFERENCE_NAMESPACE_REGISTRY,
@@ -29,6 +31,8 @@ export {
 
 export type {
   Accent,
+  AccentColorDefinition,
+  AccentModeColor,
   LocaleId,
   PreferenceMutationReceipt,
   PreferenceNamespace,

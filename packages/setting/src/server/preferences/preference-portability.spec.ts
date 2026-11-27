@@ -9,7 +9,13 @@ import { PreferencePortableCapability, PreferencePortableService } from './prefe
 import type { UserPreferenceService } from './user-preference-service';
 
 const target: UserPreferenceProfile = {
-  presentation: { theme: 'dark', language: 'en-US', accent: 'brand-gold' },
+  presentation: {
+    theme: 'dark',
+    language: 'en-US',
+    accent: 'brand-gold',
+    lightAccent: 'brand-gold',
+    darkAccent: 'brand-gold',
+  },
   regional: {
     timeZone: 'Asia/Tokyo',
     dateStyle: 'long',

@@ -71,7 +71,7 @@ const ACCENTS: Record<string, AccentValues> = {
       'sidebar-primary-foreground': '0 0% 100%',
       'sidebar-ring': '235 58% 60%',
       'progress-fill': '235 58% 68%',
-      'progress-fill-end': '235 58% 56%',
+      'progress-fill-end': '235 58% 58%',
     },
   },
   'ocean-blue': {
@@ -167,7 +167,7 @@ const ACCENTS: Record<string, AccentValues> = {
       'sidebar-primary-foreground': '0 0% 100%',
       'sidebar-ring': '262 83% 58%',
       'progress-fill': '262 83% 66%',
-      'progress-fill-end': '262 83% 56%',
+      'progress-fill-end': '262 83% 60%',
     },
   },
 };
@@ -397,6 +397,79 @@ describe('accent-driven theme tokens', () => {
             ).toBeGreaterThanOrEqual(30);
           }
         }
+      }
+    }
+  });
+
+  it('guarantees WCAG AA text contrast (>= 4.5:1) for primary and hover against foreground', () => {
+    for (const [accent, values] of Object.entries(ACCENTS)) {
+      for (const mode of ['light', 'dark'] as const) {
+        const primary = parseHsl(values[mode].primary);
+        const foreground = parseHsl(values[mode]['primary-foreground']);
+        const hover = parseHsl(values[mode]['primary-hover']);
+        const sidebarPrimary = parseHsl(values[mode]['sidebar-primary']);
+        const sidebarForeground = parseHsl(values[mode]['sidebar-primary-foreground']);
+
+        const primaryContrast = contrastRatio(primary, foreground);
+        const hoverContrast = contrastRatio(hover, foreground);
+        const sidebarContrast = contrastRatio(sidebarPrimary, sidebarForeground);
+
+        expect(
+          primaryContrast,
+          `${accent} ${mode} primary / primary-foreground contrast (${primaryContrast.toFixed(2)}) must meet 4.5:1`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          hoverContrast,
+          `${accent} ${mode} primary-hover / primary-foreground contrast (${hoverContrast.toFixed(2)}) must meet 4.5:1`,
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          sidebarContrast,
+          `${accent} ${mode} sidebar-primary / sidebar-primary-foreground contrast (${sidebarContrast.toFixed(2)}) must meet 4.5:1`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  it('guarantees WCAG AA graphical / non-text UI contrast (>= 3:1) for ring and progress against surfaces', () => {
+    const surfaces = {
+      light: {
+        background: parseHsl(declare(block(':root'), 'background')),
+        muted: parseHsl(declare(block(':root'), 'muted')),
+      },
+      dark: {
+        background: parseHsl(declare(block('.dark'), 'background')),
+        muted: parseHsl(declare(block('.dark'), 'muted')),
+      },
+    };
+
+    for (const [accent, values] of Object.entries(ACCENTS)) {
+      for (const mode of ['light', 'dark'] as const) {
+        const ring = parseHsl(values[mode].ring);
+        const primary = parseHsl(values[mode].primary);
+        const progressFill = parseHsl(values[mode]['progress-fill']);
+        const progressEnd = parseHsl(values[mode]['progress-fill-end']);
+
+        const ringContrast = contrastRatio(ring, surfaces[mode].background);
+        const primaryBorderContrast = contrastRatio(primary, surfaces[mode].background);
+        const progressFillContrast = contrastRatio(progressFill, surfaces[mode].muted);
+        const progressEndContrast = contrastRatio(progressEnd, surfaces[mode].muted);
+
+        expect(
+          ringContrast,
+          `${accent} ${mode} ring / background contrast (${ringContrast.toFixed(2)}) must meet 3:1`,
+        ).toBeGreaterThanOrEqual(3.0);
+        expect(
+          primaryBorderContrast,
+          `${accent} ${mode} primary / background contrast (${primaryBorderContrast.toFixed(2)}) must meet 3:1`,
+        ).toBeGreaterThanOrEqual(3.0);
+        expect(
+          progressFillContrast,
+          `${accent} ${mode} progress-fill / muted contrast (${progressFillContrast.toFixed(2)}) must meet 3:1`,
+        ).toBeGreaterThanOrEqual(3.0);
+        expect(
+          progressEndContrast,
+          `${accent} ${mode} progress-fill-end / muted contrast (${progressEndContrast.toFixed(2)}) must meet 3:1`,
+        ).toBeGreaterThanOrEqual(3.0);
       }
     }
   });

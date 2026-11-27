@@ -94,11 +94,11 @@ test.describe('Canonical appearance and locale settings', () => {
       { timeout: TIMEOUT_CONFIG.AUTH_MUTATION },
     );
 
-    await page.getByTestId('appearance-accent-option-violet').click();
+    await page.getByTestId('appearance-accent-option-light-violet').click();
 
     const response = await responsePromise;
     expect(response.ok()).toBe(true);
-    expect(response.request().postDataJSON()).toMatchObject({ patch: { accent: 'violet' } });
+    expect(response.request().postDataJSON().patch).toMatchObject({ lightAccent: 'violet' });
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.dataset.accent))
       .toBe('violet');

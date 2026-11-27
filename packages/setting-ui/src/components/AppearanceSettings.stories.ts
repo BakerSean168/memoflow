@@ -4,6 +4,8 @@ import AppearanceSettings from './AppearanceSettings.vue';
 
 const defaultSettings = {
   theme: 'light' as const,
+  lightAccent: 'brand-gold' as const,
+  darkAccent: 'brand-gold' as const,
 };
 
 const meta = {
@@ -81,5 +83,23 @@ export const CustomThemeOptions: Story = {
       { label: 'Night Mode', value: 'dark' },
       { label: 'Auto (System)', value: 'auto' },
     ],
+  },
+};
+
+export const DualAccentCustomized: Story = {
+  render: (args) => ({
+    components: { AppearanceSettings },
+    setup() {
+      const model = ref({ ...args.modelValue });
+      return { model };
+    },
+    template: '<AppearanceSettings v-model="model" />',
+  }),
+  args: {
+    modelValue: {
+      theme: 'auto' as const,
+      lightAccent: 'ocean-blue' as const,
+      darkAccent: 'violet' as const,
+    },
   },
 };

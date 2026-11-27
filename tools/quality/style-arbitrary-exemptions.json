@@ -13,11 +13,6 @@
       "reason": "组件几何高度（画布/列表/控件）"
     },
     {
-      "file": "packages/account-ui/src/account/components/AccountProfileEditorDialog.vue",
-      "token": "max-h-[min(88vh,620px)]",
-      "reason": "视口高度约束，随窗口变化，无刻度等价值"
-    },
-    {
       "file": "packages/ai-ui/src/components/AIComposerControls.vue",
       "token": "h-[min(346px,calc(100dvh-80px))]",
       "reason": "视口高度约束，随窗口变化，无刻度等价值"
@@ -64,11 +59,6 @@
     },
     {
       "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
-      "token": "rounded-[24px]",
-      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
-    },
-    {
-      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
       "token": "w-[min(24rem,calc(100%-1rem))]",
       "reason": "相对容器比例尺寸，无刻度等价值"
     },
@@ -89,33 +79,8 @@
     },
     {
       "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
-      "token": "max-w-[78%]",
-      "reason": "相对容器比例尺寸，无刻度等价值"
-    },
-    {
-      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
-      "token": "max-w-[82%]",
-      "reason": "相对容器比例尺寸，无刻度等价值"
-    },
-    {
-      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
-      "token": "max-w-[88%]",
-      "reason": "相对容器比例尺寸，无刻度等价值"
-    },
-    {
-      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
       "token": "min-h-[27rem]",
       "reason": "组件几何高度（画布/列表/控件）"
-    },
-    {
-      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
-      "token": "rounded-[16px]",
-      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
-    },
-    {
-      "file": "packages/ai-ui/src/components/AIMessagePanel.vue",
-      "token": "rounded-br-[6px]",
-      "reason": "组件圆角像素值，主题 --radius-* 无等值档"
     },
     {
       "file": "packages/ai-ui/src/components/AIMessagePanel.vue",

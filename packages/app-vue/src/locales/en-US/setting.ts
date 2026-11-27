@@ -625,6 +625,8 @@ export default {
     fontSize: 'Font Size',
     fontSizePlaceholder: 'Select font size',
     accentColor: 'Accent Color',
+    accentLightColor: 'Light Mode Accent',
+    accentDarkColor: 'Dark Mode Accent',
     accentColorDescription: 'Customize the accent color of the theme',
     compactMode: 'Compact Mode',
     compactModeDescription: 'Reduce spacing between elements to show more content',

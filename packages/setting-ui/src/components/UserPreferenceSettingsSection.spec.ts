@@ -11,7 +11,13 @@ import UserPreferenceSettingsSection from './UserPreferenceSettingsSection.vue';
 import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 
 const canonicalProfile: UserPreferenceProfile = {
-  presentation: { theme: 'dark', language: 'en-US', accent: 'linear-indigo' },
+  presentation: {
+    theme: 'dark',
+    language: 'en-US',
+    accent: 'linear-indigo',
+    lightAccent: 'linear-indigo',
+    darkAccent: 'linear-indigo',
+  },
   regional: {
     timeZone: 'Asia/Tokyo',
     dateStyle: 'long',
@@ -125,11 +131,18 @@ describe('UserPreferenceSettingsSection canonical ownership', () => {
     expect(themeValue(wrapper)).toBe('dark');
     expect(
       wrapper
-        .get('[data-testid="appearance-accent-option-linear-indigo"]')
+        .get('[data-testid="appearance-accent-option-dark-linear-indigo"]')
         .attributes('aria-checked'),
     ).toBe('true');
     expect(
-      wrapper.get('[data-testid="appearance-accent-option-brand-gold"]').attributes('aria-checked'),
+      wrapper
+        .get('[data-testid="appearance-accent-option-light-linear-indigo"]')
+        .attributes('aria-checked'),
+    ).toBe('true');
+    expect(
+      wrapper
+        .get('[data-testid="appearance-accent-option-dark-brand-gold"]')
+        .attributes('aria-checked'),
     ).toBe('false');
   });
 
@@ -151,16 +164,25 @@ describe('UserPreferenceSettingsSection canonical ownership', () => {
     ).toBe(true);
 
     const accentButtons = wrapper.findAll('[data-testid^="appearance-accent-option-"]');
-    expect(accentButtons).toHaveLength(6);
+    expect(accentButtons).toHaveLength(12);
     expect(accentButtons.every((button) => button.find('svg').exists() === false)).toBe(true);
     expect(
-      wrapper.get('[data-testid="appearance-accent-option-linear-indigo"]').classes(),
+      wrapper.get('[data-testid="appearance-accent-option-dark-linear-indigo"]').classes(),
+    ).toContain('ring-2');
+    expect(
+      wrapper.get('[data-testid="appearance-accent-option-light-linear-indigo"]').classes(),
     ).toContain('ring-2');
   });
 
   it('uses canonical defaults/profile values and stays independent from legacy setting availability', async () => {
     const profile: UserPreferenceProfile = {
-      presentation: { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' },
+      presentation: {
+        theme: 'auto',
+        language: 'zh-CN',
+        accent: 'brand-gold',
+        lightAccent: 'brand-gold',
+        darkAccent: 'brand-gold',
+      },
       regional: { timeZone: 'UTC', dateStyle: 'medium', timeStyle: '24h', weekStartsOn: 1 },
     };
     const service = createService({ profile });
@@ -175,18 +197,47 @@ describe('UserPreferenceSettingsSection canonical ownership', () => {
     const { wrapper, service } = mountSection();
     await flushPromises();
 
-    await wrapper.get('[data-testid="appearance-accent-option-violet"]').trigger('click');
+    await wrapper.get('[data-testid="appearance-accent-option-dark-violet"]').trigger('click');
     await flushPromises();
 
     expect(document.documentElement.dataset.accent).toBe('violet');
-    expect(usePresentationPreferenceStore().accent).toBe('violet');
+    expect(usePresentationPreferenceStore().darkAccent).toBe('violet');
     expect(service.patchPreferenceNamespace).toHaveBeenCalledWith(
       'presentation',
-      { accent: 'violet' },
+      { darkAccent: 'violet', accent: 'violet' },
       3,
     );
     expect(
-      wrapper.get('[data-testid="appearance-accent-option-violet"]').attributes('aria-checked'),
+      wrapper
+        .get('[data-testid="appearance-accent-option-dark-violet"]')
+        .attributes('aria-checked'),
+    ).toBe('true');
+  });
+
+  it('updates non-current mode accent without switching actual appearance', async () => {
+    const { wrapper, service } = mountSection();
+    await flushPromises();
+
+    // Current theme is dark with linear-indigo
+    expect(document.documentElement.dataset.accent).toBe('linear-indigo');
+
+    // Update light mode accent to ocean-blue
+    await wrapper.get('[data-testid="appearance-accent-option-light-ocean-blue"]').trigger('click');
+    await flushPromises();
+
+    // Document appearance does not switch because current active mode is dark
+    expect(document.documentElement.dataset.accent).toBe('linear-indigo');
+    expect(usePresentationPreferenceStore().lightAccent).toBe('ocean-blue');
+    expect(usePresentationPreferenceStore().darkAccent).toBe('linear-indigo');
+    expect(service.patchPreferenceNamespace).toHaveBeenCalledWith(
+      'presentation',
+      { lightAccent: 'ocean-blue', accent: 'linear-indigo' },
+      3,
+    );
+    expect(
+      wrapper
+        .get('[data-testid="appearance-accent-option-light-ocean-blue"]')
+        .attributes('aria-checked'),
     ).toBe('true');
   });
 
@@ -198,17 +249,19 @@ describe('UserPreferenceSettingsSection canonical ownership', () => {
     const { wrapper } = mountSection(service);
     await flushPromises();
 
-    await wrapper.get('[data-testid="appearance-accent-option-rose-red"]').trigger('click');
+    await wrapper.get('[data-testid="appearance-accent-option-dark-rose-red"]').trigger('click');
     await flushPromises();
 
     expect(document.documentElement.dataset.accent).toBe('linear-indigo');
-    expect(usePresentationPreferenceStore().accent).toBe('linear-indigo');
+    expect(usePresentationPreferenceStore().darkAccent).toBe('linear-indigo');
     expect(
-      wrapper.get('[data-testid="appearance-accent-option-rose-red"]').attributes('aria-checked'),
+      wrapper
+        .get('[data-testid="appearance-accent-option-dark-rose-red"]')
+        .attributes('aria-checked'),
     ).toBe('false');
     expect(
       wrapper
-        .get('[data-testid="appearance-accent-option-linear-indigo"]')
+        .get('[data-testid="appearance-accent-option-dark-linear-indigo"]')
         .attributes('aria-checked'),
     ).toBe('true');
     expect(wrapper.find('[data-testid="user-preference-mutation-error"]').exists()).toBe(true);

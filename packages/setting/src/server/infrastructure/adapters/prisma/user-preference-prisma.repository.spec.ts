@@ -45,7 +45,13 @@ describe('PrismaUserPreferenceMapper', () => {
     const domain = PrismaUserPreferenceMapper.toDomain(row());
     expect(domain.toResponse()).toEqual({
       namespace: 'presentation',
-      preferences: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
+      preferences: {
+        theme: 'dark',
+        language: 'zh-CN',
+        accent: 'brand-gold',
+        lightAccent: 'brand-gold',
+        darkAccent: 'brand-gold',
+      },
       revision: 1,
     });
     expect(PrismaUserPreferenceMapper.toPersistence(domain)).toMatchObject({
@@ -79,7 +85,13 @@ describe('UserPreferencePrismaRepository', () => {
     expect(db.userPreferenceRecord.updateMany).toHaveBeenCalledWith({
       where: { identityId: 'identity-1', namespace: 'presentation', revision: 1 },
       data: {
-        payload: { theme: 'dark', language: 'zh-CN', accent: 'brand-gold' },
+        payload: {
+          theme: 'dark',
+          language: 'zh-CN',
+          accent: 'brand-gold',
+          lightAccent: 'brand-gold',
+          darkAccent: 'brand-gold',
+        },
         revision: 2,
         updatedAt: new Date('2026-09-09T00:00:02.000Z'),
       },

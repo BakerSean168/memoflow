@@ -21,6 +21,60 @@ export const ACCENT_VALUES = [
   'violet',
 ] as const;
 export const AccentSchema = z.enum(ACCENT_VALUES);
+
+export interface AccentModeColor {
+  /** Raw HSL channels, e.g. "37 91% 40%" */
+  hsl: string;
+  /** Ready-to-use CSS color string, e.g. "hsl(37 91% 40%)" */
+  color: string;
+}
+
+export interface AccentColorDefinition {
+  light: AccentModeColor;
+  dark: AccentModeColor;
+}
+
+/**
+ * Single source of truth for accent tokens mirroring theme.css primary tokens.
+ * Locked by theme.semantic-tokens.spec.ts.
+ */
+export const ACCENT_PALETTES: Record<Accent, AccentColorDefinition> = {
+  'brand-gold': {
+    light: { hsl: '37 91% 40%', color: 'hsl(37 91% 40%)' },
+    dark: { hsl: '37 91% 55%', color: 'hsl(37 91% 55%)' },
+  },
+  'linear-indigo': {
+    light: { hsl: '235 58% 56%', color: 'hsl(235 58% 56%)' },
+    dark: { hsl: '235 58% 60%', color: 'hsl(235 58% 60%)' },
+  },
+  'ocean-blue': {
+    light: { hsl: '199 89% 34%', color: 'hsl(199 89% 34%)' },
+    dark: { hsl: '199 89% 60%', color: 'hsl(199 89% 60%)' },
+  },
+  'emerald-green': {
+    light: { hsl: '160 84% 26%', color: 'hsl(160 84% 26%)' },
+    dark: { hsl: '160 70% 52%', color: 'hsl(160 70% 52%)' },
+  },
+  'rose-red': {
+    light: { hsl: '347 77% 48%', color: 'hsl(347 77% 48%)' },
+    dark: { hsl: '347 77% 52%', color: 'hsl(347 77% 52%)' },
+  },
+  violet: {
+    light: { hsl: '262 83% 52%', color: 'hsl(262 83% 52%)' },
+    dark: { hsl: '262 83% 58%', color: 'hsl(262 83% 58%)' },
+  },
+};
+
+export function getAccentColor(accent: unknown, mode: 'light' | 'dark'): string {
+  const parsed = AccentSchema.safeParse(accent);
+  if (parsed.success) {
+    return ACCENT_PALETTES[parsed.data][mode].color;
+  }
+  return typeof accent === 'string' && accent.length > 0
+    ? accent
+    : ACCENT_PALETTES['brand-gold'][mode].color;
+}
+
 export const DateStyleSchema = z.enum(['short', 'medium', 'long']);
 export const TimeStyleSchema = z.enum(['12h', '24h']);
 export const WeekStartsOnSchema = z.union([
@@ -37,10 +91,24 @@ export const PresentationPreferencesSchema = z
   .object({
     theme: ThemeSchema,
     language: LocaleIdSchema,
-    /** Stored profiles created before accents existed fall back to the brand gold. */
-    accent: AccentSchema.default('brand-gold'),
+    accent: AccentSchema.optional(),
+    lightAccent: AccentSchema.optional(),
+    darkAccent: AccentSchema.optional(),
   })
-  .strict();
+  .strict()
+  .transform((data) => {
+    const fallback = data.accent ?? 'brand-gold';
+    const lightAccent = data.lightAccent ?? fallback;
+    const darkAccent = data.darkAccent ?? fallback;
+    const accent = data.accent ?? (data.theme === 'dark' ? darkAccent : lightAccent);
+    return {
+      theme: data.theme,
+      language: data.language,
+      accent,
+      lightAccent,
+      darkAccent,
+    };
+  });
 
 export const RegionalPreferencesSchema = z
   .object({
@@ -76,8 +144,20 @@ export const PresentationPreferencesPatchSchema = z
     theme: ThemeSchema.optional(),
     language: LocaleIdSchema.optional(),
     accent: AccentSchema.optional(),
+    lightAccent: AccentSchema.optional(),
+    darkAccent: AccentSchema.optional(),
   })
-  .strict();
+  .strict()
+  .transform((data) => {
+    if (data.accent !== undefined) {
+      return {
+        ...data,
+        lightAccent: data.lightAccent ?? data.accent,
+        darkAccent: data.darkAccent ?? data.accent,
+      };
+    }
+    return data;
+  });
 
 export const RegionalPreferencesPatchSchema = z
   .object({
@@ -187,6 +267,8 @@ export const DEFAULT_USER_PREFERENCE_PROFILE: UserPreferenceProfile = Object.fre
     theme: 'auto',
     language: 'zh-CN',
     accent: 'brand-gold',
+    lightAccent: 'brand-gold',
+    darkAccent: 'brand-gold',
   }),
   regional: Object.freeze({
     timeZone: DEFAULT_TIME_ZONE,

@@ -35,9 +35,16 @@ const {
   resetAllUserPreferences,
 } = useUserPreferences();
 
-const appearance = ref<{ theme: PresentationPreferences['theme']; accent: Accent }>({
+const appearance = ref<{
+  theme: PresentationPreferences['theme'];
+  accent: Accent;
+  lightAccent: Accent;
+  darkAccent: Accent;
+}>({
   theme: DEFAULT_USER_PREFERENCE_PROFILE.presentation.theme,
   accent: DEFAULT_USER_PREFERENCE_PROFILE.presentation.accent,
+  lightAccent: DEFAULT_USER_PREFERENCE_PROFILE.presentation.lightAccent,
+  darkAccent: DEFAULT_USER_PREFERENCE_PROFILE.presentation.darkAccent,
 });
 const locale = ref<RegionalPreferences & { language: PresentationPreferences['language'] }>({
   language: DEFAULT_USER_PREFERENCE_PROFILE.presentation.language,
@@ -54,9 +61,21 @@ function hydrateCanonicalPreferences(): void {
   const regionalValue = regional.value?.preferences;
   if (!presentationValue || !regionalValue) return;
 
+  const fallback = presentationValue.accent ?? 'brand-gold';
+  const light = presentationValue.lightAccent ?? fallback;
+  const dark = presentationValue.darkAccent ?? fallback;
+  const isDark =
+    presentationValue.theme === 'dark' ||
+    (presentationValue.theme === 'auto' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+  const active = isDark ? dark : light;
+
   appearance.value = {
     theme: presentationValue.theme,
-    accent: presentationValue.accent ?? 'brand-gold',
+    accent: presentationValue.accent ?? active,
+    lightAccent: light,
+    darkAccent: dark,
   };
   locale.value = { language: presentationValue.language, ...regionalValue };
   const profile: UserPreferenceProfile = {
@@ -64,34 +83,76 @@ function hydrateCanonicalPreferences(): void {
     regional: regionalValue,
   };
   presentationStore.syncFromUserPreferenceProfile(profile);
+  applyThemeMode(presentationValue.theme);
+  applyAccent(presentationStore.resolveActiveAccent());
   settingUiHost.setProductTimePreferences(profile);
 }
 
 async function handleAppearanceUpdate(value: {
   theme?: PresentationPreferences['theme'];
   accent?: Accent;
+  lightAccent?: Accent;
+  darkAccent?: Accent;
 }): Promise<void> {
   const previous = { ...appearance.value };
   const nextTheme = value.theme ?? previous.theme;
-  const nextAccent = value.accent ?? previous.accent;
-  if (nextTheme === previous.theme && nextAccent === previous.accent) return;
+  const nextLightAccent =
+    value.lightAccent ??
+    (value.accent && value.lightAccent === undefined ? value.accent : previous.lightAccent);
+  const nextDarkAccent =
+    value.darkAccent ??
+    (value.accent && value.darkAccent === undefined ? value.accent : previous.darkAccent);
 
-  appearance.value = { theme: nextTheme, accent: nextAccent };
+  const themeChanged = nextTheme !== previous.theme;
+  const lightChanged =
+    value.lightAccent !== undefined && value.lightAccent !== previous.lightAccent;
+  const darkChanged = value.darkAccent !== undefined && value.darkAccent !== previous.darkAccent;
+  const legacyAccentChanged =
+    value.accent !== undefined &&
+    value.lightAccent === undefined &&
+    value.darkAccent === undefined &&
+    value.accent !== previous.accent;
+
+  if (!themeChanged && !lightChanged && !darkChanged && !legacyAccentChanged) return;
+
+  const isDark =
+    nextTheme === 'dark' ||
+    (nextTheme === 'auto' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+  const nextActiveAccent = isDark ? nextDarkAccent : nextLightAccent;
+
+  appearance.value = {
+    theme: nextTheme,
+    accent: nextActiveAccent,
+    lightAccent: nextLightAccent,
+    darkAccent: nextDarkAccent,
+  };
+
   presentationStore.setTheme(nextTheme);
-  applyThemeMode(nextTheme);
-  presentationStore.setAccent(nextAccent);
-  applyAccent(nextAccent);
+  presentationStore.setLightAccent(nextLightAccent);
+  presentationStore.setDarkAccent(nextDarkAccent);
 
-  const patch: { theme?: typeof nextTheme; accent?: Accent } = {};
-  if (nextTheme !== previous.theme) patch.theme = nextTheme;
-  if (nextAccent !== previous.accent) patch.accent = nextAccent;
+  applyThemeMode(nextTheme);
+  applyAccent(presentationStore.resolveActiveAccent());
+
+  const patch: Partial<PresentationPreferences> = {};
+  if (themeChanged) patch.theme = nextTheme;
+  if (lightChanged || legacyAccentChanged) patch.lightAccent = nextLightAccent;
+  if (darkChanged || legacyAccentChanged) patch.darkAccent = nextDarkAccent;
+  if (themeChanged || lightChanged || darkChanged || legacyAccentChanged) {
+    patch.accent = nextActiveAccent;
+  }
+
   if (await patchPresentation(patch)) return;
 
+  // Failure rollback: only roll back changed state
   appearance.value = previous;
   presentationStore.setTheme(previous.theme);
+  presentationStore.setLightAccent(previous.lightAccent);
+  presentationStore.setDarkAccent(previous.darkAccent);
   applyThemeMode(previous.theme);
-  presentationStore.setAccent(previous.accent);
-  applyAccent(previous.accent);
+  applyAccent(presentationStore.resolveActiveAccent());
 }
 
 async function handleLocaleUpdate(
