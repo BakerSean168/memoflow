@@ -1,17 +1,48 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { Accent } from '@memoflow/setting-contracts';
+import { getAccentColor } from '@memoflow/setting-contracts';
 
-const props = defineProps<{ theme: 'auto' | 'light' | 'dark'; accent: string }>();
-const panes = computed(() => (props.theme === 'auto' ? ['light', 'dark'] : [props.theme]));
+const props = withDefaults(
+  defineProps<{
+    theme: 'auto' | 'light' | 'dark';
+    accent?: Accent | string;
+    lightAccent?: Accent;
+    darkAccent?: Accent;
+  }>(),
+  {
+    accent: 'brand-gold',
+    lightAccent: undefined,
+    darkAccent: undefined,
+  },
+);
+
+const panes = computed(() =>
+  props.theme === 'auto' ? (['light', 'dark'] as const) : ([props.theme] as const),
+);
+
+function paneAccent(pane: 'light' | 'dark'): string {
+  if (pane === 'light') {
+    const raw = props.lightAccent ?? props.accent;
+    return getAccentColor(raw, 'light');
+  }
+  const raw = props.darkAccent ?? props.accent;
+  return getAccentColor(raw, 'dark');
+}
 </script>
 
 <template>
-  <span aria-hidden="true" class="theme-preview" :style="{ '--preview-accent': accent }">
+  <span
+    aria-hidden="true"
+    class="theme-preview"
+    :style="{ '--preview-accent': paneAccent(theme === 'dark' ? 'dark' : 'light') }"
+  >
     <span
       v-for="pane in panes"
       :key="pane"
       class="preview-pane"
       :class="[pane, { 'split-pane': theme === 'auto' }]"
+      :style="{ '--preview-accent': paneAccent(pane) }"
     >
       <span class="preview-sidebar">
         <span class="preview-search" />

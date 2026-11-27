@@ -567,6 +567,8 @@ export default {
     fontSize: '字体大小',
     fontSizePlaceholder: '选择字体大小',
     accentColor: '强调色',
+    accentLightColor: '浅色模式强调色',
+    accentDarkColor: '深色模式强调色',
     accentColorDescription: '自定义主题的强调颜色',
     compactMode: '紧凑模式',
     compactModeDescription: '减小组件间距，显示更多内容',

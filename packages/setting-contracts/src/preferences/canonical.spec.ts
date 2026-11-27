@@ -87,7 +87,13 @@ describe('canonical user preference contracts', () => {
     const second = createDefaultUserPreferenceProfile();
 
     expect(first).toEqual({
-      presentation: { theme: 'auto', language: 'zh-CN', accent: 'brand-gold' },
+      presentation: {
+        theme: 'auto',
+        language: 'zh-CN',
+        accent: 'brand-gold',
+        lightAccent: 'brand-gold',
+        darkAccent: 'brand-gold',
+      },
       regional: {
         timeZone: 'UTC',
         dateStyle: 'medium',
@@ -112,16 +118,30 @@ describe('canonical user preference contracts', () => {
     expect(AccentSchema.safeParse('amber').success).toBe(false);
     expect(AccentSchema.safeParse(null).success).toBe(false);
 
-    expect(PresentationPreferencesSchema.parse({ theme: 'dark', language: 'en-US' }).accent).toBe(
-      'brand-gold',
-    );
-    expect(
-      PresentationPreferencesSchema.parse({
-        theme: 'dark',
-        language: 'en-US',
-        accent: 'violet',
-      }).accent,
-    ).toBe('violet');
+    const legacyProfile = PresentationPreferencesSchema.parse({ theme: 'dark', language: 'en-US' });
+    expect(legacyProfile.accent).toBe('brand-gold');
+    expect(legacyProfile.lightAccent).toBe('brand-gold');
+    expect(legacyProfile.darkAccent).toBe('brand-gold');
+
+    const migratedProfile = PresentationPreferencesSchema.parse({
+      theme: 'dark',
+      language: 'en-US',
+      accent: 'violet',
+    });
+    expect(migratedProfile.accent).toBe('violet');
+    expect(migratedProfile.lightAccent).toBe('violet');
+    expect(migratedProfile.darkAccent).toBe('violet');
+
+    const dualAccentProfile = PresentationPreferencesSchema.parse({
+      theme: 'auto',
+      language: 'zh-CN',
+      lightAccent: 'ocean-blue',
+      darkAccent: 'emerald-green',
+    });
+    expect(dualAccentProfile.lightAccent).toBe('ocean-blue');
+    expect(dualAccentProfile.darkAccent).toBe('emerald-green');
+    expect(dualAccentProfile.accent).toBe('ocean-blue');
+
     expect(
       PresentationPreferencesSchema.safeParse({
         theme: 'dark',
@@ -131,14 +151,27 @@ describe('canonical user preference contracts', () => {
     ).toBe(false);
   });
 
-  it('keeps accent optional in presentation patches', () => {
+  it('keeps accent optional in presentation patches and migrates legacy patches', () => {
     expect(PresentationPreferencesPatchSchema.parse({})).toEqual({});
     expect(PresentationPreferencesPatchSchema.parse({ accent: 'ocean-blue' })).toEqual({
       accent: 'ocean-blue',
+      lightAccent: 'ocean-blue',
+      darkAccent: 'ocean-blue',
     });
     expect(
       PresentationPreferencesPatchSchema.parse({ theme: 'light', accent: 'rose-red' }),
-    ).toEqual({ theme: 'light', accent: 'rose-red' });
+    ).toEqual({
+      theme: 'light',
+      accent: 'rose-red',
+      lightAccent: 'rose-red',
+      darkAccent: 'rose-red',
+    });
+    expect(PresentationPreferencesPatchSchema.parse({ lightAccent: 'violet' })).toEqual({
+      lightAccent: 'violet',
+    });
+    expect(PresentationPreferencesPatchSchema.parse({ darkAccent: 'emerald-green' })).toEqual({
+      darkAccent: 'emerald-green',
+    });
     expect(PresentationPreferencesPatchSchema.safeParse({ accent: 'amber' }).success).toBe(false);
   });
 

@@ -33,12 +33,30 @@ describe('usePresentationPreferenceStore', () => {
   it('defaults the accent to brand gold and rejects unknown values', () => {
     const store = usePresentationPreferenceStore();
     expect(store.accent).toBe('brand-gold');
+    expect(store.lightAccent).toBe('brand-gold');
+    expect(store.darkAccent).toBe('brand-gold');
 
     store.setAccent('ocean-blue');
     expect(store.accent).toBe('ocean-blue');
+    expect(store.lightAccent).toBe('ocean-blue');
+    expect(store.darkAccent).toBe('ocean-blue');
 
     store.setAccent('amber' as never);
     expect(store.accent).toBe('brand-gold');
+  });
+
+  it('allows independent light and dark accent selection', () => {
+    const store = usePresentationPreferenceStore();
+    store.setTheme('light');
+    store.setLightAccent('ocean-blue');
+    store.setDarkAccent('violet');
+
+    expect(store.lightAccent).toBe('ocean-blue');
+    expect(store.darkAccent).toBe('violet');
+    expect(store.accent).toBe('ocean-blue');
+
+    store.setTheme('dark');
+    expect(store.accent).toBe('violet');
   });
 
   it('syncs only from the canonical UserPreferenceProfile', () => {
@@ -47,6 +65,26 @@ describe('usePresentationPreferenceStore', () => {
     expect(store.locale).toBe('en-US');
     expect(store.theme).toBe('dark');
     expect(store.accent).toBe('violet');
+    expect(store.lightAccent).toBe('violet');
+    expect(store.darkAccent).toBe('violet');
+  });
+
+  it('syncs independent accents from a modern UserPreferenceProfile', () => {
+    const store = usePresentationPreferenceStore();
+    store.syncFromUserPreferenceProfile({
+      ...profile,
+      presentation: {
+        theme: 'light',
+        language: 'zh-CN',
+        accent: 'ocean-blue',
+        lightAccent: 'ocean-blue',
+        darkAccent: 'emerald-green',
+      },
+    });
+    expect(store.theme).toBe('light');
+    expect(store.lightAccent).toBe('ocean-blue');
+    expect(store.darkAccent).toBe('emerald-green');
+    expect(store.accent).toBe('ocean-blue');
   });
 
   it('falls back to brand gold when the canonical profile predates accents', () => {
@@ -61,9 +99,11 @@ describe('usePresentationPreferenceStore', () => {
 
     expect(store.theme).toBe('light');
     expect(store.accent).toBe('brand-gold');
+    expect(store.lightAccent).toBe('brand-gold');
+    expect(store.darkAccent).toBe('brand-gold');
   });
 
-  it('persists locale, theme, and accent under the presentation-preference key', async () => {
+  it('persists locale, theme, and accents under the presentation-preference key', async () => {
     localStorage.clear();
     const pinia = createPinia();
     pinia.use(piniaPluginPersistedstate);
@@ -71,13 +111,33 @@ describe('usePresentationPreferenceStore', () => {
     setActivePinia(pinia);
 
     const store = usePresentationPreferenceStore();
-    store.setAccent('violet');
+    store.setLightAccent('ocean-blue');
+    store.setDarkAccent('violet');
     await nextTick();
 
     expect(JSON.parse(localStorage.getItem('presentation-preference') ?? '{}')).toEqual({
       locale: 'en-US',
       theme: 'auto',
-      accent: 'violet',
+      accent: 'ocean-blue',
+      lightAccent: 'ocean-blue',
+      darkAccent: 'violet',
     });
+  });
+
+  it('hydrates and migrates legacy local storage state without lightAccent/darkAccent', async () => {
+    localStorage.clear();
+    localStorage.setItem(
+      'presentation-preference',
+      JSON.stringify({ locale: 'en-US', theme: 'light', accent: 'violet' }),
+    );
+    const pinia = createPinia();
+    pinia.use(piniaPluginPersistedstate);
+    createApp({}).use(pinia);
+    setActivePinia(pinia);
+
+    const store = usePresentationPreferenceStore();
+    expect(store.accent).toBe('violet');
+    expect(store.lightAccent).toBe('violet');
+    expect(store.darkAccent).toBe('violet');
   });
 });

@@ -52,18 +52,26 @@ export function useThemeSync() {
   };
 
   const syncAccent = () => {
-    applyAccent(store.accent);
+    applyAccent(store.resolveActiveAccent());
   };
 
   syncTheme();
   syncAccent();
 
-  watch(() => store.theme, syncTheme);
+  watch(
+    () => store.theme,
+    () => {
+      syncTheme();
+      syncAccent();
+    },
+  );
   watch(() => store.accent, syncAccent);
+  watch([() => store.lightAccent, () => store.darkAccent], syncAccent);
 
   const handleSystemThemeChange = () => {
     if (store.theme === 'auto') {
       syncTheme();
+      syncAccent();
     }
   };
 
