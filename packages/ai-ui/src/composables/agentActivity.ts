@@ -781,7 +781,12 @@ export function deriveChatTimelineRows(input: DeriveChatTimelineRowsInput): Chat
       }
     } else {
       const elapsedMs = computeRunElapsedMs(timing);
-      const showFold = records.length > 0 || elapsedMs !== null || status !== 'completed';
+      // A clean completion leaves only the reply's own timestamp: the live working
+      // row and the settled "Worked for" fold both disappear. Stopped/failed turns
+      // keep their status fold; a completed turn with a failed tool keeps it too so
+      // the failure stays reachable.
+      const cleanSuccess = status === 'completed' && !hasFailedTool;
+      const showFold = !cleanSuccess;
       const unfoldByFailure = status === 'failed' || hasFailedTool;
       const turnExpanded =
         (unfoldByFailure && !input.collapsedTurnKeys?.has(turnKey)) ||
@@ -798,7 +803,7 @@ export function deriveChatTimelineRows(input: DeriveChatTimelineRowsInput): Chat
           collapsible: records.length > 0,
         };
       }
-      if (records.length > 0 && turnExpanded) {
+      if (!cleanSuccess && records.length > 0 && turnExpanded) {
         const groupId = `work-group:${turnKey}`;
         if (records.length === 1) {
           workRows.push({

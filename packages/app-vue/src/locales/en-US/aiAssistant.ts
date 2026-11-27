@@ -157,6 +157,8 @@ export default {
     decline: 'Decline',
     answer: 'Send answer',
     chooseAnswer: 'Choose an answer',
+    otherAnswer: 'Other answer',
+    selectAllThatApply: 'Select all that apply',
     answerRequired: 'Choose an answer before sending.',
     incompleteHistory: 'This history is incomplete. Unfinished operations will not be replayed.',
     description:
