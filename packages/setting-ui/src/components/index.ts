@@ -1,5 +1,7 @@
 export { default as AppearanceSettings } from './AppearanceSettings.vue';
 export { default as AccountSettingsSection } from './AccountSettingsSection.vue';
+export { default as AIActivitySettings } from './AIActivitySettings.vue';
+export { default as AIPermissionSettings } from './AIPermissionSettings.vue';
 export { default as AISettings } from './AISettings.vue';
 export { default as ExternalMcpClients } from './ExternalMcpClients.vue';
 export { default as LocaleSettings } from './LocaleSettings.vue';

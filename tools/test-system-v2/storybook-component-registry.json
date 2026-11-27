@@ -943,6 +943,13 @@
       "status": "present"
     },
     {
+      "path": "packages/setting-ui/src/components/AIActivitySettings.vue",
+      "package": "@memoflow/setting-ui",
+      "kind": "component",
+      "storyPath": "packages/setting-ui/src/components/AIActivitySettings.stories.ts",
+      "status": "present"
+    },
+    {
       "path": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.vue",
       "package": "@memoflow/setting-ui",
       "kind": "component",

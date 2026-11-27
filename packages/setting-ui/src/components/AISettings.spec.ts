@@ -1537,3 +1537,157 @@ it.each([
     wrapper.unmount();
   },
 );
+
+describe('AI settings layered subpage IA and lazy activity logs', () => {
+  it('hides governance subpage entries on Web when local capability is unavailable', async () => {
+    const { wrapper } = await setup({ native: false });
+    expect(wrapper.find('[data-testid="ai-governance-navigation"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-external-mcp-audit"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-permission-activity-list"]').exists()).toBe(false);
+  });
+
+  it('keeps long audit lists off the AI overview and lazy-loads each activity tab independently', async () => {
+    const identityScope = ref('profile-a');
+    const getMcpEndpoint = vi.fn(async () => ({
+      url: 'http://127.0.0.1:4123/mcp',
+      discoveryPath: '~/.memoflow/local-mcp.json',
+    }));
+    const listMcpClients = vi.fn(async () => [
+      {
+        id: 'client-1',
+        name: 'Codex CLI',
+        writeScopes: [],
+        tokenPrefix: 'mf_abc123',
+        createdAt: 1000,
+        revokedAt: null,
+      },
+    ]);
+    const listGatewayAudit = vi.fn(async () => [
+      {
+        id: 'gw-1',
+        version: '1' as const,
+        at: 5000,
+        connectionId: 'client-1',
+        origin: 'client' as const,
+        tool: 'tasks.list',
+        effect: 'read' as const,
+        scopeDecision: 'allowed' as const,
+        outcome: 'ok',
+        durationMs: 14,
+        requestId: 'req-secret-1',
+        traceId: 'trace-secret-1',
+      },
+    ]);
+    const permissions = vi.fn(async () => ({
+      settings: { preset: 'confirm_each' as const, agentPresets: {}, revision: 1 },
+      rules: [],
+      audit: [
+        {
+          id: 'perm-1',
+          occurredAt: 6000,
+          agentId: 'codex',
+          conversationId: null,
+          operationId: 'task.update',
+          object: 'task' as const,
+          action: 'update' as const,
+          decision: 'ask' as const,
+          decidedBy: 'user' as const,
+          ruleId: null,
+          risks: ['bulk' as const],
+          execution: 'succeeded' as const,
+        },
+      ],
+    }));
+
+    const wrapper = mount(AISettings, {
+      global: {
+        plugins: [
+          createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }),
+        ],
+        provide: {
+          [AI_CLIENT_KEY as symbol]: {
+            listProviders: vi.fn(async () => ok([])),
+            getProviderCatalog: vi.fn(async () => ok([])),
+          },
+          [AI_CONFIGURATION_REVISION_KEY as symbol]: ref(0),
+          [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => identityScope.value,
+          [AI_LOCAL_AGENT_KEY as symbol]: {
+            listConnections: vi.fn(async () => []),
+            cachedCatalogConnection: vi.fn(async () => null),
+            getMcpEndpoint,
+            listMcpClients,
+            listGatewayAudit,
+            permissions,
+          },
+          [AI_AGENT_REGISTRY_KEY as symbol]: {
+            list: vi.fn(async () => ({ instances: [instance('mastra')], bindings: [] })),
+            execute: vi.fn(),
+          },
+        },
+      },
+    });
+    wrappers.push(wrapper);
+    await flushPromises();
+    await flushPromises();
+
+    // Overview shows compact submenu entries with summaries, and never loads/renders gateway audit.
+    expect(wrapper.find('[data-testid="ai-governance-navigation"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="ai-nav-mcp-clients-summary"]').text()).toContain('1 active');
+    expect(wrapper.get('[data-testid="ai-nav-permissions-summary"]').text()).toContain(
+      'Ask before writing',
+    );
+    expect(listGatewayAudit).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-testid="ai-external-mcp-audit"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-permission-activity-list"]').exists()).toBe(false);
+
+    // Entering MCP subpage mounts ExternalMcpClients without querying audit, then jumps to Activity MCP tab.
+    await wrapper.get('[data-testid="ai-nav-mcp-clients"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-external-mcp-clients"]').exists()).toBe(true);
+    expect(listGatewayAudit).not.toHaveBeenCalled();
+
+    await wrapper.get('[data-testid="ai-external-mcp-open-activity"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-activity-panel-mcp"]').exists()).toBe(true);
+    expect(listGatewayAudit).toHaveBeenCalledTimes(1);
+    expect(listGatewayAudit).toHaveBeenCalledWith(20);
+    const mcpAuditText = wrapper.get('[data-testid="ai-external-mcp-audit"]').text();
+    expect(mcpAuditText).toContain('tasks.list');
+    expect(mcpAuditText).toContain('Codex CLI');
+    expect(mcpAuditText).not.toContain('req-secret-1');
+    expect(mcpAuditText).not.toContain('trace-secret-1');
+
+    // Permissions tab stays lazy until selected, and keeps distinct contract rows.
+    const permCallsBeforeTab = permissions.mock.calls.length;
+    await wrapper.get('[data-testid="ai-activity-tab-permissions"]').trigger('click');
+    await flushPromises();
+    expect(permissions.mock.calls.length).toBe(permCallsBeforeTab + 1);
+    const permAuditText = wrapper.get('[data-testid="ai-permission-activity-list"]').text();
+    expect(permAuditText).toContain('Tasks · Update');
+    expect(permAuditText).toContain('Ask');
+    expect(permAuditText).toContain('Succeeded');
+    expect(permAuditText).toContain('Bulk');
+
+    // Back returns to overview; Permissions subpage jumps directly to Permissions tab.
+    await wrapper.get('[data-testid="ai-subpage-back"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-governance-navigation"]').exists()).toBe(true);
+
+    await wrapper.get('[data-testid="ai-nav-permissions"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-permission-settings"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="ai-permission-open-activity"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-activity-panel-permissions"]').exists()).toBe(true);
+
+    // Switching identity clears cached audit records and isolates errors per tab.
+    listGatewayAudit.mockRejectedValueOnce(new Error('gateway failed'));
+    identityScope.value = 'profile-b';
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-permission-activity-list"]').exists()).toBe(true);
+    await wrapper.get('[data-testid="ai-activity-tab-mcp"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-activity-mcp-error"]').exists()).toBe(true);
+    expect(wrapper.text()).not.toContain('tasks.list');
+  });
+});

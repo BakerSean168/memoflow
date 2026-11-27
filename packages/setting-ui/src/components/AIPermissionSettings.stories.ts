@@ -118,7 +118,7 @@ export const ReadOnly: Story = {
   render: () => renderSection(snapshot({ preset: 'read_only', bulkThreshold: undefined })),
 };
 
-/** Per-object overrides opened for review: mixed matrix, grants and recent activity. */
+/** Per-object overrides and grants opened for review while keeping high-risk notice visible. */
 export const CustomOverrides: Story = {
   render: () =>
     renderSection(
