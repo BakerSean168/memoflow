@@ -91,15 +91,41 @@ async function loadBootstrap<T>(load: () => Promise<T>): Promise<T> {
     return load();
   }
 
-  const retryDelays = [300, 800, 1500];
+  const reloadKey = 'memoflow:renderer-bootstrap-reloads';
+  const retryDelays = [300, 800, 1500, 3000];
   for (let attempt = 1; ; attempt += 1) {
     try {
-      return await load();
+      const bootstrap = await load();
+      try {
+        window.sessionStorage.removeItem(reloadKey);
+      } catch {
+        // Storage can be unavailable; a successful import can still boot.
+      }
+      return bootstrap;
     } catch (error) {
-      console.warn(`[DesktopRenderer] Bootstrap import attempt ${attempt}/4 failed`, error);
+      console.warn(`[DesktopRenderer] Bootstrap import attempt ${attempt}/5 failed`, error);
       const delay = retryDelays[attempt - 1];
       if (delay === undefined) {
-        throw error;
+        let reloadCount: number;
+        try {
+          const storedCount = Number(window.sessionStorage.getItem(reloadKey) ?? 0);
+          reloadCount = Number.isInteger(storedCount) && storedCount >= 0 ? storedCount : 0;
+          if (reloadCount < 3) {
+            window.sessionStorage.setItem(reloadKey, String(reloadCount + 1));
+          }
+        } catch {
+          // Without persistent accounting, reloading could loop indefinitely.
+          throw error;
+        }
+
+        if (reloadCount >= 3) {
+          throw new Error(`${formatError(error)}\nBootstrap page reloads: ${reloadCount}`);
+        }
+
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+        window.location.reload();
+        // The next document owns startup; keep this one out of the error page.
+        return new Promise<T>(() => {});
       }
       await new Promise<void>((resolve) => setTimeout(resolve, delay));
     }
