@@ -46,7 +46,9 @@ function formatDate(value: number) {
 
 function mcpOrigin(entry: LocalGatewayAuditRecord) {
   if (entry.origin === 'run') return t('setting.ai.localMcp.auditOriginRun');
-  return clientNamesById.value.get(entry.connectionId) ?? t('setting.ai.localMcp.auditOriginClient');
+  return (
+    clientNamesById.value.get(entry.connectionId) ?? t('setting.ai.localMcp.auditOriginClient')
+  );
 }
 
 function mcpEffect(entry: LocalGatewayAuditRecord) {
@@ -84,7 +86,9 @@ async function refreshMcpAudit() {
   mcpError.value = '';
   try {
     const [auditResult, clientsResult] = await Promise.allSettled([
-      typeof local.listGatewayAudit === 'function' ? local.listGatewayAudit(20) : Promise.resolve([]),
+      typeof local.listGatewayAudit === 'function'
+        ? local.listGatewayAudit(20)
+        : Promise.resolve([]),
       typeof local.listMcpClients === 'function' ? local.listMcpClients() : Promise.resolve([]),
     ]);
     if (disposed || current !== mcpGeneration || identityScope.value !== expectedScope) return;
@@ -301,12 +305,7 @@ onBeforeUnmount(() => {
         </SettingsObjectCard>
       </div>
 
-      <div
-        v-else
-        role="tabpanel"
-        class="space-y-4"
-        data-testid="ai-activity-panel-permissions"
-      >
+      <div v-else role="tabpanel" class="space-y-4" data-testid="ai-activity-panel-permissions">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <p class="text-xs leading-5 text-muted-foreground">
             {{ t('setting.ai.activity.permissionsTabDescription') }}
