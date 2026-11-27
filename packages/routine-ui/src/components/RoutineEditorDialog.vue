@@ -18,10 +18,7 @@
       @submit.prevent="submit"
       @focusout="timingTouched = true"
     >
-      <section
-        class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
-        data-testid="routine-identity-section"
-      >
+      <section class="space-y-4" data-testid="routine-identity-section">
         <div>
           <ProductAutoTextarea
             v-model="name"
@@ -105,6 +102,23 @@
             </DropdownMenuContent>
           </DropdownMenu>
 
+          <WallClockTriggerEditor
+            v-if="triggerType === 'WallClock'"
+            v-model:local-time="localTime"
+            v-model:start-date="startDate"
+            v-model:frequency="frequency"
+            v-model:recurrence-interval="recurrenceInterval"
+            v-model:selected-weekdays="selectedWeekdays"
+            v-model:time-zone="timeZone"
+            :disabled="saving"
+            @update:local-time="timingTouched = true"
+            @update:start-date="timingTouched = true"
+            @update:frequency="timingTouched = true"
+            @update:recurrence-interval="timingTouched = true"
+            @update:selected-weekdays="timingTouched = true"
+            @update:time-zone="timingTouched = true"
+          />
+
           <ElapsedTriggerEditor
             v-if="triggerType === 'Elapsed'"
             v-model:duration-minutes="durationMinutes"
@@ -137,16 +151,6 @@
         </p>
       </section>
 
-      <WallClockTriggerEditor
-        v-if="triggerType === 'WallClock'"
-        v-model:local-time="localTime"
-        v-model:start-date="startDate"
-        v-model:frequency="frequency"
-        v-model:recurrence-interval="recurrenceInterval"
-        v-model:selected-weekdays="selectedWeekdays"
-        v-model:time-zone="timeZone"
-        :disabled="saving"
-      />
       <ProductInlineValidation
         id="routine-submit-feedback"
         test-id="routine-submit-error"

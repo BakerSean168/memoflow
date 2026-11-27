@@ -26,6 +26,7 @@ const props = withDefaults(
     emptyText?: string;
     disabled?: boolean;
     testId?: string;
+    align?: 'start' | 'center' | 'end';
   }>(),
   {
     label: 'Time zone',
@@ -34,6 +35,7 @@ const props = withDefaults(
     emptyText: 'No time zones found',
     disabled: false,
     testId: 'product-time-zone-selector',
+    align: 'end',
   },
 );
 const emit = defineEmits<{ 'update:modelValue': [value: TimeZoneId] }>();
@@ -65,7 +67,7 @@ function select(value: unknown): void {
         }}</span>
       </ProductPropertyChip>
     </PopoverTrigger>
-    <PopoverContent align="end" class="w-80 max-w-[calc(100vw-1rem)] p-0">
+    <PopoverContent :align="align" class="w-80 max-w-[calc(100vw-1rem)] p-0">
       <Command :model-value="modelValue" :disabled="disabled" @update:model-value="select">
         <CommandInput
           :placeholder="searchPlaceholder"
