@@ -35,6 +35,21 @@ vi.mock('@memoflow/ui-vue-shadcn', async () => {
     DropdownMenuContent: pass('DropdownMenuContent'),
     DropdownMenuItem: pass('DropdownMenuItem'),
     DropdownMenuTrigger: pass('DropdownMenuTrigger', 'button'),
+    Input: vue.defineComponent({
+      name: 'Input',
+      inheritAttrs: false,
+      props: ['modelValue'],
+      emits: ['update:modelValue'],
+      setup(props, { emit, attrs }) {
+        return () =>
+          vue.h('input', {
+            ...attrs,
+            value: props.modelValue,
+            onInput: (event: Event) =>
+              emit('update:modelValue', (event.target as HTMLInputElement).value),
+          });
+      },
+    }),
     Tooltip: pass('Tooltip'),
     TooltipContent: pass('TooltipContent'),
     TooltipProvider: pass('TooltipProvider'),

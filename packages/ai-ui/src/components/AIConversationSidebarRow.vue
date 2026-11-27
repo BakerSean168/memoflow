@@ -11,12 +11,12 @@
         data-testid="ai-sidebar-conversation-row"
       >
         <!-- Inline rename input -->
-        <input
+        <Input
           v-if="isEditing"
           ref="titleInput"
           v-model="titleDraft"
           maxlength="80"
-          class="m-1 min-w-0 flex-1 rounded border bg-background px-2 py-1 text-sm outline-none ring-1 ring-inset ring-input focus:ring-ring"
+          class="m-1 h-7 min-w-0 flex-1 px-2 py-1 text-sm outline-none ring-1 ring-inset ring-input focus:ring-ring"
           :aria-label="t('shell.conversation.rename')"
           data-testid="conversation-title-input"
           @keydown.enter.prevent="saveTitle"
@@ -25,13 +25,15 @@
         />
 
         <!-- Main title button (flex-1 with no hardcoded padding) -->
-        <button
+        <Button
           v-else
-          type="button"
-          class="flex h-9 min-w-0 flex-1 items-center rounded-lg py-2 pl-3 pr-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          variant="ghost"
+          class="h-9 min-w-0 flex-1 justify-start rounded-lg py-2 pl-3 pr-1 text-left font-normal shadow-none hover:bg-transparent hover:text-inherit focus-visible:ring-2 focus-visible:ring-ring"
           :aria-label="conversation.name || t('common.untitled')"
           @dblclick.stop="startEdit"
-          @click="showingArchive ? $emit('restore', conversation.id) : $emit('select', conversation)"
+          @click="
+            showingArchive ? $emit('restore', conversation.id) : $emit('select', conversation)
+          "
         >
           <span class="block min-w-0 flex-1 truncate whitespace-nowrap">
             {{ conversation.name || t('common.untitled') }}
@@ -41,7 +43,7 @@
                 : t('aiAssistant.local.builtin')
             }}</span>
           </span>
-        </button>
+        </Button>
 
         <!-- Stable trailing slot: status indicator and action controls -->
         <div
@@ -51,9 +53,10 @@
           <!-- Status / Attention badge -->
           <Tooltip v-if="status">
             <TooltipTrigger as-child>
-              <button
-                type="button"
-                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                class="h-6 w-6 shrink-0 p-0 hover:bg-transparent"
                 :aria-label="t(`aiAssistant.chatPage.sidebar.attention.${status}`)"
                 data-testid="ai-sidebar-conversation-status"
                 @click.stop="$emit('select', conversation)"
@@ -64,7 +67,7 @@
                   :class="attentionColor[status]"
                   aria-hidden="true"
                 />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent side="right" class="text-xs">
               {{ t(`aiAssistant.chatPage.sidebar.attention.${status}`) }}
@@ -84,7 +87,11 @@
               class="h-7 w-7 text-muted-foreground hover:text-foreground"
               :disabled="!showingArchive && ['working', 'input', 'approval'].includes(status ?? '')"
               data-testid="ai-sidebar-conversation-archive"
-              @click.stop="showingArchive ? $emit('restore', conversation.id) : $emit('archive', conversation.id)"
+              @click.stop="
+                showingArchive
+                  ? $emit('restore', conversation.id)
+                  : $emit('archive', conversation.id)
+              "
             >
               <component :is="showingArchive ? ArchiveRestore : Archive" class="h-4 w-4" />
             </Button>
@@ -116,7 +123,10 @@
                     )
                   }}
                 </DropdownMenuItem>
-                <DropdownMenuItem class="text-destructive" @select="$emit('delete', conversation.id)">
+                <DropdownMenuItem
+                  class="text-destructive"
+                  @select="$emit('delete', conversation.id)"
+                >
                   <Trash2 class="mr-2 h-4 w-4" />{{ t('common.delete') }}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -129,16 +139,9 @@
       <ContextMenuItem @select="startEdit">
         {{ t('shell.conversation.rename') }}
       </ContextMenuItem>
-      <ContextMenuItem
-        :disabled="titleBusy"
-        @select="$emit('regenerate-title', conversation.id)"
-      >
+      <ContextMenuItem :disabled="titleBusy" @select="$emit('regenerate-title', conversation.id)">
         {{
-          t(
-            titleBusy
-              ? 'shell.conversation.generatingTitle'
-              : 'shell.conversation.regenerateTitle',
-          )
+          t(titleBusy ? 'shell.conversation.generatingTitle' : 'shell.conversation.regenerateTitle')
         }}
       </ContextMenuItem>
     </ContextMenuContent>
@@ -169,6 +172,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Input,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -221,22 +225,35 @@ const attentionColor = {
 
 const isEditing = ref(false);
 const titleDraft = ref('');
-const titleInput = ref<HTMLInputElement | null>(null);
+const titleInput = ref<InstanceType<typeof Input> | HTMLInputElement | null>(null);
+
+function getInputElement(): HTMLInputElement | null {
+  const el = (titleInput.value as { $el?: unknown } | null)?.$el ?? titleInput.value;
+  if (el && typeof (el as HTMLInputElement).select === 'function') {
+    return el as HTMLInputElement;
+  }
+  if (el && typeof (el as HTMLElement).focus === 'function') {
+    return el as HTMLInputElement;
+  }
+  return null;
+}
 
 async function startEdit() {
   isEditing.value = true;
   titleDraft.value = props.conversation.name;
   await nextTick();
-  titleInput.value?.focus();
-  titleInput.value?.select();
+  const el = getInputElement();
+  el?.focus();
+  el?.select();
 }
 
 async function focusTitleInput(event: Event) {
   if (!isEditing.value) return;
   event.preventDefault();
   await nextTick();
-  titleInput.value?.focus();
-  titleInput.value?.select();
+  const el = getInputElement();
+  el?.focus();
+  el?.select();
 }
 
 function saveTitle() {

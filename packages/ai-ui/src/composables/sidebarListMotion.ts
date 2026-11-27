@@ -40,7 +40,8 @@ export function createSidebarListMotion(parent: HTMLElement) {
   const scroller =
     parent.closest<HTMLElement>(
       '[data-slot="scroll-area-viewport"], [data-sidebar-scroller], .overflow-y-auto',
-    ) ?? (parent.parentElement?.classList.contains('overflow-y-auto') ? parent.parentElement : null);
+    ) ??
+    (parent.parentElement?.classList.contains('overflow-y-auto') ? parent.parentElement : null);
 
   let scrollTop = scroller?.scrollTop ?? 0;
   const trackScroll = () => {
@@ -324,7 +325,7 @@ export function useSidebarListMotion(
     const shouldAnimate =
       typeof options?.animate === 'function'
         ? options.animate()
-        : options?.animate?.value ?? animate;
+        : (options?.animate?.value ?? animate);
     motion?.update(shouldAnimate);
   };
 
