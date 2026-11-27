@@ -279,7 +279,10 @@ function step(segment: TimeSegment, delta: number): void {
   const range = segment === 'hour' ? 24 : 60;
   const max = range - 1;
   const draft = draftRefFor(segment);
-  const committed = parseClockPart(splitModelValue(props.modelValue, props.withSeconds)[segment], max);
+  const committed = parseClockPart(
+    splitModelValue(props.modelValue, props.withSeconds)[segment],
+    max,
+  );
   const current = parseClockPart(draft.value, max) ?? committed ?? 0;
   const next = (current + delta + range) % range;
   draft.value = pad2(next);
@@ -333,8 +336,7 @@ function handleKeydown(segment: TimeSegment, event: KeyboardEvent): void {
 
   if (event.key === 'ArrowRight' && index < segments.value.length - 1) {
     const atEnd =
-      target.selectionStart === target.value.length &&
-      target.selectionEnd === target.value.length;
+      target.selectionStart === target.value.length && target.selectionEnd === target.value.length;
     if (atEnd) {
       event.preventDefault();
       focusSegment(segments.value[index + 1]!);
