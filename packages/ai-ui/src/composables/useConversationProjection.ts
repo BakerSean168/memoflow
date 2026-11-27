@@ -263,6 +263,7 @@ export function useConversationProjection(input: {
       id?: unknown;
       role?: unknown;
       content?: unknown;
+      createdAt?: unknown;
       attachments?: unknown;
       nativeActivities?: unknown;
       toolActivities?: unknown;
@@ -279,6 +280,7 @@ export function useConversationProjection(input: {
           const candidate = attachment as {
             mediaType?: unknown;
             filename?: unknown;
+            previewDataUrl?: unknown;
           };
           if (typeof candidate.mediaType !== 'string' || !candidate.mediaType.trim()) return [];
           return [
@@ -286,6 +288,10 @@ export function useConversationProjection(input: {
               mediaType: candidate.mediaType,
               ...(typeof candidate.filename === 'string' && candidate.filename.trim()
                 ? { filename: candidate.filename }
+                : {}),
+              ...(typeof candidate.previewDataUrl === 'string' &&
+              candidate.previewDataUrl.startsWith('data:')
+                ? { previewDataUrl: candidate.previewDataUrl }
                 : {}),
             },
           ];
@@ -314,6 +320,9 @@ export function useConversationProjection(input: {
       id: item.id ? String(item.id) : `message-${index}`,
       role: normalizeChatRole(item.role),
       content: typeof item.content === 'string' ? item.content : '',
+      ...(typeof item.createdAt === 'number' && Number.isFinite(item.createdAt)
+        ? { createdAt: item.createdAt }
+        : {}),
       ...(attachments.length ? { attachments } : {}),
       nativeActivities,
       localAgentSource,

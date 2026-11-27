@@ -1621,12 +1621,14 @@ describe('useAIChatSession Mastra-native open chat', () => {
         id: expect.stringMatching(/^user-draft-/),
         role: 'user',
         content: 'hello',
+        createdAt: expect.any(Number),
         status: 'success',
       },
       {
         id: 'assistant-stream-id',
         role: 'assistant',
         content: 'stream final',
+        createdAt: expect.any(Number),
         status: 'success',
       },
     ]);
@@ -1643,11 +1645,12 @@ describe('useAIChatSession Mastra-native open chat', () => {
     );
     expect(runtime.listMessages).toHaveBeenCalledWith('conv-1');
     expect(composable.chatTimeline.value).toEqual([
-      { id: 'user-1', role: 'user', content: 'hello', status: 'success' },
+      { id: 'user-1', role: 'user', content: 'hello', createdAt: 10, status: 'success' },
       {
         id: 'assistant-1',
         role: 'assistant',
         content: 'authoritative persisted reply',
+        createdAt: 20,
         status: 'success',
       },
     ]);

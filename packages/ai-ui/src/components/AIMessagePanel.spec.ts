@@ -48,7 +48,12 @@ const i18n = createI18n({
           emptyTitle: 'Start',
           emptyDescription: 'Describe',
           context: { todayOverview: 'Today' },
-          message: { copy: 'Copy', copied: 'Copied' },
+          message: {
+            copy: 'Copy',
+            copied: 'Copied',
+            edit: 'Edit message',
+            yesterdayAt: 'yesterday at {time}',
+          },
           tools: {
             approvalTitle: 'Tool approval',
             pending: 'Waiting for your decision',
@@ -192,7 +197,6 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
           timeline: [],
           toolMode: 'chat',
           canCaptureKnowledge,
-          canSaveLocalNote: false,
         },
         global: { plugins: [i18n] },
       });
@@ -228,7 +232,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.text()).toContain('hello');
   });
 
-  it('uses raised user messages and inset assistant avatars', () => {
+  it('renders raised user messages and a heading-only assistant row (T3 header structure)', () => {
     const wrapper = mount(AIMessagePanel, {
       props: {
         timeline: [
@@ -241,10 +245,11 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     });
     const messages = wrapper.findAll('article');
     expect(messages[0].get('div').classes()).toContain(semanticElevationClass('raised'));
-    expect(messages[1].get('[aria-hidden="true"]').classes()).toContain(
-      semanticElevationClass('inset'),
-    );
-    expect(messages[1].find('[data-testid="memoflow-ai-icon"]').exists()).toBe(true);
+    // The assistant head is an sr-only author heading, not an avatar or model chip.
+    expect(messages[1].find('[data-testid="memoflow-ai-icon"]').exists()).toBe(false);
+    expect(messages[1].find('[data-testid="ai-message-native-model"]').exists()).toBe(false);
+    expect(messages[1].get('h3').classes()).toContain('sr-only');
+    expect(messages[1].get('h3').text()).toBe('Assistant');
     wrapper.unmount();
   });
 
@@ -350,6 +355,69 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.find('[data-testid="ai-welcome-state"]').exists()).toBe(false);
   });
 
+  it('renders live image attachments as media and reveals time, edit and copy on hover', async () => {
+    const createdAt = Date.now();
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'm-image',
+            role: 'user',
+            content: 'What is in this screenshot?',
+            status: 'success',
+            createdAt,
+            attachments: [
+              {
+                mediaType: 'image/png',
+                filename: 'shot.png',
+                previewDataUrl: 'data:image/png;base64,AAAA',
+              },
+            ],
+          },
+          { id: 'a-image', role: 'assistant', content: 'A chart.', status: 'success', createdAt },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    // T3 Code renders the image itself; the metadata chip must not replace it.
+    const image = wrapper.get('[data-testid="ai-message-image"]');
+    expect(image.attributes('src')).toBe('data:image/png;base64,AAAA');
+    expect(wrapper.find('[data-testid="ai-message-attachment"]').exists()).toBe(false);
+    expect(
+      wrapper.get('[data-testid="ai-user-message-time"]').text().trim().length,
+    ).toBeGreaterThan(0);
+    await wrapper.get('[data-testid="ai-user-message-edit"]').trigger('click');
+    expect(wrapper.emitted('edit-message')?.[0]).toEqual(['What is in this screenshot?']);
+    expect(wrapper.get('[data-testid="ai-user-message-copy"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="ai-message-time"]').text().trim().length).toBeGreaterThan(0);
+    expect(wrapper.get('[data-testid="ai-message-actions"]').classes()).toContain('min-h-6');
+    wrapper.unmount();
+  });
+
+  it('renders a persisted image attachment as a metadata chip when no preview payload exists', () => {
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'm-image-history',
+            role: 'user',
+            content: '',
+            status: 'success',
+            attachments: [{ mediaType: 'image/png', filename: 'shot.png' }],
+          },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(wrapper.find('[data-testid="ai-message-image"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="ai-message-attachment"]').text()).toContain('shot.png');
+    wrapper.unmount();
+  });
+
   it('emits select-shortcut from welcome cards', async () => {
     const wrapper = mount(AIMessagePanel, {
       props: {
@@ -408,7 +476,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.get('[data-testid="ai-message-markdown"] h2').text()).toBe('Result');
     expect(wrapper.findAll('[data-testid="ai-message-markdown"] li')).toHaveLength(2);
     const copy = wrapper.get('[data-testid="ai-message-copy"]');
-    expect(copy.classes()).toContain('h-8');
+    expect(copy.classes()).toContain('h-6');
     await copy.trigger('click');
     expect(writeText).toHaveBeenCalledWith('## Result\n\n- one\n- two');
   });

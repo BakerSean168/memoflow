@@ -26,7 +26,43 @@
           ]"
         >
           <template v-if="row.kind === 'user-message'">
+            <!-- T3 Code renders user media above the bubble as its own shape. -->
             <div
+              v-if="rowImageAttachments(row).length"
+              class="flex max-w-[80%] min-w-0 justify-end"
+              data-testid="ai-message-images"
+            >
+              <div
+                class="grid gap-1"
+                :class="
+                  rowImageAttachments(row).length === 1
+                    ? 'w-fit max-w-full grid-cols-1'
+                    : 'w-80 max-w-full grid-cols-2'
+                "
+              >
+                <div
+                  v-for="(attachment, attachmentIndex) in rowImageAttachments(row)"
+                  :key="`${row.id}:image:${attachmentIndex}`"
+                  class="overflow-hidden rounded-2xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised))]"
+                >
+                  <img
+                    :src="attachment.previewDataUrl"
+                    :alt="attachment.filename || ''"
+                    class="block transform-gpu object-contain"
+                    :class="
+                      rowImageAttachments(row).length === 1
+                        ? 'h-48 w-auto max-w-full min-w-24'
+                        : 'aspect-[4/3] size-full object-cover'
+                    "
+                    loading="lazy"
+                    decoding="async"
+                    data-testid="ai-message-image"
+                  />
+                </div>
+              </div>
+            </div>
+            <div
+              v-if="row.item.content.trim() || rowFileAttachments(row).length"
               class="max-w-[80%] min-w-0 rounded-2xl bg-[hsl(var(--surface-raised))] px-3 py-2 text-[13.5px] leading-6 text-foreground"
               :class="[
                 aiUiHost.semanticElevationClass('raised'),
@@ -34,9 +70,10 @@
                 row.groupedWithNext ? 'rounded-br-md' : '',
               ]"
             >
-              <div v-if="row.item.attachments?.length" class="mb-2 flex flex-wrap gap-1.5">
+              <h3 class="sr-only select-none">{{ t('aiAssistant.dialogs.chat.you') }}</h3>
+              <div v-if="rowFileAttachments(row).length" class="mb-2 flex flex-wrap gap-1.5">
                 <span
-                  v-for="(attachment, attachmentIndex) in row.item.attachments"
+                  v-for="(attachment, attachmentIndex) in rowFileAttachments(row)"
                   :key="`${row.id}:attachment:${attachmentIndex}`"
                   class="inline-flex max-w-full items-center gap-1.5 rounded-md bg-[hsl(var(--surface-overlay)/0.72)] px-2 py-1 text-[11px] leading-5 text-[hsl(var(--foreground-muted))] sm:max-w-[15rem]"
                   data-testid="ai-message-attachment"
@@ -55,55 +92,65 @@
                 {{ row.item.content }}
               </p>
             </div>
+            <!-- T3 Code: timestamp, edit and copy share one hover-revealed row. -->
             <div
-              v-if="row.item.content.trim()"
-              class="flex max-w-[80%] flex-wrap items-center justify-end gap-1 pe-1 transition-opacity duration-200 pointer-coarse:opacity-100 focus-within:opacity-100 group-hover/message:opacity-100"
+              v-if="row.item.createdAt !== undefined || row.item.content.trim()"
+              class="flex max-w-[80%] flex-wrap items-center justify-end gap-x-2 pe-1 text-xs tabular-nums transition-opacity duration-200 pointer-coarse:opacity-100 focus-within:opacity-100 group-hover/message:opacity-100"
               :class="copiedMessageId === row.id ? 'opacity-100' : 'opacity-0'"
+              data-testid="ai-user-message-meta"
             >
-              <Button
-                type="button"
-                variant="ghost"
-                class="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                :title="
-                  copiedMessageId === row.id
-                    ? t('aiAssistant.chatPage.message.copied')
-                    : t('aiAssistant.chatPage.message.copy')
-                "
-                :aria-label="
-                  copiedMessageId === row.id
-                    ? t('aiAssistant.chatPage.message.copied')
-                    : t('aiAssistant.chatPage.message.copy')
-                "
-                data-testid="ai-user-message-copy"
-                @click="copyMessage(row.id, row.item.content)"
+              <span
+                v-if="row.item.createdAt !== undefined"
+                class="whitespace-nowrap text-muted-foreground"
+                :title="formatMessageTimestampTooltip(row.item.createdAt)"
+                data-testid="ai-user-message-time"
               >
-                <Check v-if="copiedMessageId === row.id" class="h-3.5 w-3.5" />
-                <Copy v-else class="h-3.5 w-3.5" />
-                <span>{{
-                  copiedMessageId === row.id
-                    ? t('aiAssistant.chatPage.message.copied')
-                    : t('aiAssistant.chatPage.message.copy')
-                }}</span>
-              </Button>
+                {{ formatMessageTimestamp(row.item.createdAt) }}
+              </span>
+              <div class="flex items-center gap-0.5">
+                <Button
+                  v-if="row.item.content.trim()"
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  class="text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  :title="t('aiAssistant.chatPage.message.edit')"
+                  :aria-label="t('aiAssistant.chatPage.message.edit')"
+                  data-testid="ai-user-message-edit"
+                  @click="$emit('edit-message', row.item.content)"
+                >
+                  <Pencil class="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  v-if="row.item.content.trim()"
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  class="text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  :title="
+                    copiedMessageId === row.id
+                      ? t('aiAssistant.chatPage.message.copied')
+                      : t('aiAssistant.chatPage.message.copy')
+                  "
+                  :aria-label="
+                    copiedMessageId === row.id
+                      ? t('aiAssistant.chatPage.message.copied')
+                      : t('aiAssistant.chatPage.message.copy')
+                  "
+                  data-testid="ai-user-message-copy"
+                  @click="copyMessage(row.id, row.item.content)"
+                >
+                  <Check v-if="copiedMessageId === row.id" class="h-3.5 w-3.5" />
+                  <Copy v-else class="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           </template>
 
-          <div v-else class="flex w-full min-w-0 items-start gap-3">
-            <div
-              class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--surface-raised))] text-[hsl(var(--foreground-subtle))]"
-              :class="aiUiHost.semanticElevationClass('inset')"
-              aria-hidden="true"
-            >
-              <MemoFlowAiIcon class="h-5 w-5" :active="row.isActive" />
-            </div>
+          <div v-else class="flex w-full min-w-0 items-start">
             <div class="group/message group/assistant min-w-0 flex-1 pt-0.5">
-              <p
-                v-if="row.localAgentSource"
-                class="mb-2 break-words text-xs text-muted-foreground"
-                data-testid="ai-message-native-model"
-              >
-                {{ row.localAgentSource.modelId }}
-              </p>
+              <!-- T3 Code names the author for screen readers only; no avatar block. -->
+              <h3 class="sr-only select-none">{{ t('aiAssistant.dialogs.chat.assistant') }}</h3>
               <AIActivityTimeline
                 v-if="turnHasActivity(row)"
                 :turn="row"
@@ -297,25 +344,15 @@
                 </p>
                 <div
                   v-if="part.item.content.trim() && part.item.status !== 'generating'"
-                  class="mt-1.5 flex min-h-8 flex-wrap items-center gap-1 transition-opacity duration-200 pointer-coarse:opacity-100 focus-within:opacity-100 group-hover/assistant:opacity-100"
+                  class="mt-1.5 flex min-h-6 flex-wrap items-center gap-x-2 gap-y-1 text-xs tabular-nums transition-opacity duration-200 pointer-coarse:opacity-100 focus-within:opacity-100 group-hover/assistant:opacity-100"
                   :class="copiedMessageId === part.id ? 'opacity-100' : 'opacity-0'"
                   data-testid="ai-message-actions"
                 >
                   <Button
-                    v-if="canSaveLocalNote"
                     type="button"
                     variant="ghost"
-                    class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                    data-testid="ai-message-save-note"
-                    @click="$emit('save-local-note', part.item.content)"
-                  >
-                    <NotebookPen class="h-3.5 w-3.5" />
-                    {{ t('aiAssistant.local.saveNote') }}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    class="h-8 gap-1 px-2 text-[11px] text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    size="icon-xs"
+                    class="text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                     :title="
                       copiedMessageId === part.id
                         ? t('aiAssistant.chatPage.message.copied')
@@ -331,12 +368,15 @@
                   >
                     <Check v-if="copiedMessageId === part.id" class="h-3.5 w-3.5" />
                     <Copy v-else class="h-3.5 w-3.5" />
-                    <span>{{
-                      copiedMessageId === part.id
-                        ? t('aiAssistant.chatPage.message.copied')
-                        : t('aiAssistant.chatPage.message.copy')
-                    }}</span>
                   </Button>
+                  <span
+                    v-if="part.item.createdAt !== undefined"
+                    class="whitespace-nowrap text-muted-foreground"
+                    :title="formatMessageTimestampTooltip(part.item.createdAt)"
+                    data-testid="ai-message-time"
+                  >
+                    {{ formatMessageTimestamp(part.item.createdAt) }}
+                  </span>
                 </div>
               </template>
             </div>
@@ -496,6 +536,7 @@ import {
   NotebookPen,
   ImageIcon,
   Paperclip,
+  Pencil,
   Plus,
   Search,
   Settings2,
@@ -520,10 +561,12 @@ import {
   deriveChatTimelineRows,
   runTimingProjectionRevision,
   type AssistantTurnTimelineRow,
+  type UserMessageTimelineRow,
 } from '../composables/agentActivity';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
   getToolLocaleKey,
+  type ChatAttachmentView,
   type ChatItem,
   type ChatToolApproval,
   type ChatNativeRequest,
@@ -543,7 +586,6 @@ const props = withDefaults(
     hasModels?: boolean;
     /** Show workflow decision/actions + artifact surface near the timeline. */
     showWorkflowSurface?: boolean;
-    canSaveLocalNote?: boolean;
     canCaptureKnowledge?: boolean;
   }>(),
   {
@@ -558,7 +600,7 @@ const emit = defineEmits<{
   'create-goal': [];
   'quick-task': [];
   'native-response': [request: ChatNativeRequest, response: LocalAgentRequestResponse['response']];
-  'save-local-note': [content: string];
+  'edit-message': [content: string];
   'tool-decision': [approval: ChatToolApproval, decision: 'approve' | 'decline'];
   'ask-user-answer': [request: ChatAskUserRequest, answer: ChatAskUserAnswer];
   'ask-user-cancel': [request: ChatAskUserRequest];
@@ -627,7 +669,24 @@ function submitAskUser(request: ChatAskUserRequest) {
   emit('ask-user-answer', request, answer ?? '');
 }
 
-const { getMessageStatusLabel } = useAIFormatters();
+const { getMessageStatusLabel, formatMessageTimestamp, formatMessageTimestampTooltip } =
+  useAIFormatters();
+
+/**
+ * T3 Code renders image attachments as media, not as file chips. Only the live
+ * turn carries `previewDataUrl`; persisted history has metadata alone.
+ */
+function rowImageAttachments(row: UserMessageTimelineRow): ChatAttachmentView[] {
+  return (row.item.attachments ?? []).filter(
+    (attachment) => attachment.mediaType.startsWith('image/') && Boolean(attachment.previewDataUrl),
+  );
+}
+
+function rowFileAttachments(row: UserMessageTimelineRow): ChatAttachmentView[] {
+  return (row.item.attachments ?? []).filter(
+    (attachment) => !(attachment.mediaType.startsWith('image/') && attachment.previewDataUrl),
+  );
+}
 const expandedTurnKeys = ref(new Set<string>());
 const collapsedTurnKeys = ref(new Set<string>());
 const expandedWorkGroupIds = ref(new Set<string>());

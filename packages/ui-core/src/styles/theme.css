@@ -173,6 +173,8 @@
     --surface: 0 0% 99%;
     --surface-raised: 0 0% 100%;
     --surface-overlay: 0 0% 100%;
+    /* Canvas below the page background; hosts raised cards (e.g. the AI composer) on it. */
+    --surface-sunken: 0 0% 97%;
 
     /* Hybrid workspace: shell/sidebar frame one rounded content well. */
     --workspace-shell: 240 6% 96%;
@@ -267,6 +269,7 @@
     --surface: 0 0% 8%;
     --surface-raised: 0 0% 10%;
     --surface-overlay: 0 0% 13%;
+    --surface-sunken: 0 0% 4.5%;
 
     /* Hybrid workspace: shell/sidebar frame one rounded content well. */
     --workspace-shell: 0 0% 4%;

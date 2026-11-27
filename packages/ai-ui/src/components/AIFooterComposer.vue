@@ -1,6 +1,6 @@
 <template>
   <footer
-    class="global-composer-footer"
+    class="global-composer-footer bg-[hsl(var(--surface-sunken))]"
     :class="footerPaddingClass"
     data-testid="ai-footer-composer"
   >
