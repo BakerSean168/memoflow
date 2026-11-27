@@ -56,7 +56,7 @@ defineProps<{ density: ComposerDensity; dragging: boolean }>();
   border-color: hsl(var(--primary) / 0.6);
   background: hsl(var(--primary) / 0.04);
 }
-:global(.dark) .composer-host {
+:global(.dark .composer-host) {
   box-shadow: none;
 }
 </style>

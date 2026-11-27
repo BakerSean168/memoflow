@@ -224,7 +224,8 @@ describe('AIFooterComposer (Global Composer input)', () => {
       action.element.dispatchEvent(pointer);
       expect(pointer.defaultPrevented).toBe(true);
       expect(action.attributes('tabindex')).not.toBe('-1');
-      await action.trigger('click', { detail: 0 });
+      action.element.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+      await nextTick();
       expect(wrapper.emitted(loading ? 'stop' : 'send')).toHaveLength(1);
       expect(wrapper.vm.editor).toBe(editor);
       expect(editor.getText()).toBe('draft');
