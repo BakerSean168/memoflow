@@ -129,7 +129,7 @@ export function useTimelineScrollAnchoring(
     (el) => {
       stop?.();
       if (!el) return;
-      following = nearEnd(el);
+      following = position?.atEnd ?? true;
       capture();
       const scroll = () => {
         if (restoring || (awaitingContent !== undefined && content.value === awaitingContent))
@@ -137,7 +137,7 @@ export function useTimelineScrollAnchoring(
         // Corrective scrolls do not re-arm follow after a disclosure or resize.
         const delta = el.scrollTop - lastScrollTop;
         if (delta < -0.5) following = false;
-        else if (delta > 0.5 && nearEnd(el)) following = true;
+        else if (delta > 0.5) following = nearEnd(el);
         capture();
         remember();
       };
@@ -251,7 +251,12 @@ export function useTimelineScrollAnchoring(
   function scrollToEnd(options?: { streaming?: boolean; force?: boolean }) {
     const current = generation;
     void nextTick(() => {
-      if (current !== generation || restoring) return;
+      if (
+        current !== generation ||
+        restoring ||
+        (awaitingContent !== undefined && content.value === awaitingContent)
+      )
+        return;
       const el = viewport.value;
       if (!el || (!following && !options?.force)) return;
       following = true;

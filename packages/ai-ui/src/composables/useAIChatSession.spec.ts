@@ -2800,10 +2800,11 @@ describe('timeline reading position lifecycle', () => {
     const viewport = ref<HTMLElement | null>(null);
     const conversation = ref('a');
     const content = ref([{ id: 'a' }]);
+    let anchor!: ReturnType<typeof useTimelineScrollAnchoring>;
     const wrapper = mount(
       defineComponent({
         setup() {
-          useTimelineScrollAnchoring(viewport, conversation, content);
+          anchor = useTimelineScrollAnchoring(viewport, conversation, content);
           return () => h('div');
         },
       }),
@@ -2817,6 +2818,7 @@ describe('timeline reading position lifecycle', () => {
     return {
       el,
       row,
+      scrollToEnd: () => anchor.scrollToEnd(),
       wrapper,
       conversation,
       content,
@@ -2852,11 +2854,42 @@ describe('timeline reading position lifecycle', () => {
     expect(f.disconnect).toHaveBeenCalledOnce();
   });
 
+  it('preserves the visible text line across paragraph reflow instead of the paragraph start', async () => {
+    const f = fixture();
+    let lineY = 470;
+    const createRange = document.createRange.bind(document);
+    const caretRange = createRange();
+    caretRange.setStart(f.row.firstChild!, 0);
+    const descriptor = Object.getOwnPropertyDescriptor(document, 'caretRangeFromPoint');
+    Object.defineProperty(document, 'caretRangeFromPoint', {
+      configurable: true,
+      value: () => caretRange,
+    });
+    const spy = vi.spyOn(document, 'createRange').mockImplementation(() => {
+      const range = createRange();
+      range.getBoundingClientRect = () => ({ top: lineY - f.el.scrollTop }) as DOMRect;
+      return range;
+    });
+    onTestFinished(() => {
+      spy.mockRestore();
+      if (descriptor) Object.defineProperty(document, 'caretRangeFromPoint', descriptor);
+      else Reflect.deleteProperty(document, 'caretRangeFromPoint');
+    });
+    await nextTick();
+    f.el.scrollTop = 450;
+    f.el.dispatchEvent(new Event('scroll'));
+    f.moveRow(600); // Paragraph top moved 200px, but the visible line moved only 70px.
+    lineY = 540;
+    f.resize();
+    expect(f.el.scrollTop).toBe(520);
+  });
+
   it('restores by row after asynchronous history and rejects a stale queued bottom scroll', async () => {
     const f = fixture();
     await nextTick();
     f.el.scrollTop = 450;
     f.el.dispatchEvent(new Event('scroll'));
+    f.scrollToEnd();
     f.conversation.value = 'b';
     await nextTick();
     // Old A rows remain painted until B history arrives: do not scroll or remember them as B.
