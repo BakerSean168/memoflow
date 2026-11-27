@@ -1,5 +1,4 @@
 import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
-import type { LocalVaultGitDiff } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository Client Service
@@ -253,10 +252,6 @@ export class RepositoryClientService implements IRepositoryApiClient {
     request: ConfirmedLocalVaultWriteReq,
   ): Promise<Result<ConfirmedLocalVaultWriteRes>> {
     return this.repositoryApi.writeConfirmedLocalVaultNote(request);
-  }
-
-  getLocalVaultGitDiff(relativePath: string): Promise<Result<LocalVaultGitDiff>> {
-    return this.repositoryApi.getLocalVaultGitDiff(relativePath);
   }
 
   writeLocalVaultNote(request: LocalVaultNoteWriteReq): Promise<Result<LocalVaultNoteWriteRes>> {

@@ -1,5 +1,4 @@
 import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
-import type { LocalVaultGitDiff } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository IPC Adapter
@@ -267,10 +266,6 @@ export class RepositoryIpcAdapter implements IRepositoryApiClient {
     request: LocalVaultNoteWriteReq,
   ): Promise<Result<LocalVaultNoteWriteRes>> {
     return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_NOTE_WRITE, request);
-  }
-
-  async getLocalVaultGitDiff(relativePath: string): Promise<Result<LocalVaultGitDiff>> {
-    return this.ipcClient.invoke(RepositoryChannels.LOCAL_VAULT_GIT_DIFF, { relativePath });
   }
 
   private serverProjectionUnavailable<T>(): Result<T> {

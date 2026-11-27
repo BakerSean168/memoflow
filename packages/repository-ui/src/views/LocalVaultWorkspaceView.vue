@@ -101,7 +101,7 @@
       </template>
     </ModuleHeader>
     <section
-      class="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5"
+      class="min-h-0 flex-1 scrollbar-gutter-stable overflow-y-auto px-3 py-4 sm:px-5"
       data-testid="knowledge-workspace-content"
       :aria-label="t('repository.hub.title')"
       :aria-busy="busy"
@@ -136,9 +136,29 @@
         :description="t('repository.hub.localUnavailable')"
       />
       <template v-else-if="available">
-        <p v-if="linkError" role="alert" class="mb-4 text-xs text-destructive">
-          {{ t('repository.workspace.linksUnavailable') }}
-        </p>
+        <div
+          v-if="linkFailures.length"
+          class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1"
+          role="alert"
+          data-testid="knowledge-links-error"
+        >
+          <p class="text-xs text-destructive">
+            {{
+              linksReadFailed
+                ? t('repository.workspace.linksUnavailable')
+                : t('repository.workspace.linksPartiallyUnavailable')
+            }}
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            class="h-7 px-2 text-xs text-destructive"
+            :disabled="busy || linkBusy"
+            data-testid="knowledge-links-retry"
+            @click="retryLinks"
+            >{{ t('common.retry') }}</Button
+          >
+        </div>
         <p
           v-if="gitError || git?.state === 'unavailable'"
           role="status"
@@ -155,7 +175,11 @@
         </p>
         <ProductSurfaceState
           v-if="
-            !visibleRows.length && !error && !linkError && !gitError && git?.state !== 'unavailable'
+            !visibleRows.length &&
+            !error &&
+            !linkFailures.length &&
+            !gitError &&
+            git?.state !== 'unavailable'
           "
           family="collection"
           kind="empty"
@@ -214,46 +238,6 @@
                   }}</span
                 >
               </div>
-              <div v-if="row.change">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  class="h-7 px-2 text-xs text-muted-foreground"
-                  :disabled="diffBusy && diffPath === row.relativePath"
-                  :aria-expanded="diffPath === row.relativePath"
-                  data-testid="knowledge-note-diff-toggle"
-                  @click="toggleDiff(row.relativePath)"
-                  >{{
-                    t(
-                      diffPath === row.relativePath && diff
-                        ? 'repository.workspace.hideDiff'
-                        : 'repository.workspace.showDiff',
-                    )
-                  }}</Button
-                >
-                <p
-                  v-if="diffPath === row.relativePath && diffError"
-                  role="status"
-                  class="text-xs text-muted-foreground"
-                >
-                  {{ t('repository.workspace.diffUnavailable') }}
-                </p>
-                <div
-                  v-else-if="diffPath === row.relativePath && diff"
-                  class="mt-2 rounded-md border border-border/60 bg-muted/20"
-                  data-testid="knowledge-note-diff"
-                >
-                  <pre class="max-h-80 overflow-auto p-3 text-xs leading-5">{{
-                    diff.patch || t('repository.workspace.emptyDiff')
-                  }}</pre>
-                  <p
-                    v-if="diff.truncated"
-                    class="border-t border-border/60 px-3 py-1.5 text-xs text-muted-foreground"
-                  >
-                    {{ t('repository.workspace.diffTruncated') }}
-                  </p>
-                </div>
-              </div>
             </div>
             <Button
               variant="ghost"
@@ -298,9 +282,10 @@ import type {
   LocalVaultGitChanges,
   LocalVaultNoteSummaryDTO,
 } from '@memoflow/repository-contracts';
+import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import { buildVaultWorkspaceRows } from '../utils/local-vault-workspace';
-import type { KnowledgeBusinessLink } from '../repository-ui-host';
+import type { KnowledgeBusinessLink, KnowledgeLinkFailure } from '../repository-ui-host';
 import { repositoryUiHost } from '../repository-ui-host';
 const { t } = useI18n();
 const route = useRoute();
@@ -314,7 +299,7 @@ const notes = ref<LocalVaultNoteSummaryDTO[]>([]);
 const git = ref<LocalVaultGitChanges | null>(null);
 const links = ref<KnowledgeBusinessLink[]>([]);
 const gitError = ref(false);
-const linkError = ref(false);
+const linkFailures = ref<KnowledgeLinkFailure[]>([]);
 const filter = ref('all');
 const vaultMenuOpen = ref(false);
 const { ModuleHeader, ProductSingleSelectFilter, ProductPopoverSurface, ProductSurfaceState } =
@@ -353,17 +338,17 @@ const tones = {
   conflicted: 'bg-warning/10 text-warning',
 };
 
-const diffPath = ref<string | null>(null);
-const diff = ref<{ patch: string; truncated: boolean } | null>(null);
-const diffBusy = ref(false);
-const diffError = ref(false);
 const loaded = ref(false);
 const busy = ref(false);
+const linkBusy = ref(false);
 const error = ref('');
 const active = ref(true);
 let epoch = 0;
 let attemptedLink = '';
 const available = computed(() => snapshot.value?.health.state === 'Available');
+const linksReadFailed = computed(() =>
+  linkFailures.value.some((failure) => failure.stage === 'read'),
+);
 async function action(work: () => Promise<void>) {
   if (busy.value || !active.value) return;
   const actionEpoch = epoch;
@@ -394,9 +379,10 @@ async function load() {
     notes.value = [];
     links.value = [];
     git.value = null;
+    linkFailures.value = [];
   }
   gitError.value = false;
-  linkError.value = false;
+  linkFailures.value = [];
   if (!available.value || !snapshot.value) return;
   const binding = snapshot.value.binding;
   const catalog = await service.scanLocalVault();
@@ -405,30 +391,72 @@ async function load() {
   if (catalog.data.binding.id !== binding.id)
     throw new Error(t('repository.workspace.bindingChanged'));
   const nextNotes = catalog.data.notes;
-  const documents = nextNotes.flatMap((note) =>
-    note.knowledgeDocumentId
-      ? [{ knowledgeSpaceId: binding.knowledgeSpaceId, documentId: note.knowledgeDocumentId }]
-      : [],
-  );
+  // Business links and Git status are independent reads: neither may gate the note list.
   const [changes, business] = await Promise.allSettled([
     service.getLocalVaultGitChanges().then(unwrapOrThrowError),
-    readBusinessLinks(documents),
+    readBusinessLinks(documentRefs(nextNotes, binding)),
   ]);
   if (readEpoch !== epoch || !active.value) return;
   notes.value = nextNotes;
-  diffPath.value = null;
-  diff.value = null;
-  diffError.value = false;
   if (changes.status === 'fulfilled' && changes.value.bindingId === binding.id)
     git.value = changes.value;
   else {
     git.value = null;
     gitError.value = true;
   }
-  if (business.status === 'fulfilled') links.value = business.value;
-  else {
-    links.value = [];
-    linkError.value = true;
+  if (business.status === 'fulfilled') {
+    links.value = business.value.links;
+    linkFailures.value = business.value.failures;
+    reportLinkFailures(business.value.failures);
+  } else {
+    // The whole read failed: keep the links already confirmed for this binding.
+    linkFailures.value = [{ stage: 'read', code: failureCodeOf(business.reason) }];
+    reportLinkFailures(linkFailures.value);
+  }
+}
+function documentRefs(notes: LocalVaultNoteSummaryDTO[], binding: { knowledgeSpaceId: string }) {
+  return notes.flatMap((note) =>
+    note.knowledgeDocumentId
+      ? [{ knowledgeSpaceId: binding.knowledgeSpaceId, documentId: note.knowledgeDocumentId }]
+      : [],
+  ) satisfies KnowledgeDocumentRef[];
+}
+/** Codes only; failure messages can echo user content and stay out of the diagnostic log. */
+function failureCodeOf(cause: unknown) {
+  if (typeof cause === 'object' && cause !== null) {
+    const code = (cause as { code?: unknown }).code;
+    if (typeof code === 'string' && code) return code;
+    const name = (cause as { name?: unknown }).name;
+    if (typeof name === 'string' && name) return name;
+  }
+  return 'UNKNOWN';
+}
+/** Structured runtime evidence for the next reproduction on the failing platform. */
+function reportLinkFailures(failures: KnowledgeLinkFailure[]) {
+  if (!failures.length) return;
+  console.warn('[knowledge-business-links] business link read failed', {
+    bindingId: snapshot.value?.binding.id,
+    documents: notes.value.length,
+    failures,
+  });
+}
+/** Re-read business links alone; the note list and Git status stay untouched. */
+async function retryLinks() {
+  if (busy.value || linkBusy.value || !available.value || !snapshot.value) return;
+  const retryEpoch = epoch;
+  linkBusy.value = true;
+  try {
+    const read = await readBusinessLinks(documentRefs(notes.value, snapshot.value.binding));
+    if (retryEpoch !== epoch || !active.value) return;
+    links.value = read.links;
+    linkFailures.value = read.failures;
+    reportLinkFailures(read.failures);
+  } catch (failure) {
+    if (retryEpoch !== epoch) return;
+    linkFailures.value = [{ stage: 'read', code: failureCodeOf(failure) }];
+    reportLinkFailures(linkFailures.value);
+  } finally {
+    if (retryEpoch === epoch) linkBusy.value = false;
   }
 }
 function reload() {
@@ -459,31 +487,6 @@ async function detach() {
     if (!result.ok) throw unwrapOrThrowError(result);
     await load();
   });
-}
-async function toggleDiff(relativePath: string) {
-  if (diffPath.value === relativePath && diff.value) {
-    diffPath.value = null;
-    diff.value = null;
-    diffError.value = false;
-    return;
-  }
-  diffPath.value = relativePath;
-  diff.value = null;
-  diffError.value = false;
-  diffBusy.value = true;
-  try {
-    const result = await service.getLocalVaultGitDiff(relativePath);
-    if (diffPath.value !== relativePath) return;
-    if (!result.ok || result.data.state !== 'ready') {
-      diffError.value = true;
-      return;
-    }
-    diff.value = { patch: result.data.patch, truncated: result.data.truncated };
-  } catch {
-    if (diffPath.value === relativePath) diffError.value = true;
-  } finally {
-    if (diffPath.value === relativePath) diffBusy.value = false;
-  }
 }
 function openObsidian(relativePath?: string) {
   return action(async () => {

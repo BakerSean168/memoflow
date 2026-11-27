@@ -9,7 +9,6 @@ function createLocalVaultPort(): LocalVaultElectronPort {
     detachVault: vi.fn(),
     scanVault: vi.fn(),
     getGitChanges: vi.fn(),
-    getGitDiff: vi.fn(),
     listRecentWrites: vi.fn(),
     readNote: vi.fn(),
     findNoteById: vi.fn(),

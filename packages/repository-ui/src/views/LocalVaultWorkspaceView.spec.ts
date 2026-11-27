@@ -85,17 +85,11 @@ function service(state = 'Available') {
         ],
       }),
     ),
-    getLocalVaultGitDiff: vi.fn(async (relativePath: string) =>
-      ok({
-        relativePath,
-        state: 'ready',
-        patch: `diff --git a/${relativePath} b/${relativePath}\n+changed`,
-        truncated: false,
-        observedAt: 1,
-      }),
-    ),
     openLocalVaultInObsidian: vi.fn(async () => ok(undefined)),
   };
+}
+function businessLinks(links: unknown[], failures: unknown[] = []) {
+  return { links, failures };
 }
 function options(api: ReturnType<typeof service>) {
   return {
@@ -118,14 +112,21 @@ beforeEach(() => {
   route.name = 'repository';
   route.query = {};
   vi.clearAllMocks();
-  vi.spyOn(repositoryUiHost, 'useKnowledgeBusinessLinks').mockReturnValue(async () => [
-    {
-      documentId: 'document-1',
-      subjectType: 'goal',
-      subjectId: 'goal-1',
-      title: 'Build a calmer workspace',
-    },
-  ]);
+  const read = vi.fn(async () =>
+    Promise.resolve(
+      businessLinks([
+        {
+          documentId: 'document-1',
+          subjectType: 'goal',
+          subjectId: 'goal-1',
+          title: 'Build a calmer workspace',
+        },
+      ]),
+    ),
+  );
+  vi.spyOn(repositoryUiHost, 'useKnowledgeBusinessLinks').mockReturnValue(
+    read as unknown as typeof repositoryUiHost.useKnowledgeBusinessLinks,
+  );
 });
 afterEach(() => vi.restoreAllMocks());
 describe('Local Vault connection workspace', () => {
@@ -144,20 +145,13 @@ describe('Local Vault connection workspace', () => {
     expect(api.scanLocalVault).toHaveBeenCalledTimes(1);
     wrapper.unmount();
   });
-  it('shows the real Git diff for a changed note without attributing every change to AI', async () => {
+  it('shows Git status without offering an inline diff and without requesting one', async () => {
     const api = service();
     const wrapper = mount(LocalVaultWorkspaceView, options(api));
     await flushPromises();
-    await wrapper
-      .get('[data-note-path="notes/saved.md"] [data-testid="knowledge-note-diff-toggle"]')
-      .trigger('click');
-    await flushPromises();
-    expect(api.getLocalVaultGitDiff).toHaveBeenCalledWith('notes/saved.md');
-    expect(wrapper.get('[data-testid="knowledge-note-diff"]').text()).toContain('+changed');
-    await wrapper
-      .get('[data-note-path="notes/saved.md"] [data-testid="knowledge-note-diff-toggle"]')
-      .trigger('click');
-    expect(wrapper.find('[data-testid="knowledge-note-diff"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid^="knowledge-note-diff"]').exists()).toBe(false);
+    expect(wrapper.find('[data-change-status="modified"]').exists()).toBe(true);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
     wrapper.unmount();
   });
   it('filters linked notes and keeps deleted entries visible without an open action', async () => {
@@ -186,6 +180,85 @@ describe('Local Vault connection workspace', () => {
     await flushPromises();
     expect(wrapper.text()).toContain('Saved note');
     expect(wrapper.text()).toContain(repository.workspace.gitUnavailable);
+    expect(wrapper.find('[data-testid="knowledge-notes-empty"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+  it('keeps successful links and the Git change marks when one link read fails', async () => {
+    const api = service();
+    linksRead(
+      [
+        {
+          documentId: 'document-1',
+          subjectType: 'goal',
+          subjectId: 'goal-1',
+          title: 'Build a calmer workspace',
+        },
+      ],
+      [{ stage: 'relations', code: 'INTERNAL_ERROR', documentId: 'document-9' }],
+    );
+    const wrapper = mount(LocalVaultWorkspaceView, options(api));
+    await flushPromises();
+    expect(wrapper.get('[data-testid="knowledge-links-error"]').text()).toContain(
+      repository.workspace.linksPartiallyUnavailable,
+    );
+    expect(wrapper.text()).toContain('Build a calmer workspace');
+    expect(wrapper.find('[data-change-status="modified"]').exists()).toBe(true);
+    expect(wrapper.text()).not.toContain(repository.workspace.gitUnavailable);
+    expect(wrapper.find('[data-testid="knowledge-notes-empty"]').exists()).toBe(false);
+    expect(wrapper.findAll('[data-testid="knowledge-links-retry"]')).toHaveLength(1);
+    await wrapper.get('select').setValue('linked');
+    expect(wrapper.findAll('[data-note-path]')).toHaveLength(1);
+    expect(
+      wrapper.get('[data-testid="knowledge-links-retry"]').attributes('disabled'),
+    ).toBeDefined();
+    wrapper.unmount();
+  });
+  it('retries only the business link read and recovers the notice', async () => {
+    const api = service();
+    const read = linksRead(
+      [
+        {
+          documentId: 'document-1',
+          subjectType: 'goal',
+          subjectId: 'goal-1',
+          title: 'Build a calmer workspace',
+        },
+      ],
+      [{ stage: 'relations', code: 'INTERNAL_ERROR', documentId: 'document-9' }],
+    );
+    const wrapper = mount(LocalVaultWorkspaceView, options(api));
+    await flushPromises();
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(api.scanLocalVault).toHaveBeenCalledTimes(1);
+    read.mockResolvedValueOnce(
+      businessLinks([
+        {
+          documentId: 'document-1',
+          subjectType: 'goal',
+          subjectId: 'goal-1',
+          title: 'Build a calmer workspace',
+        },
+      ]),
+    );
+    await wrapper.get('[data-testid="knowledge-links-retry"]').trigger('click');
+    await flushPromises();
+    expect(read).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-testid="knowledge-links-error"]').exists()).toBe(false);
+    expect(api.scanLocalVault).toHaveBeenCalledTimes(1);
+    expect(api.getLocalVaultGitChanges).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).toContain('Build a calmer workspace');
+    wrapper.unmount();
+  });
+  it('reports a whole failed link read without dropping the notes and Git marks', async () => {
+    const api = service();
+    linksRead([], [{ stage: 'read', code: 'INTERNAL_ERROR' }]);
+    const wrapper = mount(LocalVaultWorkspaceView, options(api));
+    await flushPromises();
+    expect(wrapper.get('[data-testid="knowledge-links-error"]').text()).toContain(
+      repository.workspace.linksUnavailable,
+    );
+    expect(wrapper.text()).toContain('Saved note');
+    expect(wrapper.find('[data-change-status="modified"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="knowledge-notes-empty"]').exists()).toBe(false);
     wrapper.unmount();
   });

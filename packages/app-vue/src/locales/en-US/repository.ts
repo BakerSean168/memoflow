@@ -207,7 +207,9 @@ export default {
     unboundDescription: 'Choose a local Obsidian vault to review business links and Git changes.',
     emptyTitle: 'No matching notes',
     emptyDescription: 'Linked notes and added, modified, or deleted notes will appear here.',
-    linksUnavailable: 'Business links could not be loaded. Refresh to try again.',
+    linksUnavailable: 'Business links could not be loaded.',
+    linksPartiallyUnavailable:
+      'Some business links could not be read. Links that loaded are still shown.',
     gitUnavailable: 'Git status is unavailable. Linked notes are still shown when available.',
     notGit: 'This folder is not a Git repository. Only linked notes are shown.',
     bindingChanged: 'The selected vault changed. Refresh to try again.',
@@ -215,11 +217,6 @@ export default {
     goalLink: 'Goal · {title}',
     openNote: 'Open “{title}” in Obsidian',
     deletedNote: 'This note has been deleted and cannot be opened',
-    showDiff: 'View diff',
-    hideDiff: 'Hide diff',
-    diffUnavailable: 'The diff is unavailable for this change.',
-    emptyDiff: 'No textual diff for this file.',
-    diffTruncated: 'The diff was truncated.',
     status: {
       added: 'Added',
       modified: 'Modified',
