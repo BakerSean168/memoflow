@@ -1,6 +1,10 @@
 import { installAiUiHost } from '@ai-ui-test-host/di/ai-ui-host';
 installAiUiHost();
-import { defineComponent, h, nextTick } from 'vue';
+import { defineComponent, h, nextTick, ref } from 'vue';
+import {
+  preserveTimelineDisclosure,
+  useTimelineScrollAnchoring,
+} from './useTimelineScrollAnchoring';
 import { mount, flushPromises } from '@vue/test-utils';
 async function flushTitleWork() {
   await flushPromises();
@@ -1701,35 +1705,49 @@ describe('useAIChatSession Mastra-native open chat', () => {
     }
   });
 
-  it('auto-follows streaming output only near the bottom and never smooth-scrolls it', async () => {
-    const service = createServiceStub();
-    const runtime = createRuntimeStub();
-    const composable = mountComposable(service, runtime);
-    const scrollTo = vi.fn();
-    const viewport = {
-      scrollHeight: 1_000,
-      scrollTop: 850,
-      clientHeight: 100,
-      scrollTo,
-    } as unknown as HTMLElement;
+  it('keeps follow across large stream growth, releases on up-scroll and re-arms near end', async () => {
+    const composable = mountComposable(createServiceStub(), createRuntimeStub());
+    const viewport = document.createElement('div');
+    let height = 1_000;
+    Object.defineProperties(viewport, {
+      scrollHeight: { get: () => height },
+      clientHeight: { value: 100 },
+    });
+    viewport.scrollTop = 900;
+    const scrollTo = vi.fn(({ top }: { top: number }) => {
+      viewport.scrollTop = top - 100;
+    });
+    viewport.scrollTo = scrollTo;
     composable.messagesViewport.value = viewport;
+    await nextTick();
 
+    height = 2_000; // Growth exceeds the old 96px threshold before the callback.
     composable.scrollMessagesToBottom({ streaming: true });
     await nextTick();
-    expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'auto' });
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 2_000, behavior: 'auto' });
 
     scrollTo.mockClear();
-    Object.defineProperty(viewport, 'scrollTop', {
-      configurable: true,
-      value: 500,
-    });
+    viewport.scrollTop = 1_850; // Even an up-scroll within the re-arm zone releases follow.
+    viewport.dispatchEvent(new Event('scroll'));
+    height = 3_000;
     composable.scrollMessagesToBottom({ streaming: true });
-    await nextTick();
-    expect(scrollTo).not.toHaveBeenCalled();
-
     composable.scrollMessagesToBottom();
     await nextTick();
-    expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'smooth' });
+    expect(scrollTo).not.toHaveBeenCalled();
+    expect(viewport.scrollTop).toBe(1_850);
+
+    viewport.scrollTop = 2_900;
+    viewport.dispatchEvent(new Event('scroll'));
+    height = 4_000;
+    composable.scrollMessagesToBottom({ streaming: true });
+    await nextTick();
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 4_000, behavior: 'auto' });
+
+    viewport.scrollTop = 500;
+    viewport.dispatchEvent(new Event('scroll'));
+    composable.scrollMessagesToBottom({ force: true });
+    await nextTick();
+    expect(viewport.scrollTop).toBe(3_900);
   });
 
   it('restores terminal approval and run outcomes from canonical history', async () => {
@@ -2747,5 +2765,136 @@ describe('conversation archive and undo', () => {
     ]);
     expect(service.updateConversation).not.toHaveBeenCalled();
     expect(toastMocks.dismiss).toHaveBeenCalled();
+  });
+});
+
+describe('timeline reading position lifecycle', () => {
+  function fixture() {
+    let resize: () => void = () => {};
+    const disconnect = vi.fn();
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resize = callback;
+        }
+        observe() {}
+        disconnect = disconnect;
+      },
+    );
+    const el = document.createElement('div');
+    el.innerHTML = '<div><article data-scroll-row="a">A long paragraph</article></div>';
+    document.body.append(el);
+    const row = el.querySelector('article')!;
+    let rowTop = 400;
+    let height = 2_000;
+    let viewportHeight = 500;
+    Object.defineProperties(el, {
+      scrollHeight: { get: () => height },
+      clientHeight: { get: () => viewportHeight },
+    });
+    el.getBoundingClientRect = () =>
+      ({ top: 0, bottom: viewportHeight, left: 0, width: 500, height: viewportHeight }) as DOMRect;
+    row.getBoundingClientRect = () =>
+      ({ top: rowTop - el.scrollTop, bottom: rowTop + 1_000 - el.scrollTop }) as DOMRect;
+    const viewport = ref<HTMLElement | null>(null);
+    const conversation = ref('a');
+    const content = ref([{ id: 'a' }]);
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          useTimelineScrollAnchoring(viewport, conversation, content);
+          return () => h('div');
+        },
+      }),
+    );
+    onTestFinished(() => {
+      wrapper.unmount();
+      el.remove();
+      vi.unstubAllGlobals();
+    });
+    viewport.value = el;
+    return {
+      el,
+      row,
+      wrapper,
+      conversation,
+      content,
+      disconnect,
+      resize: () => resize(),
+      moveRow: (top: number) => {
+        rowTop = top;
+      },
+      grow: () => {
+        height += 1_000;
+      },
+      shrinkViewport: () => {
+        viewportHeight = 300;
+      },
+    };
+  }
+
+  it('preserves a free reader on image/content growth and composer resize, and cleans observers', async () => {
+    const f = fixture();
+    await nextTick();
+    f.el.scrollTop = 450;
+    f.el.dispatchEvent(new Event('scroll'));
+    f.moveRow(600);
+    f.el.dispatchEvent(new Event('load')); // An image above the visible line grew 200px.
+    expect(f.el.scrollTop).toBe(650);
+    f.shrinkViewport();
+    f.resize();
+    expect(f.el.scrollTop).toBe(650);
+    f.grow();
+    f.resize();
+    expect(f.el.scrollTop).toBe(650);
+    f.wrapper.unmount();
+    expect(f.disconnect).toHaveBeenCalledOnce();
+  });
+
+  it('restores by row after asynchronous history and rejects a stale queued bottom scroll', async () => {
+    const f = fixture();
+    await nextTick();
+    f.el.scrollTop = 450;
+    f.el.dispatchEvent(new Event('scroll'));
+    f.conversation.value = 'b';
+    await nextTick();
+    // Old A rows remain painted until B history arrives: do not scroll or remember them as B.
+    f.resize();
+    expect(f.el.scrollTop).toBe(450);
+    f.row.dataset.scrollRow = 'b';
+    f.content.value = [{ id: 'b' }];
+    await nextTick();
+    expect(f.el.scrollTop).toBe(1_500);
+    f.conversation.value = 'a';
+    await nextTick();
+    f.moveRow(700); // History now has a different height above the remembered row.
+    f.row.dataset.scrollRow = 'a';
+    f.content.value = [{ id: 'a' }];
+    await nextTick();
+    expect(f.el.scrollTop).toBe(750);
+    f.resize();
+    expect(f.el.scrollTop).toBe(750);
+  });
+
+  it('keeps a disclosure stable and follows viewport resizing only when already following', async () => {
+    const f = fixture();
+    await nextTick();
+    f.el.scrollTop = 1_500;
+    f.el.dispatchEvent(new Event('scroll'));
+    f.grow();
+    f.resize();
+    expect(f.el.scrollTop).toBe(2_500);
+    f.shrinkViewport();
+    f.resize();
+    expect(f.el.scrollTop).toBe(2_700);
+    preserveTimelineDisclosure(f.el, () => {
+      f.moveRow(600);
+    });
+    await nextTick();
+    const top = f.el.scrollTop;
+    f.grow();
+    f.resize();
+    expect(f.el.scrollTop).toBe(top); // A settled disclosure releases end follow.
   });
 });

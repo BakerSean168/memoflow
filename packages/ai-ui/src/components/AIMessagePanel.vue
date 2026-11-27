@@ -15,6 +15,8 @@
         <article
           v-for="row in timelineRows"
           :key="row.id"
+          :data-scroll-row="row.id"
+          :data-streaming="row.kind === 'assistant-turn' && row.isActive"
           class="flex w-full min-w-0"
           :class="[
             row.kind === 'user-message'
@@ -486,6 +488,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, reactive, ref } from 'vue';
+import { preserveTimelineDisclosure } from '../composables/useTimelineScrollAnchoring';
 import {
   Check,
   Copy,
@@ -631,31 +634,35 @@ const expandedWorkGroupIds = ref(new Set<string>());
 const collapsedWorkGroupIds = ref(new Set<string>());
 
 function toggleTurn(turnKey: string, currentlyExpanded: boolean) {
-  const nextExpanded = new Set(expandedTurnKeys.value);
-  const nextCollapsed = new Set(collapsedTurnKeys.value);
-  if (currentlyExpanded) {
-    nextExpanded.delete(turnKey);
-    nextCollapsed.add(turnKey);
-  } else {
-    nextCollapsed.delete(turnKey);
-    nextExpanded.add(turnKey);
-  }
-  expandedTurnKeys.value = nextExpanded;
-  collapsedTurnKeys.value = nextCollapsed;
+  preserveTimelineDisclosure(viewport.value, () => {
+    const nextExpanded = new Set(expandedTurnKeys.value);
+    const nextCollapsed = new Set(collapsedTurnKeys.value);
+    if (currentlyExpanded) {
+      nextExpanded.delete(turnKey);
+      nextCollapsed.add(turnKey);
+    } else {
+      nextCollapsed.delete(turnKey);
+      nextExpanded.add(turnKey);
+    }
+    expandedTurnKeys.value = nextExpanded;
+    collapsedTurnKeys.value = nextCollapsed;
+  });
 }
 
 function toggleWorkGroup(groupId: string, currentlyExpanded: boolean) {
-  const nextExpanded = new Set(expandedWorkGroupIds.value);
-  const nextCollapsed = new Set(collapsedWorkGroupIds.value);
-  if (currentlyExpanded) {
-    nextExpanded.delete(groupId);
-    nextCollapsed.add(groupId);
-  } else {
-    nextCollapsed.delete(groupId);
-    nextExpanded.add(groupId);
-  }
-  expandedWorkGroupIds.value = nextExpanded;
-  collapsedWorkGroupIds.value = nextCollapsed;
+  preserveTimelineDisclosure(viewport.value, () => {
+    const nextExpanded = new Set(expandedWorkGroupIds.value);
+    const nextCollapsed = new Set(collapsedWorkGroupIds.value);
+    if (currentlyExpanded) {
+      nextExpanded.delete(groupId);
+      nextCollapsed.add(groupId);
+    } else {
+      nextCollapsed.delete(groupId);
+      nextExpanded.add(groupId);
+    }
+    expandedWorkGroupIds.value = nextExpanded;
+    collapsedWorkGroupIds.value = nextCollapsed;
+  });
 }
 
 function turnHasActivity(row: AssistantTurnTimelineRow): boolean {
@@ -680,3 +687,9 @@ const timelineRows = computed(() => {
   });
 });
 </script>
+
+<style scoped>
+[data-testid='ai-message-panel'] {
+  overflow-anchor: none;
+}
+</style>

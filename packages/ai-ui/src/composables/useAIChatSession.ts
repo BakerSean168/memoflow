@@ -19,7 +19,7 @@ import {
 } from './useConversationAttention';
 import { useDurableConversationAttention } from './useDurableConversationAttention';
 
-const STREAM_AUTO_FOLLOW_THRESHOLD_PX = 96;
+import { useTimelineScrollAnchoring } from './useTimelineScrollAnchoring';
 export interface UseAIChatSessionOptions {
   /** Transitional shell/workflow client. Open-chat transcript execution never uses it. */
   service: AIChatService;
@@ -363,23 +363,11 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     clearLastActiveConversation();
   }
 
-  function scrollMessagesToBottom(options?: { streaming?: boolean; force?: boolean }) {
-    nextTick(() => {
-      const viewport = messagesViewport.value;
-      if (!viewport) return;
-      const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
-      if (
-        options?.streaming &&
-        !options.force &&
-        distanceFromBottom > STREAM_AUTO_FOLLOW_THRESHOLD_PX
-      )
-        return;
-      viewport.scrollTo({
-        top: viewport.scrollHeight,
-        behavior: options?.streaming ? 'auto' : 'smooth',
-      });
-    });
-  }
+  const { scrollToEnd: scrollMessagesToBottom } = useTimelineScrollAnchoring(
+    messagesViewport,
+    chatConversationId,
+    chatTimeline,
+  );
 
   return {
     runtimeChoice,
