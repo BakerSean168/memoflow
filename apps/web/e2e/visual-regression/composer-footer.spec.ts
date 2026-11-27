@@ -167,15 +167,17 @@ for (const host of ['web', 'desktop'] as const) {
           surface.evaluate(async (el) => {
             await Promise.all(el.getAnimations().map((animation) => animation.finished));
             const style = getComputedStyle(el);
+            // P1 paints the fixed outline on ::after; the host owns only the shadow.
+            const outline = getComputedStyle(el, '::after');
             return {
               shadow: style.boxShadow,
               borders: [
-                style.borderTopWidth,
-                style.borderRightWidth,
-                style.borderBottomWidth,
-                style.borderLeftWidth,
+                outline.borderTopWidth,
+                outline.borderRightWidth,
+                outline.borderBottomWidth,
+                outline.borderLeftWidth,
               ],
-              color: style.borderTopColor,
+              color: outline.borderTopColor,
             };
           });
         const box = await surface.evaluate((el) => {
@@ -187,7 +189,7 @@ for (const host of ['web', 'desktop'] as const) {
         expect(box.bottom).toBeLessThanOrEqual(900);
         const idle = await paint();
         await page.screenshot({ path: testInfo.outputPath('composer-idle.png') });
-        expect(idle.shadow).toBe('none');
+        expect(idle.shadow).toBe(theme === 'dark' ? 'none' : 'rgba(0, 0, 0, 0.05) 0px 1px 2px 0px');
         expect(idle.borders).toEqual(['1px', '1px', '1px', '1px']);
         expect(
           await page
@@ -200,8 +202,7 @@ for (const host of ['web', 'desktop'] as const) {
         await page.keyboard.press('Shift+Tab');
         await expect(input).toBeFocused();
         const focused = await paint();
-        expect(focused.shadow).toBe('none');
-        expect(focused.color).not.toBe(idle.color);
+        expect(focused).toEqual(idle);
         expect(await input.evaluate((el) => el.getBoundingClientRect().height)).toBe(initialHeight);
         await input.fill('First line\nSecond line\nThird line\nFourth line');
         expect(await input.evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(

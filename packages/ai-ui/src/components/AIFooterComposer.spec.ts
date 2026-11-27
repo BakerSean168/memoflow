@@ -210,6 +210,68 @@ describe('AIFooterComposer (Global Composer input)', () => {
     wrapper.unmount();
   });
 
+  it('cancels pointer focus on primary actions while preserving click and keyboard activation', async () => {
+    const wrapper = await mountComposer({ modelValue: 'draft' });
+    const editor = wrapper.vm.editor!;
+    for (const loading of [false, true]) {
+      await wrapper.setProps({ loading });
+      const action = wrapper.get(
+        loading
+          ? '[data-testid="ai-chat-stop-generating"]'
+          : '[data-testid="ai-chat-send-message"]',
+      );
+      const pointer = new Event('pointerdown', { bubbles: true, cancelable: true });
+      action.element.dispatchEvent(pointer);
+      expect(pointer.defaultPrevented).toBe(true);
+      expect(action.attributes('tabindex')).not.toBe('-1');
+      action.element.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+      await nextTick();
+      expect(wrapper.emitted(loading ? 'stop' : 'send')).toHaveLength(1);
+      expect(wrapper.vm.editor).toBe(editor);
+      expect(editor.getText()).toBe('draft');
+    }
+    const uploadPointer = new Event('pointerdown', { bubbles: true, cancelable: true });
+    wrapper.get('[data-testid="ai-chat-upload-file"]').element.dispatchEvent(uploadPointer);
+    expect(uploadPointer.defaultPrevented).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('keeps the editor and draft through density, unavailable-model and knowledge-error changes', async () => {
+    const wrapper = await mountComposer({ modelValue: '保留草稿' });
+    const editor = wrapper.vm.editor!;
+    for (const density of ['icon', 'compact', 'comfortable'] as const) {
+      await wrapper.setProps({
+        density,
+        canSend: false,
+        modelGroups: [],
+        knowledgeError: 'unavailable',
+      });
+      expect(wrapper.vm.editor).toBe(editor);
+      expect(editor.getText()).toBe('保留草稿');
+      expect(wrapper.get('[data-testid="ai-chat-composer"]').attributes('contenteditable')).toBe(
+        'true',
+      );
+      expect(
+        (wrapper.get('[data-testid="ai-chat-send-message"]').element as HTMLButtonElement).disabled,
+      ).toBe(true);
+    }
+    wrapper.unmount();
+  });
+
+  it('forwards model selection and file drops without submitting the draft', async () => {
+    const wrapper = await mountComposer({ modelValue: 'draft' });
+    wrapper.findComponent({ name: 'SelectStub' }).vm.$emit('update:modelValue', 'm2');
+    expect(wrapper.emitted('select-model')).toEqual([['m2']]);
+    const file = new File(['note'], 'note.md', { type: 'text/markdown' });
+    await wrapper.get('[data-testid="ai-composer-surface"]').trigger('drop', {
+      dataTransfer: { files: [file] },
+    });
+    expect(wrapper.emitted('add-files')).toEqual([[[file]]]);
+    expect(wrapper.emitted('send')).toBeUndefined();
+    expect(wrapper.vm.editor!.getText()).toBe('draft');
+    wrapper.unmount();
+  });
+
   it('sends on Enter and keeps Shift+Enter as newline', async () => {
     const wrapper = await mountComposer({ modelValue: 'hello' });
     const textarea = wrapper.get('[data-testid="ai-chat-composer"]');
