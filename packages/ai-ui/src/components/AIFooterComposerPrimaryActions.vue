@@ -9,7 +9,7 @@
     variant="outline"
     size="icon"
     class="h-8 w-8 shrink-0 rounded-full p-0 shadow-none focus-visible:ring-2 focus-visible:ring-ring"
-    data-testid="ai-chat-stop-generating"
+    :data-testid="stopTestId"
     :title="t('aiAssistant.dialogs.chat.stopGenerating')"
     :aria-label="t('aiAssistant.dialogs.chat.stopGenerating')"
     @pointerdown.prevent
@@ -37,7 +37,7 @@
 import { ArrowUp, Square } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { useI18n } from 'vue-i18n';
-defineProps<{ loading: boolean; canSubmit: boolean }>();
+defineProps<{ loading: boolean; canSubmit: boolean; stopTestId: string }>();
 defineEmits<{ send: []; stop: [] }>();
 const { t } = useI18n();
 </script>

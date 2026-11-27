@@ -242,6 +242,7 @@
           <AIFooterComposerPrimaryActions
             :loading="loading"
             :can-submit="canSubmit"
+            :stop-test-id="'ai-chat-stop-generating'"
             @send="$emit('send')"
             @stop="$emit('stop')"
           />
