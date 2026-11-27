@@ -2,21 +2,23 @@
   <div class="mb-2 min-w-0 space-y-1 text-xs text-muted-foreground" data-testid="ai-agent-activity">
     <!-- Settled turn fold header (Worked for / You stopped after / Failed after / Interrupted) -->
     <div v-if="turn.foldRow" class="border-b border-border/60 pb-2 pt-0.5">
-      <button
+      <Button
         v-if="turn.foldRow.collapsible"
         type="button"
+        variant="ghost"
+        size="sm"
         role="status"
         aria-live="polite"
         aria-atomic="true"
         :aria-expanded="turn.foldRow.expanded"
         data-testid="ai-agent-phase"
-        class="flex cursor-pointer select-none items-center gap-1 rounded-md px-1 py-0.5 text-sm leading-relaxed text-muted-foreground tabular-nums transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
+        class="flex h-auto cursor-pointer select-none items-center gap-1 px-1 py-0.5 text-sm font-normal leading-relaxed text-muted-foreground tabular-nums hover:bg-transparent hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70 [&_svg]:size-3.5"
         @click="$emit('toggle-turn', turn.foldRow.turnKey, turn.foldRow.expanded)"
       >
         <span>{{ foldLabel }}</span>
         <ChevronDown v-if="turn.foldRow.expanded" class="size-3.5 shrink-0" aria-hidden="true" />
         <ChevronRight v-else class="size-3.5 shrink-0" aria-hidden="true" />
-      </button>
+      </Button>
       <p
         v-else
         role="status"
@@ -53,12 +55,14 @@
       </div>
 
       <!-- Live Active Tool Row -->
-      <button
+      <Button
         v-else-if="row.kind === 'work-live'"
         type="button"
+        variant="ghost"
+        size="sm"
         :aria-expanded="row.expanded"
         data-testid="ai-tool-activity"
-        class="flex min-h-6 w-full min-w-0 cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 text-left text-sm leading-relaxed transition-colors hover:bg-muted/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
+        class="flex h-auto min-h-6 w-full min-w-0 cursor-pointer justify-start gap-1.5 px-1 py-0.5 text-left text-sm font-normal leading-relaxed hover:bg-muted/35 hover:text-current focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70 [&_svg]:size-3.5"
         @click="$emit('toggle-work-group', row.groupId, row.expanded)"
       >
         <span class="flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
@@ -81,15 +85,17 @@
           class="size-3 shrink-0 text-muted-foreground/75 transition-transform duration-200"
           :class="{ 'rotate-90': row.expanded }"
         />
-      </button>
+      </Button>
 
       <!-- Settled Tool Group Toggle -->
-      <button
+      <Button
         v-else-if="row.kind === 'work-toggle'"
         type="button"
+        variant="ghost"
+        size="sm"
         :aria-expanded="row.expanded"
         data-testid="ai-work-group-toggle"
-        class="flex min-h-6 w-full min-w-0 cursor-pointer items-center gap-1.5 rounded-md px-1 py-0.5 text-left text-sm leading-relaxed text-muted-foreground transition-colors hover:bg-muted/35 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70"
+        class="flex h-auto min-h-6 w-full min-w-0 cursor-pointer justify-start gap-1.5 px-1 py-0.5 text-left text-sm font-normal leading-relaxed text-muted-foreground hover:bg-muted/35 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70 [&_svg]:size-3.5"
         @click="$emit('toggle-work-group', row.groupId, row.expanded)"
       >
         <span class="flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
@@ -105,7 +111,7 @@
           class="size-3 shrink-0 text-muted-foreground/75 transition-transform duration-200"
           :class="{ 'rotate-90': row.expanded }"
         />
-      </button>
+      </Button>
 
       <!-- Tool Group Entries List -->
       <div
@@ -164,6 +170,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Button } from '@memoflow/ui-vue-shadcn';
 import {
   Ban,
   Check,
