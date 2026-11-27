@@ -335,6 +335,16 @@ export const AssistantRunOutcomeSchema = z
   .strict();
 export type AssistantRunOutcome = z.infer<typeof AssistantRunOutcomeSchema>;
 
+export const AssistantRunTimingSchema = z
+  .object({
+    runId: z.string().min(1).max(512),
+    startedAt: z.number().int().nonnegative().nullable().optional(),
+    completedAt: z.number().int().nonnegative().nullable().optional(),
+    pausedDurationMs: z.number().int().nonnegative().optional(),
+  })
+  .strict();
+export type AssistantRunTiming = z.infer<typeof AssistantRunTimingSchema>;
+
 export const AssistantRuntimeMessageViewSchema = z
   .object({
     id: z.string().min(1),
@@ -344,6 +354,7 @@ export const AssistantRuntimeMessageViewSchema = z
     attachments: z.array(AssistantRuntimeMessageAttachmentViewSchema).max(4).default([]),
     approvalReceipt: AssistantApprovalReceiptSchema.optional(),
     runOutcome: AssistantRunOutcomeSchema.optional(),
+    runTiming: AssistantRunTimingSchema.optional(),
     toolActivities: z.array(AssistantToolActivityViewSchema).max(256).optional(),
     nativeActivities: z.array(LocalAgentActivitySchema).max(256).optional(),
     goalClarification: GoalIntentClarificationSchema.optional(),
