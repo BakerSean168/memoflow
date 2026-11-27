@@ -220,7 +220,7 @@
                 :data-ask-user-status="request.status"
                 data-testid="ai-ask-user-request"
               >
-                <!-- T3 Code collapses an answered question into question + chosen answer. -->
+                <!-- T3 Code collapses answered questions into question + chosen answer rows. -->
                 <template v-if="request.status === 'answered'">
                   <button
                     type="button"
@@ -230,14 +230,23 @@
                     @click="toggleAnsweredExpanded(request.toolCallId)"
                   >
                     <span class="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                      {{ request.question }}
+                      {{
+                        askUserQuestions(request).length > 1
+                          ? t('aiAssistant.local.answeredQuestions', {
+                              count: askUserQuestions(request).length,
+                            })
+                          : request.question
+                      }}
                     </span>
                     <span
-                      v-if="askUserAnswerText(request.toolCallId)"
+                      v-if="
+                        askUserQuestions(request).length === 1 &&
+                        askUserAnswerText(request, askUserQuestions(request)[0]!)
+                      "
                       class="min-w-0 max-w-[50%] truncate text-sm text-foreground"
                       data-testid="ai-ask-user-answer"
                     >
-                      {{ askUserAnswerText(request.toolCallId) }}
+                      {{ askUserAnswerText(request, askUserQuestions(request)[0]!) }}
                     </span>
                     <ChevronDown
                       v-if="isAnsweredExpanded(request.toolCallId)"
@@ -252,30 +261,50 @@
                   </button>
                   <div
                     v-if="isAnsweredExpanded(request.toolCallId)"
-                    class="space-y-1 border-t border-[hsl(var(--border-subtle))] px-3 py-2"
+                    class="space-y-1.5 border-t border-[hsl(var(--border-subtle))] px-3 py-2"
                     data-testid="ai-ask-user-history"
                   >
-                    <p class="whitespace-pre-wrap text-sm text-muted-foreground">
-                      {{ request.question }}
-                    </p>
-                    <p
-                      v-if="askUserAnswerText(request.toolCallId)"
-                      class="ps-3 whitespace-pre-wrap text-sm text-foreground"
+                    <div
+                      v-for="question in askUserQuestions(request)"
+                      :key="question.question"
+                      class="space-y-0.5"
                     >
-                      {{ askUserAnswerText(request.toolCallId) }}
-                    </p>
+                      <p class="whitespace-pre-wrap text-sm text-muted-foreground">
+                        {{ question.header }} · {{ question.question }}
+                      </p>
+                      <p
+                        v-if="askUserAnswerText(request, question)"
+                        class="ps-3 whitespace-pre-wrap text-sm text-foreground"
+                      >
+                        {{ askUserAnswerText(request, question) }}
+                      </p>
+                    </div>
                   </div>
                 </template>
 
                 <form
                   v-else
                   class="min-w-0 px-3 pt-2.5 pb-3"
-                  @submit.prevent="submitAskUser(request)"
+                  @submit.prevent="nextAskUser(request)"
                 >
                   <div class="flex items-start gap-2">
+                    <span
+                      v-if="activeAskUserQuestion(request)?.header"
+                      class="shrink-0 rounded-md bg-muted/60 px-1.5 py-0.5 text-[11px] font-medium leading-4 text-muted-foreground"
+                      data-testid="ai-ask-user-header"
+                    >
+                      {{ activeAskUserQuestion(request)?.header }}
+                    </span>
                     <p class="min-w-0 flex-1 text-xs text-muted-foreground">
                       {{ t('aiAssistant.local.question') }}
                     </p>
+                    <span
+                      v-if="askUserQuestions(request).length > 1"
+                      class="shrink-0 text-xs tabular-nums text-muted-foreground"
+                      data-testid="ai-ask-user-progress"
+                    >
+                      {{ askUserQuestionIndex(request) + 1 }}/{{ askUserQuestions(request).length }}
+                    </span>
                     <span
                       v-if="request.status !== 'pending'"
                       class="shrink-0 text-xs text-muted-foreground"
@@ -299,7 +328,7 @@
                   <p
                     class="mt-1 whitespace-pre-wrap break-words text-sm font-medium text-foreground"
                   >
-                    {{ request.question }}
+                    {{ activeAskUserQuestion(request)?.question }}
                   </p>
                   <p
                     v-if="request.errorMessage"
@@ -316,16 +345,24 @@
                     {{ askUserErrors[request.toolCallId] }}
                   </p>
                   <div
-                    v-if="request.options?.length"
+                    v-if="activeAskUserQuestion(request)?.options?.length"
                     class="mt-2 space-y-0.5"
-                    :role="request.selectionMode === 'multi_select' ? 'group' : 'radiogroup'"
-                    :aria-label="request.question"
+                    :role="
+                      activeAskUserQuestion(request)?.selectionMode === 'multi_select'
+                        ? 'group'
+                        : 'radiogroup'
+                    "
+                    :aria-label="activeAskUserQuestion(request)?.question"
                   >
                     <button
-                      v-for="option in request.options"
+                      v-for="option in activeAskUserQuestion(request)?.options"
                       :key="option.label"
                       type="button"
-                      :role="request.selectionMode === 'multi_select' ? 'checkbox' : 'radio'"
+                      :role="
+                        activeAskUserQuestion(request)?.selectionMode === 'multi_select'
+                          ? 'checkbox'
+                          : 'radio'
+                      "
                       :aria-checked="isAskUserOptionSelected(request, option.label)"
                       :disabled="request.status !== 'pending'"
                       data-testid="ai-ask-user-option"
@@ -344,14 +381,16 @@
                         <span
                           class="flex size-4 items-center justify-center border border-foreground/55"
                           :class="
-                            request.selectionMode === 'multi_select' ? 'rounded-sm' : 'rounded-full'
+                            activeAskUserQuestion(request)?.selectionMode === 'multi_select'
+                              ? 'rounded-sm'
+                              : 'rounded-full'
                           "
                         >
                           <span
                             v-if="isAskUserOptionSelected(request, option.label)"
                             class="bg-primary"
                             :class="
-                              request.selectionMode === 'multi_select'
+                              activeAskUserQuestion(request)?.selectionMode === 'multi_select'
                                 ? 'size-2.5 rounded-[2px]'
                                 : 'size-2 rounded-full'
                             "
@@ -370,7 +409,7 @@
                     </button>
                   </div>
                   <p
-                    v-if="request.selectionMode === 'multi_select'"
+                    v-if="activeAskUserQuestion(request)?.selectionMode === 'multi_select'"
                     class="mt-1 ps-2 text-xs text-muted-foreground"
                   >
                     {{ t('aiAssistant.local.selectAllThatApply') }}
@@ -380,26 +419,44 @@
                       {{ t('aiAssistant.local.otherAnswer') }}
                     </span>
                     <Input
-                      :model-value="askUserFreeText[request.toolCallId] ?? ''"
+                      :model-value="askUserFreeText(request) ?? ''"
                       class="h-8 w-full rounded-md border bg-background px-2 text-sm"
                       :maxlength="4000"
                       :disabled="request.status !== 'pending'"
                       data-testid="ai-ask-user-free-text"
-                      @update:model-value="setAskUserFreeText(request.toolCallId, $event)"
+                      @update:model-value="setAskUserFreeText(request, $event)"
                     />
                   </label>
-                  <div
-                    v-if="askUserNeedsSubmit(request)"
-                    class="mt-2 flex flex-wrap items-center gap-2"
-                  >
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
                     <Button
-                      v-if="request.status === 'pending' || request.status === 'sending'"
+                      v-if="
+                        askUserQuestionIndex(request) > 0 &&
+                        (request.status === 'pending' || request.status === 'sending')
+                      "
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      :disabled="request.status !== 'pending'"
+                      data-testid="ai-ask-user-previous"
+                      @click="previousAskUserQuestion(request)"
+                    >
+                      {{ t('aiAssistant.local.previousQuestion') }}
+                    </Button>
+                    <Button
+                      v-if="
+                        askUserNeedsAdvance(request) &&
+                        (request.status === 'pending' || request.status === 'sending')
+                      "
                       type="submit"
                       size="sm"
                       :disabled="request.status !== 'pending'"
                       data-testid="ai-ask-user-submit"
                     >
-                      {{ t('aiAssistant.local.answer') }}
+                      {{
+                        askUserQuestionIndex(request) < askUserQuestions(request).length - 1
+                          ? t('aiAssistant.local.nextQuestion')
+                          : t('aiAssistant.local.answer')
+                      }}
                     </Button>
                   </div>
                 </form>
@@ -659,6 +716,7 @@ import {
   type ChatNativeRequest,
   type ChatAskUserRequest,
   type ChatAskUserAnswer,
+  type ChatAskUserQuestion,
   type WorkflowMode,
 } from '../composables/types';
 import { aiUiHost } from '../ai-ui-host';
@@ -731,60 +789,153 @@ async function copyMessage(messageId: string, content: string) {
 
 onBeforeUnmount(() => {
   if (copyResetTimer) clearTimeout(copyResetTimer);
+  for (const timer of askUserAdvanceTimers.values()) clearTimeout(timer);
+  askUserAdvanceTimers.clear();
 });
 
 defineExpose({ viewport });
 
 const { t } = useI18n();
-const askUserAnswers = reactive<Record<string, string | string[]>>({});
-const askUserFreeText = reactive<Record<string, string>>({});
+
+type AskUserDraft = {
+  index: number;
+  selections: Record<string, string | string[]>;
+  freeText: Record<string, string>;
+};
+
+const askUserDrafts = reactive<Record<string, AskUserDraft>>({});
 const askUserErrors = reactive<Record<string, string>>({});
 const submittedAskUserAnswers = reactive<Record<string, ChatAskUserAnswer>>({});
+const askUserAdvanceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const expandedAnsweredRequests = ref(new Set<string>());
 
-function setAskUserFreeText(toolCallId: string, value: unknown) {
-  askUserFreeText[toolCallId] = typeof value === 'string' ? value : '';
-  if (askUserFreeText[toolCallId]?.trim()) delete askUserErrors[toolCallId];
+/** Legacy cards carry one question; normalize so the card has a single flow. */
+function askUserQuestions(request: ChatAskUserRequest): ChatAskUserQuestion[] {
+  if (request.questions?.length) return request.questions;
+  return [
+    {
+      header: 'Question 1',
+      question: request.question,
+      ...(request.options?.length ? { options: request.options } : {}),
+      selectionMode: request.selectionMode ?? 'single_select',
+    },
+  ];
+}
+
+function ensureAskUserDraft(toolCallId: string): AskUserDraft {
+  askUserDrafts[toolCallId] ??= { index: 0, selections: {}, freeText: {} };
+  return askUserDrafts[toolCallId]!;
+}
+
+function askUserQuestionIndex(request: ChatAskUserRequest): number {
+  const draft = askUserDrafts[request.toolCallId];
+  const lastIndex = Math.max(askUserQuestions(request).length - 1, 0);
+  return Math.min(Math.max(draft?.index ?? 0, 0), lastIndex);
+}
+
+function activeAskUserQuestion(request: ChatAskUserRequest): ChatAskUserQuestion | undefined {
+  return askUserQuestions(request)[askUserQuestionIndex(request)];
+}
+
+function askUserFreeText(request: ChatAskUserRequest): string {
+  const question = activeAskUserQuestion(request);
+  if (!question) return '';
+  return askUserDrafts[request.toolCallId]?.freeText[question.question] ?? '';
+}
+
+function setAskUserFreeText(request: ChatAskUserRequest, value: unknown) {
+  const question = activeAskUserQuestion(request);
+  if (!question) return;
+  ensureAskUserDraft(request.toolCallId).freeText[question.question] =
+    typeof value === 'string' ? value : '';
+  if (typeof value === 'string' && value.trim()) delete askUserErrors[request.toolCallId];
 }
 
 /** T3 Code: a typed custom answer replaces selected options. */
-function hasCustomAskUserAnswer(toolCallId: string): boolean {
-  return Boolean(askUserFreeText[toolCallId]?.trim());
+function hasCustomAskUserAnswer(request: ChatAskUserRequest): boolean {
+  return Boolean(askUserFreeText(request).trim());
 }
 
 function isAskUserOptionSelected(request: ChatAskUserRequest, label: string): boolean {
-  if (hasCustomAskUserAnswer(request.toolCallId)) return false;
-  const answer = askUserAnswers[request.toolCallId];
+  const question = activeAskUserQuestion(request);
+  if (!question || hasCustomAskUserAnswer(request)) return false;
+  const answer = askUserDrafts[request.toolCallId]?.selections[question.question];
   return Array.isArray(answer) ? answer.includes(label) : answer === label;
+}
+
+function clearAskUserAdvanceTimer(toolCallId: string) {
+  const timer = askUserAdvanceTimers.get(toolCallId);
+  if (timer === undefined) return;
+  clearTimeout(timer);
+  askUserAdvanceTimers.delete(toolCallId);
 }
 
 function selectAskUserOption(request: ChatAskUserRequest, label: string) {
   if (request.status !== 'pending') return;
-  if (request.selectionMode === 'multi_select') {
-    const current = askUserAnswers[request.toolCallId];
+  const question = activeAskUserQuestion(request);
+  if (!question) return;
+  const draft = ensureAskUserDraft(request.toolCallId);
+  if (question.selectionMode === 'multi_select') {
+    const current = draft.selections[question.question];
     const selected = Array.isArray(current) ? current : [];
-    askUserAnswers[request.toolCallId] = selected.includes(label)
+    draft.selections[question.question] = selected.includes(label)
       ? selected.filter((value) => value !== label)
       : [...selected, label];
     delete askUserErrors[request.toolCallId];
     return;
   }
-  // T3 Code advances a single-select question as soon as its option is clicked.
-  askUserAnswers[request.toolCallId] = label;
-  submitAskUser(request, label);
+  draft.selections[question.question] = label;
+  delete askUserErrors[request.toolCallId];
+  // A single question is answered by the click itself; several questions follow
+  // T3's short optimistic pause before advancing to the next question.
+  if (askUserQuestions(request).length === 1) {
+    submitAskUser(request);
+    return;
+  }
+  clearAskUserAdvanceTimer(request.toolCallId);
+  askUserAdvanceTimers.set(
+    request.toolCallId,
+    setTimeout(() => {
+      askUserAdvanceTimers.delete(request.toolCallId);
+      if (request.status !== 'pending') return;
+      advanceAskUser(request);
+    }, 200),
+  );
 }
 
-/** Single-select with options needs no button; multi-select, free text and optionless prompts do. */
-function askUserNeedsSubmit(request: ChatAskUserRequest): boolean {
-  if (request.selectionMode === 'multi_select') return true;
-  if (!request.options?.length) return true;
-  return hasCustomAskUserAnswer(request.toolCallId);
+/** Multi-select, free text and optionless prompts need an explicit advance button. */
+function askUserNeedsAdvance(request: ChatAskUserRequest): boolean {
+  const question = activeAskUserQuestion(request);
+  if (!question) return false;
+  if (question.selectionMode === 'multi_select') return true;
+  if (!question.options?.length) return true;
+  return hasCustomAskUserAnswer(request);
 }
 
-function askUserAnswerText(toolCallId: string): string {
-  const answer = submittedAskUserAnswers[toolCallId];
-  if (answer === undefined) return '';
-  return Array.isArray(answer) ? answer.join(', ') : answer;
+function askUserAnswerValue(
+  request: ChatAskUserRequest,
+  question: ChatAskUserQuestion,
+): string | string[] | undefined {
+  const draft = askUserDrafts[request.toolCallId];
+  const freeText = draft?.freeText[question.question]?.trim();
+  if (freeText) return freeText;
+  const selected = draft?.selections[question.question];
+  if (Array.isArray(selected)) return selected.length ? [...selected] : undefined;
+  return typeof selected === 'string' && selected ? selected : undefined;
+}
+
+function askUserAnswerText(request: ChatAskUserRequest, question: ChatAskUserQuestion): string {
+  const answer = request.answers?.[question.question];
+  const value =
+    answer ??
+    (askUserQuestions(request).length === 1
+      ? submittedAskUserAnswers[request.toolCallId]
+      : undefined);
+  if (value === undefined) return '';
+  if (Array.isArray(value)) return value.join(', ');
+  if (typeof value === 'string') return value;
+  const nested = value[question.question];
+  return nested === undefined ? '' : Array.isArray(nested) ? nested.join(', ') : nested;
 }
 
 function isAnsweredExpanded(toolCallId: string): boolean {
@@ -798,30 +949,64 @@ function toggleAnsweredExpanded(toolCallId: string) {
   expandedAnsweredRequests.value = next;
 }
 
-function submitAskUser(request: ChatAskUserRequest, explicitAnswer?: ChatAskUserAnswer) {
+function advanceAskUser(request: ChatAskUserRequest) {
+  const questions = askUserQuestions(request);
+  const draft = ensureAskUserDraft(request.toolCallId);
+  if (draft.index >= questions.length - 1) {
+    submitAskUser(request);
+    return;
+  }
+  draft.index += 1;
+  delete askUserErrors[request.toolCallId];
+}
+
+function previousAskUserQuestion(request: ChatAskUserRequest) {
   if (request.status !== 'pending') return;
-  const freeText = askUserFreeText[request.toolCallId]?.trim();
-  let answer: ChatAskUserAnswer;
-  if (freeText) {
-    answer = freeText;
-  } else if (request.selectionMode === 'multi_select') {
-    const selected = askUserAnswers[request.toolCallId];
-    if (!Array.isArray(selected) || selected.length === 0) {
+  const draft = ensureAskUserDraft(request.toolCallId);
+  draft.index = Math.max(draft.index - 1, 0);
+  delete askUserErrors[request.toolCallId];
+}
+
+/** Explicit advance: validates the active question, then moves or submits. */
+function nextAskUser(request: ChatAskUserRequest) {
+  if (request.status !== 'pending') return;
+  clearAskUserAdvanceTimer(request.toolCallId);
+  const question = activeAskUserQuestion(request);
+  if (!question) return;
+  if (askUserAnswerValue(request, question) === undefined) {
+    askUserErrors[request.toolCallId] = t('aiAssistant.local.answerRequired');
+    return;
+  }
+  advanceAskUser(request);
+}
+
+function submitAskUser(request: ChatAskUserRequest) {
+  if (request.status !== 'pending') return;
+  const questions = askUserQuestions(request);
+  if (questions.length === 1) {
+    const value = askUserAnswerValue(request, questions[0]!);
+    if (value === undefined) {
       askUserErrors[request.toolCallId] = t('aiAssistant.local.answerRequired');
       return;
     }
-    answer = [...selected];
-  } else {
-    const selected = explicitAnswer ?? askUserAnswers[request.toolCallId];
-    if (typeof selected !== 'string' || !selected.trim()) {
+    delete askUserErrors[request.toolCallId];
+    submittedAskUserAnswers[request.toolCallId] = value;
+    emit('ask-user-answer', request, value);
+    return;
+  }
+  const answers: Record<string, string | string[]> = {};
+  for (const [index, question] of questions.entries()) {
+    const value = askUserAnswerValue(request, question);
+    if (value === undefined) {
+      ensureAskUserDraft(request.toolCallId).index = index;
       askUserErrors[request.toolCallId] = t('aiAssistant.local.answerRequired');
       return;
     }
-    answer = selected;
+    answers[question.question] = value;
   }
   delete askUserErrors[request.toolCallId];
-  submittedAskUserAnswers[request.toolCallId] = answer;
-  emit('ask-user-answer', request, answer);
+  submittedAskUserAnswers[request.toolCallId] = answers;
+  emit('ask-user-answer', request, answers);
 }
 
 const { getMessageStatusLabel, formatMessageTimestamp, formatMessageTimestampTooltip } =

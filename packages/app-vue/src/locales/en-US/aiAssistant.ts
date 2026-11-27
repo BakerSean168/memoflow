@@ -159,6 +159,9 @@ export default {
     chooseAnswer: 'Choose an answer',
     otherAnswer: 'Other answer',
     selectAllThatApply: 'Select all that apply',
+    previousQuestion: 'Previous question',
+    nextQuestion: 'Next question',
+    answeredQuestions: '{count} questions answered',
     answerRequired: 'Choose an answer before sending.',
     incompleteHistory: 'This history is incomplete. Unfinished operations will not be replayed.',
     description:

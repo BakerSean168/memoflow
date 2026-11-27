@@ -11,6 +11,11 @@ import {
   assertMemoFlowToolClassification,
   applyMemoFlowSessionToolPolicy,
 } from './product-tool-policy';
+import {
+  buildAskUserAnswers,
+  formatAskUserAnswersForModel,
+  readAskUserQuestions,
+} from './ask-user-tool';
 
 function createTools(deps: Omit<MemoFlowProductToolDependencies, 'permissions'>) {
   return createMemoFlowProductTools({
@@ -306,5 +311,75 @@ describe('MemoFlow AI owner tools (AI-9609)', () => {
         /schedule.*(pause|resume|complete|cancel|delete)/i.test(key),
       ),
     ).toBe(false);
+  });
+});
+
+describe('ask_user multi-question contract', () => {
+  const questions = [
+    {
+      header: 'Approach',
+      question: 'Which approach?',
+      options: [{ label: 'Simple' }, { label: 'Safe' }],
+      selectionMode: 'single_select' as const,
+    },
+    {
+      header: 'Areas',
+      question: 'Which areas?',
+      options: [{ label: 'Chat' }, { label: 'Timeline' }],
+      selectionMode: 'multi_select' as const,
+    },
+  ];
+
+  it('projects the current questions shape and the legacy single question', () => {
+    expect(readAskUserQuestions({ questions })).toEqual(questions);
+    expect(
+      readAskUserQuestions({
+        question: 'Pick one',
+        options: [{ label: 'A' }],
+        selectionMode: 'multi_select',
+      }),
+    ).toEqual([
+      {
+        header: 'Question 1',
+        question: 'Pick one',
+        options: [{ label: 'A' }],
+        selectionMode: 'multi_select',
+      },
+    ]);
+    expect(readAskUserQuestions({ questions: [] })).toBeNull();
+    expect(readAskUserQuestions({ question: 'Pick one', options: [{ label: '' }] })).toBeNull();
+  });
+
+  it('keys answers by question and validates each answer shape', () => {
+    expect(
+      buildAskUserAnswers(questions, {
+        answers: { 'Which approach?': 'Simple', 'Which areas?': ['Chat', 'Timeline'] },
+      }),
+    ).toEqual({ 'Which approach?': 'Simple', 'Which areas?': ['Chat', 'Timeline'] });
+    // A free-text answer replaces the options, matching Claude's "Other" channel.
+    expect(
+      buildAskUserAnswers(questions, {
+        answers: { 'Which approach?': 'Custom text', 'Which areas?': ['Chat'] },
+      }),
+    ).toEqual({ 'Which approach?': 'Custom text', 'Which areas?': ['Chat'] });
+    expect(buildAskUserAnswers(questions, { answers: { 'Which approach?': 'Simple' } })).toBeNull();
+    expect(
+      buildAskUserAnswers(questions, {
+        answers: { 'Which approach?': ['Simple'], 'Which areas?': ['Chat'] },
+      }),
+    ).toBeNull();
+    expect(buildAskUserAnswers(questions, { answer: 'Simple' })).toBeNull();
+    expect(buildAskUserAnswers([questions[0]!], { answer: 'Free text answer' })).toEqual({
+      'Which approach?': 'Free text answer',
+    });
+  });
+
+  it('returns every answer to the model with multi-select labels joined', () => {
+    expect(
+      formatAskUserAnswersForModel(
+        { 'Which approach?': 'Simple', 'Which areas?': ['Chat', 'Timeline'] },
+        questions,
+      ),
+    ).toBe('User answered:\nWhich approach?: Simple\nWhich areas?: Chat, Timeline');
   });
 });

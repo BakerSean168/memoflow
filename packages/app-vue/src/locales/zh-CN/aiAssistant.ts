@@ -146,6 +146,9 @@ export default {
     chooseAnswer: '请选择一项',
     otherAnswer: '其他答案',
     selectAllThatApply: '可多选',
+    previousQuestion: '上一题',
+    nextQuestion: '下一题',
+    answeredQuestions: '{count} 个问题已回答',
     answerRequired: '请先选择答案再提交。',
     incompleteHistory: '这段历史不完整，未完成的操作不会自动重放。',
     description:

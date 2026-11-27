@@ -8,6 +8,8 @@ import {
 import {
   AssistantToolNameSchema,
   type AssistantRuntimeApprovalCommand,
+  type AssistantRuntimeAskUserAnswers,
+  type AssistantRuntimeAskUserQuestion,
   type AssistantRuntimeToolAnswerCommand,
   type AIChatPermissionMode,
   type AssistantRuntimeAttachment,
@@ -19,6 +21,7 @@ import type { ResolvedAIModel } from '../models';
 import type { IAIExecutionRecordPort } from '../../application/ports';
 import type { PermissionRepository } from '../../permissions';
 import { memoFlowToolPolicy, recordMemoFlowToolDecision } from '../tools/product-tool-policy';
+import { buildAskUserAnswers, readAskUserQuestions } from '../tools/ask-user-tool';
 import type { AssistantHistoryService } from './assistant-history.service';
 import { AsyncEventQueue } from './async-event-queue';
 import { projectAssistantUsage, type AssistantUsageSnapshot } from './assistant-observability';
@@ -131,13 +134,7 @@ export class AssistantTurnSession {
     >();
     const pending = new Set<string>();
     const suspensions = new Set<string>();
-    const questions = new Map<
-      string,
-      {
-        options?: { label: string }[];
-        selectionMode?: 'single_select' | 'multi_select';
-      }
-    >();
+    const questions = new Map<string, readonly AssistantRuntimeAskUserQuestion[]>();
     const ownsTurn = () =>
       !settled &&
       session.run.bindingGeneration() === bindingGeneration &&
@@ -203,11 +200,14 @@ export class AssistantTurnSession {
         });
       }
       pending.clear();
-      for (const toolCallId of suspensions)
+      for (const toolCallId of suspensions) {
+        const pendingQuestions = questions.get(toolCallId);
         emit('assistant.ask_user.resolved', {
           toolCallId,
           resolution: type === 'assistant.run.cancelled' ? 'cancelled' : 'failed',
+          ...(pendingQuestions?.length ? { questions: [...pendingQuestions] } : {}),
         });
+      }
       suspensions.clear();
       questions.clear();
       settled = true;
@@ -318,32 +318,20 @@ export class AssistantTurnSession {
       const suspension = session.suspensions.get({
         toolCallId: command.toolCallId,
       });
-      const question = questions.get(command.toolCallId);
+      const pendingQuestions = questions.get(command.toolCallId);
       if (
         !suspension ||
         suspension.runId !== runId ||
         suspension.threadId !== input.conversationId ||
         suspension.resourceId !== input.identityId ||
-        !question
+        !pendingQuestions?.length
       )
         return false;
-      const labels = new Set((question.options ?? []).map(({ label }) => label));
-      if (question.selectionMode === 'multi_select') {
-        if (
-          !Array.isArray(command.answer) ||
-          command.answer.length === 0 ||
-          new Set(command.answer).size !== command.answer.length ||
-          command.answer.some((value) => !labels.has(value))
-        )
-          return false;
-      } else if (question.options) {
-        if (typeof command.answer !== 'string' || !labels.has(command.answer)) return false;
-      } else if (
-        typeof command.answer !== 'string' ||
-        !command.answer.trim() ||
-        command.answer.length > 4000
-      )
-        return false;
+      const answers: AssistantRuntimeAskUserAnswers | null = buildAskUserAnswers(
+        pendingQuestions,
+        command,
+      );
+      if (!answers) return false;
       suspensions.delete(command.toolCallId);
       questions.delete(command.toolCallId);
       const answerContext = new RequestContext(requestContext.entries());
@@ -353,7 +341,7 @@ export class AssistantTurnSession {
       answerContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
       session
         .respondToToolSuspension({
-          resumeData: command.answer,
+          resumeData: answers,
           toolCallId: command.toolCallId,
           requestContext: answerContext,
         })
@@ -363,6 +351,8 @@ export class AssistantTurnSession {
       emit('assistant.ask_user.resolved', {
         toolCallId: command.toolCallId,
         resolution: 'answered',
+        questions: [...pendingQuestions],
+        answers,
       });
       return true;
     };
@@ -432,62 +422,27 @@ export class AssistantTurnSession {
           return;
         }
         const payload = raw as Record<string, unknown>;
-        const rawOptions = payload.options;
-        const validOptions =
-          rawOptions === undefined ||
-          (Array.isArray(rawOptions) &&
-            rawOptions.length <= 20 &&
-            rawOptions.every((item) => {
-              if (!item || typeof item !== 'object') return false;
-              const choice = item as Record<string, unknown>;
-              return (
-                typeof choice.label === 'string' &&
-                choice.label.trim().length > 0 &&
-                choice.label.length <= 500 &&
-                (choice.description === undefined ||
-                  (typeof choice.description === 'string' && choice.description.length <= 1000))
-              );
-            }));
-        if (
-          typeof payload.question !== 'string' ||
-          !payload.question.trim() ||
-          payload.question.length > 2000 ||
-          !validOptions ||
-          (payload.selectionMode !== undefined &&
-            payload.selectionMode !== 'single_select' &&
-            payload.selectionMode !== 'multi_select')
-        ) {
+        const pendingQuestions = readAskUserQuestions(payload);
+        if (!pendingQuestions) {
           abort();
           return;
         }
-        const options = rawOptions as { label: string; description?: string }[] | undefined;
-        questions.set(event.toolCallId, {
-          ...(options ? { options: options.map(({ label }) => ({ label })) } : {}),
-          ...(payload.selectionMode
-            ? {
-                selectionMode: payload.selectionMode as 'single_select' | 'multi_select',
-              }
-            : {}),
-        });
+        questions.set(event.toolCallId, pendingQuestions);
         suspensions.add(event.toolCallId);
         emit('assistant.ask_user.required', {
           toolCallId: event.toolCallId,
-          question: payload.question.trim(),
-          ...(options ? { options } : {}),
-          ...(payload.selectionMode
-            ? {
-                selectionMode: payload.selectionMode as 'single_select' | 'multi_select',
-              }
-            : {}),
+          questions: [...pendingQuestions],
         });
         return;
       }
       if (event.type === 'tool_suspension_cancelled') {
         suspensions.delete(event.toolCallId);
+        const cancelledQuestions = questions.get(event.toolCallId);
         questions.delete(event.toolCallId);
         emit('assistant.ask_user.resolved', {
           toolCallId: event.toolCallId,
           resolution: 'cancelled',
+          ...(cancelledQuestions?.length ? { questions: [...cancelledQuestions] } : {}),
         });
         return;
       }

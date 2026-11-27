@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { AssistantToolNameSchema } from './assistant-runtime.dto';
+import {
+  AssistantRuntimeAskUserAnswersSchema,
+  AssistantRuntimeAskUserOptionSchema,
+  AssistantRuntimeAskUserQuestionSchema,
+  AssistantRuntimeAskUserSelectionModeSchema,
+  AssistantToolNameSchema,
+} from './assistant-runtime.dto';
 import { RuntimeEventBaseShape } from './runtime-event-base';
 import { AIRuntimeUsageSchema } from './runtime-usage.dto';
 import { LocalAgentRequestSchema, LocalAgentActivitySchema } from './local-agent.dto';
@@ -61,21 +67,23 @@ export const AssistantRuntimeEventSchema = z.discriminatedUnion('type', [
       data: z
         .object({
           toolCallId: z.string().min(1).max(512),
-          question: z.string().trim().min(1).max(2000),
-          options: z
-            .array(
-              z
-                .object({
-                  label: z.string().min(1).max(500),
-                  description: z.string().max(1000).optional(),
-                })
-                .strict(),
-            )
-            .max(20)
-            .optional(),
-          selectionMode: z.enum(['single_select', 'multi_select']).optional(),
+          /** Current shape: every question carried by the ask_user call. */
+          questions: z.array(AssistantRuntimeAskUserQuestionSchema).min(1).max(4).optional(),
+          /** Legacy single-question fields, kept parseable for older emitters. */
+          question: z.string().trim().min(1).max(2000).optional(),
+          options: z.array(AssistantRuntimeAskUserOptionSchema).max(20).optional(),
+          selectionMode: AssistantRuntimeAskUserSelectionModeSchema.optional(),
         })
-        .strict(),
+        .strict()
+        .superRefine((data, context) => {
+          if (!data.questions?.length && !data.question) {
+            context.addIssue({
+              code: 'custom',
+              path: ['questions'],
+              message: 'Ask user event requires questions',
+            });
+          }
+        }),
     })
     .strict(),
   z
@@ -86,6 +94,8 @@ export const AssistantRuntimeEventSchema = z.discriminatedUnion('type', [
         .object({
           toolCallId: z.string().min(1).max(512),
           resolution: z.enum(['answered', 'cancelled', 'failed']),
+          questions: z.array(AssistantRuntimeAskUserQuestionSchema).min(1).max(4).optional(),
+          answers: AssistantRuntimeAskUserAnswersSchema.optional(),
         })
         .strict(),
     })

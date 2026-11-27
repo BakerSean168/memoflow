@@ -27,6 +27,9 @@ const i18n = createI18n({
           chooseAnswer: 'Choose answer',
           otherAnswer: 'Other answer',
           selectAllThatApply: 'Select all that apply',
+          previousQuestion: 'Previous question',
+          nextQuestion: 'Next question',
+          answeredQuestions: '{count} questions answered',
           question: 'Additional information requested',
           answerRequired: 'Choose an answer before sending.',
           cancel: 'Cancel',
@@ -338,6 +341,69 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     ]);
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
     wrapper.unmount();
+  });
+
+  it('walks multiple questions one at a time and submits every answer together', async () => {
+    vi.useFakeTimers();
+    const questions = [
+      {
+        header: 'Approach',
+        question: 'Which approach?',
+        options: [{ label: 'Simple' }, { label: 'Safe' }],
+        selectionMode: 'single_select' as const,
+      },
+      {
+        header: 'Areas',
+        question: 'Which areas?',
+        options: [{ label: 'Chat' }, { label: 'Timeline' }],
+        selectionMode: 'multi_select' as const,
+      },
+    ];
+    const request = {
+      toolCallId: 'ask-multi',
+      runId: 'run-3',
+      conversationId: 'conversation-1',
+      question: questions[0]!.question,
+      options: questions[0]!.options,
+      selectionMode: 'single_select' as const,
+      questions,
+    };
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'assistant-ask-multi',
+            role: 'assistant',
+            content: '',
+            status: 'generating',
+            askUserRequests: [{ ...request, status: 'pending' }],
+          },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    expect(wrapper.get('[data-testid="ai-ask-user-progress"]').text()).toBe('1/2');
+    expect(wrapper.get('[data-testid="ai-ask-user-header"]').text()).toBe('Approach');
+    // Single-select advances after T3's short optimistic pause.
+    await wrapper.findAll('[data-testid="ai-ask-user-option"]')[0]!.trigger('click');
+    await vi.advanceTimersByTimeAsync(200);
+    expect(wrapper.get('[data-testid="ai-ask-user-progress"]').text()).toBe('2/2');
+    expect(wrapper.get('[data-testid="ai-ask-user-header"]').text()).toBe('Areas');
+    expect(wrapper.emitted('ask-user-answer')).toBeUndefined();
+
+    const secondOptions = wrapper.findAll('[data-testid="ai-ask-user-option"]');
+    await secondOptions[0]!.trigger('click');
+    await secondOptions[1]!.trigger('click');
+    await wrapper.get('[data-testid="ai-ask-user-submit"]').trigger('click');
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([
+      { toolCallId: 'ask-multi' },
+      { 'Which approach?': 'Simple', 'Which areas?': ['Chat', 'Timeline'] },
+    ]);
+    wrapper.unmount();
+    vi.useRealTimers();
   });
 
   it('accepts a free-text answer and collapses an answered question into a summary', async () => {

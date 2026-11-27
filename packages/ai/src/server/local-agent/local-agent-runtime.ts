@@ -1388,6 +1388,14 @@ export class LocalAgentRuntime {
           type: 'assistant.ask_user.required',
           data: {
             toolCallId: assistant.id,
+            questions: [
+              {
+                header: 'Question 1',
+                question: question.question,
+                ...(question.options.length ? { options: question.options } : {}),
+                selectionMode: 'single_select' as const,
+              },
+            ],
             question: question.question,
             ...(question.options.length
               ? {
@@ -1757,6 +1765,14 @@ export class LocalAgentRuntime {
         {
           runId: pending.runId,
           toolCallId: pending.draftId,
+          questions: [
+            {
+              header: 'Question 1',
+              question: pending.question.question,
+              ...(pending.question.options.length ? { options: pending.question.options } : {}),
+              selectionMode: 'single_select' as const,
+            },
+          ],
           question: pending.question.question,
           ...(pending.question.options.length
             ? {
@@ -1787,7 +1803,10 @@ export class LocalAgentRuntime {
       this.options.store.resolveConversation(input.identityId, command.conversationId),
     );
     if (connection.id !== pending.connectionId) return false;
-    const answer = typeof command.answer === 'string' ? command.answer.trim() : '';
+    // The goal clarification is a single MemoFlow-owned question; a multi-question
+    // answers record can still arrive over the shared command contract.
+    const answered = command.answers ? Object.values(command.answers)[0] : command.answer;
+    const answer = typeof answered === 'string' ? answered.trim() : '';
     const resolution =
       command.action === 'cancel' ? null : resolveGoalIntent(pending.question, answer);
     if (command.action !== 'cancel' && !resolution && answer !== '我还不确定') return false;

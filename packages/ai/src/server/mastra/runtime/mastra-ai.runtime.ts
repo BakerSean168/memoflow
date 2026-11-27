@@ -14,7 +14,11 @@ import {
   memoFlowToolPolicy,
 } from '../tools/product-tool-policy';
 import { AgentController, type Session } from '@mastra/core/agent-controller';
-import { askUserTool } from '@mastra/core/tools';
+import {
+  buildAskUserAnswers,
+  memoFlowAskUserTool,
+  readAskUserQuestions,
+} from '../tools/ask-user-tool';
 import { Mastra } from '@mastra/core/mastra';
 import {
   MASTRA_RESOURCE_ID_KEY,
@@ -258,7 +262,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         {
           id: 'assistant',
           name: 'Assistant',
-          tools: { ...productTools, ask_user: askUserTool },
+          tools: { ...productTools, ask_user: memoFlowAskUserTool },
           availableTools: [...Object.keys(productTools), 'ask_user'],
         },
       ],
@@ -870,26 +874,20 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
           )
             return [];
           const payload = raw as Record<string, unknown>;
-          if (
-            typeof payload.question !== 'string' ||
-            !payload.question.trim() ||
-            payload.question.length > 2000
-          )
-            return [];
-          const options = Array.isArray(payload.options)
-            ? payload.options.filter(
-                (option): option is { label: string; description?: string } =>
-                  Boolean(option) &&
-                  typeof option === 'object' &&
-                  typeof (option as { label?: unknown }).label === 'string',
-              )
-            : undefined;
+          const questions = readAskUserQuestions(payload);
+          if (!questions) return [];
+          if (Array.isArray(payload.questions)) {
+            return [{ runId: run.runId, toolCallId: call.toolCallId, questions }];
+          }
+          // A run persisted before the multi-question contract keeps its legacy
+          // projection so an older client can still render and answer it.
+          const [legacy] = questions;
           return [
             {
               runId: run.runId,
               toolCallId: call.toolCallId,
-              question: payload.question,
-              ...(options?.length ? { options } : {}),
+              question: legacy.question,
+              ...(legacy.options?.length ? { options: legacy.options } : {}),
               ...(payload.selectionMode === 'single_select' ||
               payload.selectionMode === 'multi_select'
                 ? { selectionMode: payload.selectionMode }
@@ -1015,32 +1013,15 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     );
     const raw = suspended?.suspendPayload ?? suspended?.args;
     if (!run || !suspended || !raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
-    const payload = raw as {
-      options?: { label?: unknown }[];
-      selectionMode?: unknown;
-    };
-    if (payload.options) {
-      const labels = new Set(
-        payload.options
-          .map((option) => option.label)
-          .filter((label): label is string => typeof label === 'string'),
-      );
-      if (payload.selectionMode === 'multi_select') {
-        if (
-          !Array.isArray(input.command.answer) ||
-          !input.command.answer.length ||
-          input.command.answer.some((value) => !labels.has(value)) ||
-          new Set(input.command.answer).size !== input.command.answer.length
-        )
-          return false;
-      } else if (typeof input.command.answer !== 'string' || !labels.has(input.command.answer))
-        return false;
-    } else if (
-      typeof input.command.answer !== 'string' ||
-      !input.command.answer.trim() ||
-      input.command.answer.length > 4000
-    )
-      return false;
+    const payload = raw as Record<string, unknown>;
+    const questions = readAskUserQuestions(payload);
+    const answers = questions ? buildAskUserAnswers(questions, input.command) : null;
+    if (!questions || !answers) return false;
+    // A run suspended before the multi-question contract resumes with the bare
+    // legacy answer so its persisted tool call keeps its original semantics.
+    const resumeData = Array.isArray(payload.questions)
+      ? answers
+      : (input.command.answer ?? Object.values(answers)[0]);
     if (this.resumedRuns.has(run.runId)) return false;
     this.resumedRuns.add(run.runId);
     try {
@@ -1064,7 +1045,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         input.command.toolCallId,
         async () => {
           await session.respondToToolSuspension({
-            resumeData: input.command.answer,
+            resumeData,
             toolCallId: input.command.toolCallId,
             requestContext,
           });
