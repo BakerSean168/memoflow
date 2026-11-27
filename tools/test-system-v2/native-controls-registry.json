@@ -49,9 +49,9 @@
     },
     {
       "path": "packages/ai-ui/src/components/AIMessagePanel.vue",
-      "native": ["button", "input"],
+      "native": ["button"],
       "category": "custom-control",
-      "reason": "Welcome tiles and the free-form Ask User multi-select checkbox group are custom surfaces; Checkbox has no array model."
+      "reason": "Welcome tiles and the Ask User option rows/dismiss control are custom interaction surfaces; free text uses the library Input."
     },
     {
       "path": "packages/ai-ui/src/components/AIModelTraitsPanel.vue",

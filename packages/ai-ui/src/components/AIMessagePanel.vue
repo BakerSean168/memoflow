@@ -216,99 +216,190 @@
               <section
                 v-for="request in row.askUserRequests"
                 :key="`${request.runId}:${request.toolCallId}`"
-                class="mb-3 space-y-3 rounded-xl border p-3"
+                class="mb-3 min-w-0 overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.35)]"
+                :data-ask-user-status="request.status"
                 data-testid="ai-ask-user-request"
               >
-                <p class="break-words text-sm font-medium">{{ request.question }}</p>
-                <p class="text-xs text-muted-foreground" role="status">
-                  {{ t(`aiAssistant.local.${request.status}`) }}
-                </p>
-                <p v-if="request.errorMessage" role="alert">
-                  {{ request.errorMessage }}
-                </p>
+                <!-- T3 Code collapses an answered question into question + chosen answer. -->
+                <template v-if="request.status === 'answered'">
+                  <button
+                    type="button"
+                    class="flex w-full min-w-0 items-start gap-2 px-3 py-2 text-left transition-colors hover:bg-[hsl(var(--surface-raised)/0.5)]"
+                    :aria-expanded="isAnsweredExpanded(request.toolCallId)"
+                    data-testid="ai-ask-user-summary-toggle"
+                    @click="toggleAnsweredExpanded(request.toolCallId)"
+                  >
+                    <span class="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                      {{ request.question }}
+                    </span>
+                    <span
+                      v-if="askUserAnswerText(request.toolCallId)"
+                      class="min-w-0 max-w-[50%] truncate text-sm text-foreground"
+                      data-testid="ai-ask-user-answer"
+                    >
+                      {{ askUserAnswerText(request.toolCallId) }}
+                    </span>
+                    <ChevronDown
+                      v-if="isAnsweredExpanded(request.toolCallId)"
+                      class="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                    <ChevronRight
+                      v-else
+                      class="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <div
+                    v-if="isAnsweredExpanded(request.toolCallId)"
+                    class="space-y-1 border-t border-[hsl(var(--border-subtle))] px-3 py-2"
+                    data-testid="ai-ask-user-history"
+                  >
+                    <p class="whitespace-pre-wrap text-sm text-muted-foreground">
+                      {{ request.question }}
+                    </p>
+                    <p
+                      v-if="askUserAnswerText(request.toolCallId)"
+                      class="ps-3 whitespace-pre-wrap text-sm text-foreground"
+                    >
+                      {{ askUserAnswerText(request.toolCallId) }}
+                    </p>
+                  </div>
+                </template>
+
                 <form
-                  v-if="request.status === 'pending' || request.status === 'sending'"
-                  class="space-y-2"
+                  v-else
+                  class="min-w-0 px-3 pt-2.5 pb-3"
                   @submit.prevent="submitAskUser(request)"
                 >
+                  <div class="flex items-start gap-2">
+                    <p class="min-w-0 flex-1 text-xs text-muted-foreground">
+                      {{ t('aiAssistant.local.question') }}
+                    </p>
+                    <span
+                      v-if="request.status !== 'pending'"
+                      class="shrink-0 text-xs text-muted-foreground"
+                      role="status"
+                    >
+                      {{ t(`aiAssistant.local.${request.status}`) }}
+                    </span>
+                    <button
+                      v-if="request.status === 'pending' || request.status === 'sending'"
+                      type="button"
+                      class="-me-1 -mt-1 flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/70 disabled:pointer-events-none disabled:opacity-50"
+                      :disabled="request.status !== 'pending'"
+                      :aria-label="t('aiAssistant.local.cancel')"
+                      :title="t('aiAssistant.local.cancel')"
+                      data-testid="ai-ask-user-cancel"
+                      @click="$emit('ask-user-cancel', request)"
+                    >
+                      <X class="size-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <p
+                    class="mt-1 whitespace-pre-wrap break-words text-sm font-medium text-foreground"
+                  >
+                    {{ request.question }}
+                  </p>
+                  <p
+                    v-if="request.errorMessage"
+                    role="alert"
+                    class="mt-1.5 text-xs text-destructive"
+                  >
+                    {{ request.errorMessage }}
+                  </p>
                   <p
                     v-if="askUserErrors[request.toolCallId]"
                     role="alert"
-                    class="text-xs text-destructive"
+                    class="mt-1.5 text-xs text-destructive"
                   >
                     {{ askUserErrors[request.toolCallId] }}
                   </p>
-                  <label
-                    v-if="request.options && request.selectionMode !== 'multi_select'"
-                    class="block space-y-1 text-sm"
+                  <div
+                    v-if="request.options?.length"
+                    class="mt-2 space-y-0.5"
+                    :role="request.selectionMode === 'multi_select' ? 'group' : 'radiogroup'"
+                    :aria-label="request.question"
                   >
-                    <span>{{ t('aiAssistant.local.chooseAnswer') }}</span>
-                    <Select
-                      :model-value="askUserAnswers[request.toolCallId] as string"
-                      :disabled="request.status !== 'pending'"
-                      @update:model-value="setAskUserAnswer(request.toolCallId, $event)"
-                    >
-                      <SelectTrigger
-                        class="w-full"
-                        :aria-label="t('aiAssistant.local.chooseAnswer')"
-                      >
-                        <SelectValue :placeholder="t('aiAssistant.local.chooseAnswer')" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem
-                          v-for="option in request.options"
-                          :key="option.label"
-                          :value="option.label"
-                        >
-                          {{ option.label }}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </label>
-                  <template v-else-if="request.options && request.selectionMode === 'multi_select'">
-                    <label
+                    <button
                       v-for="option in request.options"
                       :key="option.label"
-                      class="flex items-center gap-2 text-sm"
+                      type="button"
+                      :role="request.selectionMode === 'multi_select' ? 'checkbox' : 'radio'"
+                      :aria-checked="isAskUserOptionSelected(request, option.label)"
+                      :disabled="request.status !== 'pending'"
+                      data-testid="ai-ask-user-option"
+                      class="group flex w-full items-start gap-2.5 rounded-md py-1.5 ps-2 pe-2 text-left outline-none transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary/25 disabled:pointer-events-none disabled:opacity-50"
+                      :class="
+                        isAskUserOptionSelected(request, option.label)
+                          ? 'bg-[hsl(var(--selected)/0.6)] text-foreground'
+                          : 'text-foreground/70 hover:bg-muted/30'
+                      "
+                      @click="selectAskUserOption(request, option.label)"
                     >
-                      <input
-                        v-model="askUserAnswers[request.toolCallId]"
-                        type="checkbox"
-                        :value="option.label"
-                        :disabled="request.status !== 'pending'"
-                      />
-                      {{ option.label }}
-                    </label>
-                  </template>
-                  <Input
-                    v-else
-                    :model-value="String(askUserAnswers[request.toolCallId] ?? '')"
-                    class="w-full rounded border bg-background p-2"
-                    :maxlength="4000"
-                    required
-                    :disabled="request.status !== 'pending'"
-                    @update:model-value="askUserAnswers[request.toolCallId] = String($event)"
-                  />
-                  <div class="flex flex-wrap gap-2">
+                      <span
+                        class="pointer-events-none mt-0.5 flex size-4 shrink-0 items-center justify-center"
+                        aria-hidden="true"
+                      >
+                        <span
+                          class="flex size-4 items-center justify-center border border-foreground/55"
+                          :class="
+                            request.selectionMode === 'multi_select' ? 'rounded-sm' : 'rounded-full'
+                          "
+                        >
+                          <span
+                            v-if="isAskUserOptionSelected(request, option.label)"
+                            class="bg-primary"
+                            :class="
+                              request.selectionMode === 'multi_select'
+                                ? 'size-2.5 rounded-[2px]'
+                                : 'size-2 rounded-full'
+                            "
+                          />
+                        </span>
+                      </span>
+                      <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-medium">{{ option.label }}</span>
+                        <span
+                          v-if="option.description && option.description !== option.label"
+                          class="mt-0.5 block text-xs leading-5 text-muted-foreground"
+                        >
+                          {{ option.description }}
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                  <p
+                    v-if="request.selectionMode === 'multi_select'"
+                    class="mt-1 ps-2 text-xs text-muted-foreground"
+                  >
+                    {{ t('aiAssistant.local.selectAllThatApply') }}
+                  </p>
+                  <label class="mt-2 block space-y-1">
+                    <span class="block text-xs text-muted-foreground">
+                      {{ t('aiAssistant.local.otherAnswer') }}
+                    </span>
+                    <Input
+                      :model-value="askUserFreeText[request.toolCallId] ?? ''"
+                      class="h-8 w-full rounded-md border bg-background px-2 text-sm"
+                      :maxlength="4000"
+                      :disabled="request.status !== 'pending'"
+                      data-testid="ai-ask-user-free-text"
+                      @update:model-value="setAskUserFreeText(request.toolCallId, $event)"
+                    />
+                  </label>
+                  <div
+                    v-if="askUserNeedsSubmit(request)"
+                    class="mt-2 flex flex-wrap items-center gap-2"
+                  >
                     <Button
+                      v-if="request.status === 'pending' || request.status === 'sending'"
                       type="submit"
-                      size="lg"
-                      class="px-3"
+                      size="sm"
                       :disabled="request.status !== 'pending'"
                       data-testid="ai-ask-user-submit"
                     >
                       {{ t('aiAssistant.local.answer') }}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      class="px-3"
-                      :disabled="request.status !== 'pending'"
-                      data-testid="ai-ask-user-cancel"
-                      @click="$emit('ask-user-cancel', request)"
-                    >
-                      {{ t('aiAssistant.local.cancel') }}
                     </Button>
                   </div>
                 </form>
@@ -531,6 +622,8 @@ import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 import { preserveTimelineDisclosure } from '../composables/useTimelineScrollAnchoring';
 import {
   Check,
+  ChevronDown,
+  ChevronRight,
   Copy,
   ClipboardCheck,
   NotebookPen,
@@ -542,17 +635,11 @@ import {
   Settings2,
   Sparkles,
   Target,
+  X,
 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@memoflow/ui-vue-shadcn';
 import type { LocalAgentRequestResponse } from '@memoflow/ai-contracts';
 import AILocalRequestCard from './AILocalRequestCard.vue';
 import AIMessageContent from './AIMessageContent.vue';
@@ -650,23 +737,91 @@ defineExpose({ viewport });
 
 const { t } = useI18n();
 const askUserAnswers = reactive<Record<string, string | string[]>>({});
+const askUserFreeText = reactive<Record<string, string>>({});
 const askUserErrors = reactive<Record<string, string>>({});
+const submittedAskUserAnswers = reactive<Record<string, ChatAskUserAnswer>>({});
+const expandedAnsweredRequests = ref(new Set<string>());
 
-function setAskUserAnswer(toolCallId: string, value: unknown) {
-  askUserAnswers[toolCallId] = typeof value === 'string' ? value : '';
-  if (typeof value === 'string' && value.trim()) delete askUserErrors[toolCallId];
+function setAskUserFreeText(toolCallId: string, value: unknown) {
+  askUserFreeText[toolCallId] = typeof value === 'string' ? value : '';
+  if (askUserFreeText[toolCallId]?.trim()) delete askUserErrors[toolCallId];
 }
 
-function submitAskUser(request: ChatAskUserRequest) {
+/** T3 Code: a typed custom answer replaces selected options. */
+function hasCustomAskUserAnswer(toolCallId: string): boolean {
+  return Boolean(askUserFreeText[toolCallId]?.trim());
+}
+
+function isAskUserOptionSelected(request: ChatAskUserRequest, label: string): boolean {
+  if (hasCustomAskUserAnswer(request.toolCallId)) return false;
   const answer = askUserAnswers[request.toolCallId];
-  if (request.options && request.selectionMode !== 'multi_select') {
-    if (typeof answer !== 'string' || !answer.trim()) {
+  return Array.isArray(answer) ? answer.includes(label) : answer === label;
+}
+
+function selectAskUserOption(request: ChatAskUserRequest, label: string) {
+  if (request.status !== 'pending') return;
+  if (request.selectionMode === 'multi_select') {
+    const current = askUserAnswers[request.toolCallId];
+    const selected = Array.isArray(current) ? current : [];
+    askUserAnswers[request.toolCallId] = selected.includes(label)
+      ? selected.filter((value) => value !== label)
+      : [...selected, label];
+    delete askUserErrors[request.toolCallId];
+    return;
+  }
+  // T3 Code advances a single-select question as soon as its option is clicked.
+  askUserAnswers[request.toolCallId] = label;
+  submitAskUser(request, label);
+}
+
+/** Single-select with options needs no button; multi-select, free text and optionless prompts do. */
+function askUserNeedsSubmit(request: ChatAskUserRequest): boolean {
+  if (request.selectionMode === 'multi_select') return true;
+  if (!request.options?.length) return true;
+  return hasCustomAskUserAnswer(request.toolCallId);
+}
+
+function askUserAnswerText(toolCallId: string): string {
+  const answer = submittedAskUserAnswers[toolCallId];
+  if (answer === undefined) return '';
+  return Array.isArray(answer) ? answer.join(', ') : answer;
+}
+
+function isAnsweredExpanded(toolCallId: string): boolean {
+  return expandedAnsweredRequests.value.has(toolCallId);
+}
+
+function toggleAnsweredExpanded(toolCallId: string) {
+  const next = new Set(expandedAnsweredRequests.value);
+  if (next.has(toolCallId)) next.delete(toolCallId);
+  else next.add(toolCallId);
+  expandedAnsweredRequests.value = next;
+}
+
+function submitAskUser(request: ChatAskUserRequest, explicitAnswer?: ChatAskUserAnswer) {
+  if (request.status !== 'pending') return;
+  const freeText = askUserFreeText[request.toolCallId]?.trim();
+  let answer: ChatAskUserAnswer;
+  if (freeText) {
+    answer = freeText;
+  } else if (request.selectionMode === 'multi_select') {
+    const selected = askUserAnswers[request.toolCallId];
+    if (!Array.isArray(selected) || selected.length === 0) {
       askUserErrors[request.toolCallId] = t('aiAssistant.local.answerRequired');
       return;
     }
-    delete askUserErrors[request.toolCallId];
+    answer = [...selected];
+  } else {
+    const selected = explicitAnswer ?? askUserAnswers[request.toolCallId];
+    if (typeof selected !== 'string' || !selected.trim()) {
+      askUserErrors[request.toolCallId] = t('aiAssistant.local.answerRequired');
+      return;
+    }
+    answer = selected;
   }
-  emit('ask-user-answer', request, answer ?? '');
+  delete askUserErrors[request.toolCallId];
+  submittedAskUserAnswers[request.toolCallId] = answer;
+  emit('ask-user-answer', request, answer);
 }
 
 const { getMessageStatusLabel, formatMessageTimestamp, formatMessageTimestampTooltip } =

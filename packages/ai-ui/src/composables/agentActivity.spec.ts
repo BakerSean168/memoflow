@@ -342,13 +342,11 @@ describe('Pure timeline / turn projection (T3 alignment)', () => {
     if (turn.kind !== 'assistant-turn') return;
     expect(turn.approvals).toHaveLength(1);
     expect(turn.records.map((r) => r.id)).toEqual(['tool:call-read', 'tool:call-write']);
-    expect(turn.foldRow).toMatchObject({
-      status: 'completed',
-      elapsedMs: 4_200,
-      expanded: false,
-      collapsible: true,
-    });
+    // A clean completion keeps no working row and no "Worked for" fold; the reply's
+    // own timestamp is the only remaining time signal.
+    expect(turn.foldRow).toBeNull();
     expect(turn.workRows).toEqual([]);
+    expect(turn.elapsedMs).toBe(4_200);
     expect(turn.messages.map((m) => m.item.content)).toEqual(['Routine created.']);
 
     const expandedRows = deriveChatTimelineRows({
@@ -362,7 +360,8 @@ describe('Pure timeline / turn projection (T3 alignment)', () => {
     });
     const expandedTurn = expandedRows[1]!;
     if (expandedTurn.kind !== 'assistant-turn') return;
-    expect(expandedTurn.workRows.map((r) => r.kind)).toEqual(['work-toggle']);
+    expect(expandedTurn.foldRow).toBeNull();
+    expect(expandedTurn.workRows).toEqual([]);
   });
 
   it('keeps failed turns and failed tool groups unfolded by default and allows collapsing them', () => {

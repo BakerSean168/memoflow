@@ -53,7 +53,7 @@ describe('AIActivityTimeline', () => {
     wrapper.unmount();
   });
 
-  it('shows live Working timer via shared secondTick and transitions to Worked for without leaking timers', async () => {
+  it('shows live Working timer via shared secondTick and drops it on a clean completion', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(10_000);
     const timedItem: ChatItem = {
@@ -83,7 +83,9 @@ describe('AIActivityTimeline', () => {
       terminalObserved: true,
     });
     await wrapper.setProps({ item: settled });
-    expect(wrapper.get('[data-testid="ai-agent-phase"]').text()).toBe('Worked for 4.2s');
+    // T3 keeps only the reply's own timestamp once the turn completes.
+    expect(wrapper.find('[data-testid="ai-agent-phase"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('Worked for');
     expect(vi.getTimerCount()).toBe(0);
     wrapper.unmount();
   });
@@ -146,7 +148,7 @@ describe('AIActivityTimeline', () => {
     wrapper.unmount();
   });
 
-  it('renders localized stopped/worked labels and degrades cleanly without fabricated numbers on legacy history', async () => {
+  it('renders localized stopped labels and hides legacy completed-work history without fabricated numbers', async () => {
     const stoppedItem: ChatItem = {
       id: 'stopped-1',
       role: 'assistant',
@@ -172,7 +174,8 @@ describe('AIActivityTimeline', () => {
       toolActivities: [{ toolCallId: 't1', toolName: 'knowledge_search', state: 'completed' }],
     };
     const legacy = render(legacyItem, 'en-US');
-    expect(legacy.get('[data-testid="ai-agent-phase"]').text()).toBe('Worked');
+    // Legacy completed turns carry no working row either; nothing is fabricated.
+    expect(legacy.find('[data-testid="ai-agent-phase"]').exists()).toBe(false);
     expect(legacy.text()).not.toMatch(/\d+(ms|s|m|h)/);
     legacy.unmount();
   });

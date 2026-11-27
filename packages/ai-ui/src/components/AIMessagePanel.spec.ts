@@ -3,7 +3,6 @@ installAiUiHost();
 import { describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { Select } from '@memoflow/ui-vue-shadcn';
 import AIMessagePanel from './AIMessagePanel.vue';
 import { semanticElevationClass } from '@ai-ui-test-host/shared/constants/semantic-elevation';
 import enAI from '@ai-ui-test-host/locales/en-US/aiAssistant';
@@ -26,6 +25,9 @@ const i18n = createI18n({
           expired: 'Expired',
           answer: 'Send answer',
           chooseAnswer: 'Choose answer',
+          otherAnswer: 'Other answer',
+          selectAllThatApply: 'Select all that apply',
+          question: 'Additional information requested',
           answerRequired: 'Choose an answer before sending.',
           cancel: 'Cancel',
         },
@@ -253,7 +255,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     wrapper.unmount();
   });
 
-  it('renders an Ask User prompt with selection and answer/cancel actions', async () => {
+  it('renders a T3-style Ask User option card where single-select clicks answer immediately', async () => {
     const wrapper = mount(AIMessagePanel, {
       props: {
         timeline: [
@@ -280,9 +282,10 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
       global: { plugins: [i18n] },
     });
     expect(wrapper.get('[data-testid="ai-ask-user-request"]').text()).toContain('Choose a target');
-    wrapper.findComponent(Select).vm.$emit('update:modelValue', 'Long term');
-    await wrapper.vm.$nextTick();
-    await wrapper.get('form').trigger('submit');
+    const options = wrapper.findAll('[data-testid="ai-ask-user-option"]');
+    expect(options).toHaveLength(2);
+    expect(options[0]?.attributes('role')).toBe('radio');
+    await options[1]!.trigger('click');
     expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([
       { toolCallId: 'ask-1' },
       'Long term',
@@ -292,7 +295,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     wrapper.unmount();
   });
 
-  it('blocks an empty Ask User selection with a visible alert', async () => {
+  it('lets multi-select cards collect options and blocks an empty submission with a visible alert', async () => {
     const wrapper = mount(AIMessagePanel, {
       props: {
         timeline: [
@@ -308,7 +311,7 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
                 conversationId: 'conversation-1',
                 question: 'Choose a target',
                 options: [{ label: 'Near term' }, { label: 'Long term' }],
-                selectionMode: 'single_select',
+                selectionMode: 'multi_select',
                 status: 'pending',
               },
             ],
@@ -323,13 +326,63 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
     expect(wrapper.emitted('ask-user-answer')).toBeUndefined();
     expect(wrapper.get('[role="alert"]').text()).toBe('Choose an answer before sending.');
 
-    wrapper.findComponent(Select).vm.$emit('update:modelValue', 'Near term');
-    await wrapper.vm.$nextTick();
+    const options = wrapper.findAll('[data-testid="ai-ask-user-option"]');
+    expect(options[0]?.attributes('role')).toBe('checkbox');
+    await options[0]!.trigger('click');
+    await options[1]!.trigger('click');
+    expect(options[0]?.attributes('aria-checked')).toBe('true');
     await wrapper.get('form').trigger('submit');
     expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([
       { toolCallId: 'ask-empty' },
-      'Near term',
+      ['Near term', 'Long term'],
     ]);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('accepts a free-text answer and collapses an answered question into a summary', async () => {
+    const request = {
+      toolCallId: 'ask-free',
+      runId: 'run-2',
+      conversationId: 'conversation-1',
+      question: 'Which workspace should I update?',
+      options: [{ label: 'Work' }, { label: 'Personal' }],
+      selectionMode: 'single_select' as const,
+    };
+    const timelineFor = (status: 'pending' | 'answered') => [
+      {
+        id: 'assistant-ask-free',
+        role: 'assistant' as const,
+        content: '',
+        status: 'generating' as const,
+        askUserRequests: [{ ...request, status }],
+      },
+    ];
+    const wrapper = mount(AIMessagePanel, {
+      props: { timeline: timelineFor('pending'), toolMode: 'chat' },
+      global: { plugins: [i18n] },
+    });
+
+    // Typing overrides option selection, mirroring T3's composer custom answer.
+    await wrapper.get('[data-testid="ai-ask-user-free-text"]').setValue('Use the archive vault');
+    expect(
+      wrapper.findAll('[data-testid="ai-ask-user-option"]')[0]?.attributes('aria-checked'),
+    ).toBe('false');
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([
+      { toolCallId: 'ask-free' },
+      'Use the archive vault',
+    ]);
+
+    await wrapper.setProps({ timeline: timelineFor('answered') });
+    const summary = wrapper.get('[data-testid="ai-ask-user-summary-toggle"]');
+    expect(summary.text()).toContain('Which workspace should I update?');
+    expect(summary.text()).toContain('Use the archive vault');
+    expect(wrapper.find('[data-testid="ai-ask-user-history"]').exists()).toBe(false);
+    await summary.trigger('click');
+    expect(wrapper.get('[data-testid="ai-ask-user-history"]').text()).toContain(
+      'Use the archive vault',
+    );
     wrapper.unmount();
   });
 
@@ -562,7 +615,7 @@ describe('Assistant inline tool decisions', () => {
     wrapper.unmount();
   });
 
-  it('aggregates same-run receipts and replies with collapsible Worked for log and user hover copy', async () => {
+  it('aggregates same-run receipts and replies without a settled Worked for log, keeping user hover copy', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -618,16 +671,9 @@ describe('Assistant inline tool decisions', () => {
     // 2 grouped user messages + 1 aggregated assistant turn = 3 articles
     expect(wrapper.findAll('article')).toHaveLength(3);
     expect(wrapper.get('[data-testid="ai-tool-approval"]').text()).toContain('Create a routine');
-    expect(wrapper.get('[data-testid="ai-agent-phase"]').text()).toBe('Worked for 3.5s');
+    // A clean completion drops the working row and its duration fold entirely.
+    expect(wrapper.find('[data-testid="ai-agent-phase"]').exists()).toBe(false);
     expect(wrapper.find('[data-testid="ai-agent-history"]').exists()).toBe(false);
-
-    // Expand turn-fold -> reveals work-toggle -> expand work-toggle -> reveals tool list
-    await wrapper.get('[data-testid="ai-agent-phase"]').trigger('click');
-    await wrapper.get('[data-testid="ai-work-group-toggle"]').trigger('click');
-    const historyItems = wrapper.findAll('[data-testid="ai-tool-history"]');
-    expect(historyItems).toHaveLength(2);
-    expect(historyItems[0]?.text()).toContain('Searching knowledge');
-    expect(historyItems[1]?.text()).toContain('Create a routine');
 
     // User message hover/focus copy action works
     const userCopies = wrapper.findAll('[data-testid="ai-user-message-copy"]');
