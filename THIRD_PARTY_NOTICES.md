@@ -101,10 +101,13 @@ identify the Pi coding agent integration and claims no endorsement.
 
 AFFiNE, Bitwarden, Notesnook, Anytype, AppFlowy, Steam Offline Mode, Electron safeStorage, and Joplin E2EE were used only as architecture and product-behavior references. No source code was copied from these projects in this rewrite.
 
-## T3 Code Composer
+## T3 Code Composer & Chat Timeline Projection
 
-- Source: https://github.com/pingdotgg/t3code (revision f9b19a7f8).
-- Use: Adapted the custom atomic inline mention and attachment-path prompt patterns to MemoFlow Vue and native Agent runtime. ComposerSurface Shell/Host/Main, FooterControls and PrimaryActions were additionally adapted to Vue 3 in AIFooterComposerSurface.vue, AIFooterComposerFooterControls.vue and AIFooterComposerPrimaryActions.vue from revision 0b42e2e2febf51627d6c150be686c02d26ef2739.
+- Source: https://github.com/pingdotgg/t3code (revisions `f9b19a7f8` and `0b42e2e2febf51627d6c150be686c02d26ef2739`).
+- Use:
+  - Adapted the custom atomic inline mention and attachment-path prompt patterns to MemoFlow Vue and native Agent runtime.
+  - Adapted ComposerSurface Shell/Host/Main, FooterControls and PrimaryActions to Vue 3 in `AIFooterComposerSurface.vue`, `AIFooterComposerFooterControls.vue` and `AIFooterComposerPrimaryActions.vue` from revision `0b42e2e2febf51627d6c150be686c02d26ef2739`.
+  - Adapted the pure chat timeline/turn projection (`MessagesTimeline.logic.ts`), work-group/working row presentation (`TimelineWorkGroupRows.tsx`, `TimelineWorkEntryRow.tsx`), shared `secondTick` clock (`clock.ts`), and duration formatting (`orchestrationTimingCopy.ts`) into `packages/ai-ui/src/composables/agentActivity.ts`, `packages/ai-ui/src/components/AIWorkGroupRows.vue`, and `packages/ai-ui/src/components/AIMessagePanel.vue`.
 - License: MIT.
 
 ```text
