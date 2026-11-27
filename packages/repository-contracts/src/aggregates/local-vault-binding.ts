@@ -195,13 +195,3 @@ export const LocalVaultGitChangesSchema = z.object({
   observedAt: z.number(),
 });
 export type LocalVaultGitChanges = z.infer<typeof LocalVaultGitChangesSchema>;
-
-/** Bounded unified diff for one vault-relative path (read-only observation). */
-export const LocalVaultGitDiffSchema = z.object({
-  relativePath: z.string(),
-  state: z.enum(['ready', 'not-repository', 'unavailable']),
-  patch: z.string(),
-  truncated: z.boolean(),
-  observedAt: z.number(),
-});
-export type LocalVaultGitDiff = z.infer<typeof LocalVaultGitDiffSchema>;

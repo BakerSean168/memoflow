@@ -21,6 +21,23 @@ export interface KnowledgeBusinessLink {
   title: string;
 }
 
+/**
+ * Structured, desensitized read failure. Stage names the request that failed and
+ * `code` carries the transport error code (or error type), never user content.
+ */
+export interface KnowledgeLinkFailure {
+  stage: 'relations' | 'goal-title' | 'read';
+  code: string;
+  documentId?: string;
+  subjectId?: string;
+}
+
+/** Read outcome for a batch of stable document refs; `links` holds every confirmed link. */
+export interface KnowledgeBusinessLinks {
+  links: KnowledgeBusinessLink[];
+  failures: KnowledgeLinkFailure[];
+}
+
 export interface RepositoryUiHost extends PlatformRendererHost {
   REPOSITORY_SERVICE_KEY: InjectionKey<RepositoryClientPort>;
   DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge>;
@@ -37,7 +54,7 @@ export interface RepositoryUiHost extends PlatformRendererHost {
   };
   useKnowledgeBusinessLinks(): (
     documents: KnowledgeDocumentRef[],
-  ) => Promise<KnowledgeBusinessLink[]>;
+  ) => Promise<KnowledgeBusinessLinks>;
   stripMarkdownFrontmatter(source: string): string;
   renderSafeMarkdown(source: string): string;
   recentKnowledgeQueryKeys: {

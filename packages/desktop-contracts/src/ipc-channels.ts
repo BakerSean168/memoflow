@@ -279,7 +279,6 @@ export const RepositoryChannels = {
   LOCAL_VAULT_DETACH: 'repository:local-vault:detach',
   LOCAL_VAULT_SCAN: 'repository:local-vault:scan',
   LOCAL_VAULT_GIT_CHANGES: 'repository:local-vault:git-changes',
-  LOCAL_VAULT_GIT_DIFF: 'repository:local-vault:git-diff',
   LOCAL_VAULT_WRITES: 'repository:local-vault:writes',
   LOCAL_VAULT_NOTE_READ: 'repository:local-vault:note:read',
   LOCAL_VAULT_SEARCH: 'repository:local-vault:search',

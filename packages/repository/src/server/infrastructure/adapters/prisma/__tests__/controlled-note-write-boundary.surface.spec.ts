@@ -107,11 +107,14 @@ describe('controlled note-write boundary surface', () => {
     expect(localVaultRuntime).not.toMatch(/open\(candidate,\s*'a'/);
 
     expect(electronIndex).toContain('LOCAL_VAULT_NOTE_WRITE');
-    expect(electronIndex).toContain('LOCAL_VAULT_GIT_DIFF');
+    expect(electronIndex).not.toContain('LOCAL_VAULT_GIT_DIFF');
     expect(repositoryChannels).toContain(
       "LOCAL_VAULT_NOTE_WRITE: 'repository:local-vault:note:write'",
     );
-    expect(repositoryChannels).toContain("LOCAL_VAULT_GIT_DIFF: 'repository:local-vault:git-diff'");
+    expect(repositoryChannels).not.toContain('LOCAL_VAULT_GIT_DIFF');
+    // The inline Git diff view is retired; Git status reads survive for the notes list.
+    expect(localVaultRuntime).toContain('getGitChanges');
+    expect(localVaultRuntime).not.toContain('getGitDiff');
   });
 
   it('confirmed-create DTOs and AI schema require proposal confirmation', () => {

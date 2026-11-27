@@ -1,5 +1,4 @@
 import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
-import type { LocalVaultGitDiff } from '@memoflow/repository-contracts';
 import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 /**
  * Repository API Client Port
@@ -145,7 +144,6 @@ export interface IRepositoryApiClient {
   ): Promise<Result<LocalVaultBindingSnapshotDTO | null>>;
   detachLocalVault(): Promise<Result<void>>;
   getLocalVaultGitChanges(): Promise<Result<LocalVaultGitChanges>>;
-  getLocalVaultGitDiff(relativePath: string): Promise<Result<LocalVaultGitDiff>>;
   scanLocalVault(): Promise<Result<ScanLocalVaultRes>>;
   listLocalVaultWrites(): Promise<Result<LocalVaultWriteReceipt[]>>;
   readLocalVaultNote(request: ReadLocalVaultNoteReq): Promise<Result<ReadLocalVaultNoteRes>>;

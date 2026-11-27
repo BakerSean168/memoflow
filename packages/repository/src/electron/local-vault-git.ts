@@ -1,15 +1,10 @@
 import { execFile } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
-import type {
-  LocalVaultGitChange,
-  LocalVaultGitChanges,
-  LocalVaultGitDiff,
-} from '@memoflow/repository-contracts';
+import type { LocalVaultGitChange, LocalVaultGitChanges } from '@memoflow/repository-contracts';
 
 const runFile = promisify(execFile);
 const ignored = new Set(['.git', '.obsidian', '.trash', '.Trash', 'node_modules']);
-const MAX_DIFF_BYTES = 256 * 1024;
 
 /** Porcelain -z uses repository-relative paths; rename records put the destination first. */
 export function parseVaultGitStatus(
@@ -97,72 +92,6 @@ export async function readVaultGitChanges(
     return {
       state: /not a git repository/i.test(stderr) ? 'not-repository' : 'unavailable',
       changes: [],
-    };
-  }
-}
-
-/**
- * Read the working-tree patch for one vault-relative Markdown path.
- *
- * `git diff HEAD` includes staged and unstaged edits; an untracked file has no
- * HEAD side, so its full content is rendered through `--no-index /dev/null`.
- * The result is bounded and never mutates the repository.
- */
-export async function readVaultGitDiff(
-  vaultRoot: string,
-  relativePath: string,
-): Promise<Pick<LocalVaultGitDiff, 'state' | 'patch' | 'truncated'>> {
-  const env: NodeJS.ProcessEnv = { ...process.env, GIT_OPTIONAL_LOCKS: '0' };
-  for (const key of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_COMMON_DIR'])
-    delete env[key];
-  const git = (...args: string[]) =>
-    runFile(
-      'git',
-      ['-c', 'core.fsmonitor=false', '-c', 'core.untrackedCache=false', '-C', vaultRoot, ...args],
-      { env, timeout: 10_000, maxBuffer: 8 * 1024 * 1024, encoding: 'utf8', windowsHide: true },
-    );
-  const bound = (patch: string) => {
-    const bytes = Buffer.byteLength(patch, 'utf8');
-    if (bytes <= MAX_DIFF_BYTES) return { patch, truncated: false };
-    return {
-      patch: Buffer.from(patch, 'utf8').subarray(0, MAX_DIFF_BYTES).toString('utf8'),
-      truncated: true,
-    };
-  };
-  try {
-    await git('rev-parse', '--show-toplevel');
-    let patch = '';
-    const tracked = await git('ls-files', '--error-unmatch', '--', relativePath).then(
-      () => true,
-      () => false,
-    );
-    if (tracked) {
-      patch = (await git('diff', 'HEAD', '--no-color', '--unified=3', '--', relativePath)).stdout;
-    } else {
-      try {
-        patch = (
-          await git(
-            'diff',
-            '--no-index',
-            '--no-color',
-            '--unified=3',
-            '--',
-            '/dev/null',
-            relativePath,
-          )
-        ).stdout;
-      } catch (error) {
-        // `--no-index` exits 1 when the file differs; the patch is still valid.
-        patch = (error as { stdout?: string }).stdout ?? '';
-      }
-    }
-    return { state: 'ready', ...bound(patch) };
-  } catch (error) {
-    const stderr = (error as { stderr?: string }).stderr ?? '';
-    return {
-      state: /not a git repository/i.test(stderr) ? 'not-repository' : 'unavailable',
-      patch: '',
-      truncated: false,
     };
   }
 }

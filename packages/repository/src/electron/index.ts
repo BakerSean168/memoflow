@@ -111,12 +111,6 @@ export function createRepositoryElectronModule(
           withAuthenticatedValue(ctx, () => withLocalVault((port) => port.getGitChanges())),
         );
         installed.push(RepositoryChannels.LOCAL_VAULT_GIT_CHANGES);
-        ipcMain.handle(RepositoryChannels.LOCAL_VAULT_GIT_DIFF, (_, request) =>
-          withAuthenticatedValue(ctx, () =>
-            withLocalVault((port) => port.getGitDiff(request?.relativePath ?? '')),
-          ),
-        );
-        installed.push(RepositoryChannels.LOCAL_VAULT_GIT_DIFF);
         ipcMain.handle(RepositoryChannels.LOCAL_VAULT_SCAN, (_) =>
           withAuthenticatedValue(ctx, () => withLocalVault((port) => port.scanVault())),
         );

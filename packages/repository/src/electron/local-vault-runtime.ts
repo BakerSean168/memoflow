@@ -1,6 +1,6 @@
 import type { LocalVaultGitChanges } from '@memoflow/repository-contracts';
-import { readVaultGitChanges, readVaultGitDiff } from './local-vault-git';
-import type { LocalVaultGitDiff, LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
+import { readVaultGitChanges } from './local-vault-git';
+import type { LocalVaultWriteReceipt } from '@memoflow/repository-contracts';
 import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -183,7 +183,6 @@ export interface LocalVaultElectronPort {
    * `requestId`.
    */
   writeNote(request: LocalVaultNoteWriteReq): Promise<LocalVaultNoteWriteRes>;
-  getGitDiff(relativePath: string): Promise<LocalVaultGitDiff>;
   inspectSyncContent(): Promise<KnowledgeRepositoryContentState>;
   dispose(): Promise<void>;
 }
@@ -464,14 +463,6 @@ export class LocalVaultRuntime implements LocalVaultElectronPort {
     const observation = await readVaultGitChanges(scope.root);
     this.assertScope(scope);
     return { bindingId: scope.binding.id, ...observation, observedAt: this.now() };
-  }
-
-  async getGitDiff(relativePathValue: string): Promise<LocalVaultGitDiff> {
-    const scope = await this.captureScope();
-    const relativePath = normalizeRelativeMarkdownPath(relativePathValue);
-    const observation = await readVaultGitDiff(scope.root, relativePath);
-    this.assertScope(scope);
-    return { relativePath, ...observation, observedAt: this.now() };
   }
 
   async scanVault(): Promise<ScanLocalVaultRes> {
