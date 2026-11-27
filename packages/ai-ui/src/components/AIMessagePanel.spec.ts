@@ -10,6 +10,7 @@ import enAI from '@ai-ui-test-host/locales/en-US/aiAssistant';
 import zhAI from '@ai-ui-test-host/locales/zh-CN/aiAssistant';
 import { setItemRunTiming } from '../composables/agentActivity';
 import type { ChatItem } from '../composables/types';
+import { resolveDisclosureRevealScrollDelta } from '../composables/useTimelineScrollAnchoring';
 
 const i18n = createI18n({
   legacy: false,
@@ -566,5 +567,15 @@ describe('Assistant inline tool decisions', () => {
     await userCopies[0]!.trigger('click');
     expect(writeText).toHaveBeenCalledWith('First prompt');
     wrapper.unmount();
+  });
+});
+
+// Geometry regression cases from T3's disclosure reveal contract.
+describe('disclosure reading anchor', () => {
+  it('reveals only the hidden portion while keeping the disclosure header visible', () => {
+    expect(resolveDisclosureRevealScrollDelta(80, 580, 0, 500)).toBe(56);
+    expect(resolveDisclosureRevealScrollDelta(200, 530, 0, 500)).toBe(30);
+    expect(resolveDisclosureRevealScrollDelta(10, 800, 0, 500)).toBe(0);
+    expect(resolveDisclosureRevealScrollDelta(80, 450, 0, 500)).toBe(0);
   });
 });

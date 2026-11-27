@@ -107,6 +107,7 @@ AFFiNE, Bitwarden, Notesnook, Anytype, AppFlowy, Steam Offline Mode, Electron sa
 - Use:
   - Adapted the custom atomic inline mention and attachment-path prompt patterns to MemoFlow Vue and native Agent runtime.
   - Adapted ComposerSurface Shell/Host/Main, FooterControls and PrimaryActions to Vue 3 in `AIFooterComposerSurface.vue`, `AIFooterComposerFooterControls.vue` and `AIFooterComposerPrimaryActions.vue` from revision `0b42e2e2febf51627d6c150be686c02d26ef2739`.
+  - Adapted visible text reading anchors, near-end follow/re-arm, disclosure preservation and bounded per-conversation position memory from `lib/preserveReadingPosition.ts`, `components/chat/MessagesTimeline.tsx` and `components/chat/timelineScrollAnchoring.ts` into `packages/ai-ui/src/composables/useTimelineScrollAnchoring.ts` (same fixed revision; MIT notice below).
   - Adapted the pure chat timeline/turn projection (`MessagesTimeline.logic.ts`), work-group/working row presentation (`TimelineWorkGroupRows.tsx`, `TimelineWorkEntryRow.tsx`), shared `secondTick` clock (`clock.ts`), and duration formatting (`orchestrationTimingCopy.ts`) into `packages/ai-ui/src/composables/agentActivity.ts`, `packages/ai-ui/src/components/AIWorkGroupRows.vue`, and `packages/ai-ui/src/components/AIMessagePanel.vue`.
 
 ## T3 Code Composer, Sidebar, and List Motion
