@@ -702,16 +702,22 @@ export function useAssistantStream(input: {
 
       userDraftId = `user-draft-${Date.now()}`;
       assistantDraftId = `assistant-draft-${Date.now()}`;
+      const draftCreatedAt = Date.now();
       chatTimeline.value.push(
         {
           id: userDraftId,
           role: 'user',
           content: pendingUserMessage,
+          createdAt: draftCreatedAt,
           ...(pendingAttachments.length
             ? {
                 attachments: pendingAttachments.map((attachment) => ({
                   mediaType: attachment.mediaType,
                   ...(attachment.filename ? { filename: attachment.filename } : {}),
+                  // The live turn keeps the picture; persisted history only carries metadata.
+                  ...(attachment.mediaType.startsWith('image/')
+                    ? { previewDataUrl: attachment.data }
+                    : {}),
                 })),
               }
             : {}),
@@ -721,6 +727,7 @@ export function useAssistantStream(input: {
           id: assistantDraftId,
           role: 'assistant',
           content: '',
+          createdAt: draftCreatedAt,
           status: 'generating',
         },
       );

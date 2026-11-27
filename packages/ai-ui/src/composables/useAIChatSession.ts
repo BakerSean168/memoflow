@@ -327,6 +327,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
         id: `workflow-user-draft-${Date.now()}`,
         role: 'user',
         content: pendingContent,
+        createdAt: Date.now(),
         status: 'success',
       });
       chatMessage.value = '';

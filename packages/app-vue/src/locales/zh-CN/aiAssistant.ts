@@ -241,6 +241,8 @@ export default {
     message: {
       copy: '复制',
       copied: '已复制',
+      edit: '编辑消息',
+      yesterdayAt: '昨天 {time}',
     },
     context: {
       title: '上下文',

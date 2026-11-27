@@ -98,6 +98,11 @@ export type MessageStatus = 'generating' | 'success' | 'error' | 'aborted' | 'in
 export type ChatAttachmentView = {
   mediaType: string;
   filename?: string;
+  /**
+   * Client-local data URL for the live turn only. Persisted history intentionally
+   * projects attachments down to metadata, so this never survives a reload.
+   */
+  previewDataUrl?: string;
 };
 
 export type ComposerAttachment = AssistantRuntimeAttachment & {
@@ -138,6 +143,8 @@ export type ChatItem = {
   role: 'user' | 'assistant';
   content: string;
   status: MessageStatus;
+  /** Message creation time (epoch ms); absent for items the runtime did not timestamp. */
+  createdAt?: number;
   attachments?: ChatAttachmentView[];
   errorMessage?: string;
   workflowInterruption?: {

@@ -79,15 +79,21 @@
       </div>
     </div>
 
-    <section class="@container/ai flex min-w-0 flex-1 flex-col overflow-hidden">
+    <section
+      class="@container/ai flex min-w-0 flex-1 flex-col overflow-hidden bg-[hsl(var(--surface-sunken))]"
+    >
+      <!--
+        T3 Code ChatHeader at 0b42e2e2: a single breadcrumb line on the chat canvas.
+        No product icon, no model badge, no divider — the title sits on the page.
+      -->
       <header
         v-show="!composerOnly"
-        class="flex h-9 shrink-0 items-center border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.58)] px-4 @md/ai:px-5"
+        class="flex h-9 shrink-0 items-center px-4 @md/ai:px-5"
         data-testid="ai-chat-header"
       >
         <div class="flex w-full items-center justify-between gap-3">
           <div class="flex min-w-0 items-center gap-2">
-            <h1 class="truncate text-[13px] font-semibold tracking-[-0.01em] text-foreground">
+            <h1 class="min-w-0 truncate text-sm font-medium text-foreground">
               {{ currentConversationLabel }}
             </h1>
             <span
@@ -141,9 +147,6 @@
         :tool-mode="toolMode"
         :has-models="modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'"
         :can-capture-knowledge="localAssistant.canSaveNote"
-        :can-save-local-note="
-          runtimeChoice.runtimeKind === 'local_agent' && localAssistant.canSaveNote
-        "
         @select-shortcut="handleWelcomeShortcut"
         @configure-ai="openAISettings"
         @create-goal="openGoalWithoutAI"
@@ -152,7 +155,7 @@
         @native-response="respondNativeRequest"
         @ask-user-answer="answerAskUser"
         @ask-user-cancel="cancelAskUser"
-        @save-local-note="localAssistant.saveNote"
+        @edit-message="editUserMessage"
       >
         <template #workflow-surface>
           <section
@@ -687,6 +690,16 @@ function stopGenerating() {
   composerWorkflowEpoch++;
   if (toolMode.value === 'goal-create') void cancelGoalAgentRun();
   else stopGeneratingBase();
+}
+
+/**
+ * T3 Code's user message actions include an edit affordance. MemoFlow has no
+ * turn revert, so editing restores the text into the composer for resubmission.
+ */
+function editUserMessage(content: string) {
+  if (!content.trim()) return;
+  chatMessage.value = content;
+  void nextTick(() => composerRef.value?.composerTextarea?.focus());
 }
 
 async function handleComposerSend() {

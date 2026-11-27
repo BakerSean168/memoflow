@@ -262,6 +262,8 @@ export default {
     message: {
       copy: 'Copy',
       copied: 'Copied',
+      edit: 'Edit message',
+      yesterdayAt: 'yesterday at {time}',
     },
     context: {
       title: 'Context',
