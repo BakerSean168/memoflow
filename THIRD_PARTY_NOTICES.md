@@ -104,7 +104,7 @@ AFFiNE, Bitwarden, Notesnook, Anytype, AppFlowy, Steam Offline Mode, Electron sa
 ## T3 Code Composer
 
 - Source: https://github.com/pingdotgg/t3code (revision f9b19a7f8).
-- Use: Adapted the custom atomic inline mention and attachment-path prompt patterns to MemoFlow Vue and native Agent runtime.
+- Use: Adapted the custom atomic inline mention and attachment-path prompt patterns to MemoFlow Vue and native Agent runtime. ComposerSurface Shell/Host/Main, FooterControls and PrimaryActions were additionally adapted to Vue 3 in AIFooterComposerSurface.vue, AIFooterComposerFooterControls.vue and AIFooterComposerPrimaryActions.vue from revision 0b42e2e2febf51627d6c150be686c02d26ef2739.
 - License: MIT.
 
 ```text
