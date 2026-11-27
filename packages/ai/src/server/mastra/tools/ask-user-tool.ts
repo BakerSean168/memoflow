@@ -39,12 +39,7 @@ export const ASK_USER_TOOL_DESCRIPTION = [
 ].join('\n');
 
 const askUserOptionSchema = z.object({
-  label: z
-    .string()
-    .trim()
-    .min(1)
-    .max(MAX_LABEL_CHARS)
-    .describe('Concise display text, 1-5 words.'),
+  label: z.string().trim().min(1).max(MAX_LABEL_CHARS).describe('Concise display text, 1-5 words.'),
   description: z
     .string()
     .trim()
@@ -123,10 +118,7 @@ function readSelectionMode(value: unknown): 'single_select' | 'multi_select' | n
   return value === 'single_select' || value === 'multi_select' ? value : null;
 }
 
-function readQuestion(
-  value: unknown,
-  index: number,
-): AssistantRuntimeAskUserQuestion | null {
+function readQuestion(value: unknown, index: number): AssistantRuntimeAskUserQuestion | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   const record = value as Record<string, unknown>;
   const question = typeof record.question === 'string' ? record.question.trim() : '';
@@ -196,7 +188,8 @@ export function buildAskUserAnswers(
   if (command.answers !== undefined) {
     const expected = new Set(questions.map((question) => question.question));
     const received = Object.keys(command.answers);
-    if (received.length !== expected.size || received.some((key) => !expected.has(key))) return null;
+    if (received.length !== expected.size || received.some((key) => !expected.has(key)))
+      return null;
     for (const question of questions) {
       const value = command.answers[question.question];
       if (value === undefined || !answerValueMatches(question, value)) return null;
