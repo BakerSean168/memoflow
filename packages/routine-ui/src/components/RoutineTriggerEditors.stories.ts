@@ -117,17 +117,15 @@ export const WallClock: Story = {
       };
     },
     template: `
-      <div style="width: 100%; max-width: 640px;">
-        <WallClockTriggerEditor
-          v-bind="args"
-          v-model:localTime="localTime"
-          v-model:startDate="startDate"
-          v-model:frequency="frequency"
-          v-model:recurrenceInterval="recurrenceInterval"
-          v-model:selectedWeekdays="selectedWeekdays"
-          v-model:timeZone="timeZone"
-        />
-      </div>
+      <WallClockTriggerEditor
+        v-bind="args"
+        v-model:localTime="localTime"
+        v-model:startDate="startDate"
+        v-model:frequency="frequency"
+        v-model:recurrenceInterval="recurrenceInterval"
+        v-model:selectedWeekdays="selectedWeekdays"
+        v-model:timeZone="timeZone"
+      />
     `,
   }),
 };

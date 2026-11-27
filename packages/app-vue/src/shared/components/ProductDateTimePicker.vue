@@ -14,8 +14,6 @@
     <template v-if="description" #description>{{ description }}</template>
     <ProductDateTimePickerFields
       v-model:calendar-placeholder="calendarPlaceholder"
-      v-model:hour-draft="hourDraft"
-      v-model:minute-draft="minuteDraft"
       :selected-date="selectedDate"
       :product-locale="productLocale"
       :week-starts-on="weekStartsOn"
@@ -24,14 +22,15 @@
       :return-to-today-label="returnToTodayLabel"
       :time-label="timeLabel"
       :time-zone-label="timeZoneLabel"
+      :time-value="seededTime"
+      :time-sync-key="timeSyncKey"
       :hour-label="hourLabel"
       :minute-label="minuteLabel"
+      :disabled="disabled"
       :validation-message="validationMessage"
       :preview-label="previewLabel"
       @select-day="handleCalendarValue"
-      @normalize-numeric="normalizeNumericDraft"
-      @normalize-clock="normalizeClockPart"
-      @adjust-clock="adjustClockPart"
+      @update:time-draft="handleTimeDraft"
     />
     <template #footer>
       <Button type="button" variant="ghost" size="sm" @click="setOpen(false)">
@@ -72,8 +71,6 @@
 
       <ProductDateTimePickerFields
         v-model:calendar-placeholder="calendarPlaceholder"
-        v-model:hour-draft="hourDraft"
-        v-model:minute-draft="minuteDraft"
         :selected-date="selectedDate"
         :product-locale="productLocale"
         :week-starts-on="weekStartsOn"
@@ -82,14 +79,15 @@
         :return-to-today-label="returnToTodayLabel"
         :time-label="timeLabel"
         :time-zone-label="timeZoneLabel"
+        :time-value="seededTime"
+        :time-sync-key="timeSyncKey"
         :hour-label="hourLabel"
         :minute-label="minuteLabel"
+        :disabled="disabled"
         :validation-message="validationMessage"
         :preview-label="previewLabel"
         @select-day="handleCalendarValue"
-        @normalize-numeric="normalizeNumericDraft"
-        @normalize-clock="normalizeClockPart"
-        @adjust-clock="adjustClockPart"
+        @update:time-draft="handleTimeDraft"
       />
 
       <DialogFooter
@@ -125,6 +123,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  type SegmentedTimeDraft,
 } from '@memoflow/ui-vue-shadcn';
 import { parseToCalendarDate } from '../utils/parse-to-date';
 import ProductEditorFrame from './ProductEditorFrame.vue';
@@ -138,7 +137,6 @@ import {
 } from '../utils/product-time';
 
 type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-type ClockPart = 'hour' | 'minute';
 
 const props = withDefaults(
   defineProps<{
@@ -183,8 +181,15 @@ const emit = defineEmits<{
 }>();
 
 const draftDate = ref<Ymd>(getProductTodayYmd());
-const hourDraft = ref('09');
-const minuteDraft = ref('00');
+const seededTime = ref('09:00');
+const timeSyncKey = ref(0);
+const timeDraft = ref<SegmentedTimeDraft>({
+  hour: '09',
+  minute: '00',
+  second: '00',
+  valid: true,
+  value: '09:00',
+});
 const calendarPlaceholder = shallowRef<DateValue | undefined>(parseToCalendarDate(draftDate.value));
 
 const productLocale = computed(() => {
@@ -210,14 +215,8 @@ const minCalendarDate = computed(() => {
 });
 const selectedDate = computed(() => parseToCalendarDate(draftDate.value));
 
-const hourValue = computed(() => parseClockPart(hourDraft.value, 23));
-const minuteValue = computed(() => parseClockPart(minuteDraft.value, 59));
-const clockValid = computed(() => hourValue.value != null && minuteValue.value != null);
-const draftHm = computed(() =>
-  clockValid.value
-    ? `${String(hourValue.value).padStart(2, '0')}:${String(minuteValue.value).padStart(2, '0')}`
-    : null,
-);
+const clockValid = computed(() => timeDraft.value.valid);
+const draftHm = computed(() => timeDraft.value.value);
 const draftInstant = computed<Instant | null>(() => {
   if (!draftHm.value) return null;
   const value = getProductTime().input.combine(draftDate.value, draftHm.value);
@@ -267,37 +266,20 @@ function seedDraft(): void {
       : defaultDraftInstant();
   draftDate.value = getProductTime().calendar.toYmd(seed);
   const hm = getProductTime().input.timeValue(seed) || '09:00';
-  hourDraft.value = hm.slice(0, 2);
-  minuteDraft.value = hm.slice(3, 5);
+  seededTime.value = hm;
+  timeSyncKey.value += 1;
+  timeDraft.value = {
+    hour: hm.slice(0, 2),
+    minute: hm.slice(3, 5),
+    second: '00',
+    valid: true,
+    value: hm,
+  };
   calendarPlaceholder.value = parseToCalendarDate(draftDate.value);
 }
 
-function parseClockPart(raw: string, max: number): number | null {
-  if (!/^\d{1,2}$/.test(raw)) return null;
-  const value = Number(raw);
-  return Number.isInteger(value) && value >= 0 && value <= max ? value : null;
-}
-
-function normalizeNumericDraft(part: ClockPart): void {
-  const source = part === 'hour' ? hourDraft : minuteDraft;
-  source.value = source.value.replace(/\D/g, '').slice(0, 2);
-}
-
-function normalizeClockPart(part: ClockPart): void {
-  const source = part === 'hour' ? hourDraft : minuteDraft;
-  const max = part === 'hour' ? 23 : 59;
-  const parsed = parseClockPart(source.value, max);
-  if (parsed == null) return;
-  source.value = String(parsed).padStart(2, '0');
-}
-
-function adjustClockPart(part: ClockPart, delta: number): void {
-  const source = part === 'hour' ? hourDraft : minuteDraft;
-  const max = part === 'hour' ? 23 : 59;
-  const current = parseClockPart(source.value, max) ?? 0;
-  const range = max + 1;
-  const next = (current + delta + range) % range;
-  source.value = String(next).padStart(2, '0');
+function handleTimeDraft(draft: SegmentedTimeDraft): void {
+  timeDraft.value = draft;
 }
 
 function handleCalendarValue(value: unknown): void {

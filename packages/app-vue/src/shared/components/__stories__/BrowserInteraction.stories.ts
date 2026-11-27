@@ -46,7 +46,7 @@ export const EditorDialog: Story = {
 };
 
 export const DateTimePickerDialog: Story = {
-  name: 'Date/time picker: Tab is contained in dialog',
+  name: 'Date/time picker: segmented typing and Tab contained in dialog',
   args: { scenario: 'picker' },
   play: async ({ canvasElement }) => {
     const page = bodyOf(canvasElement);
@@ -54,6 +54,18 @@ export const DateTimePickerDialog: Story = {
     await userEvent.click(opener);
     const dialog = await page.findByTestId('t3-date-time-picker');
     await waitFor(() => expect(dialog).toBeVisible());
+    const hour = within(dialog).getByLabelText('Hour') as HTMLInputElement;
+    const minute = within(dialog).getByLabelText('Minute') as HTMLInputElement;
+    await userEvent.click(hour);
+    await userEvent.keyboard('1');
+    await expect(hour).toHaveValue('1');
+    await userEvent.keyboard('3');
+    await expect(hour).toHaveValue('13');
+    await waitFor(() => expect(minute).toHaveFocus());
+    await userEvent.keyboard('2');
+    await expect(minute).toHaveValue('2');
+    await userEvent.keyboard('3');
+    await expect(minute).toHaveValue('23');
     for (let i = 0; i < 8; i += 1) {
       await userEvent.tab();
       await expect(dialog.contains(canvasElement.ownerDocument.activeElement)).toBe(true);

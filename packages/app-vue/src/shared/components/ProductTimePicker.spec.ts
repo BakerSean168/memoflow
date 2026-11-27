@@ -1,9 +1,22 @@
+import { defineComponent, nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import ProductTimePicker from './ProductTimePicker.vue';
 
 function mountPicker(modelValue = '07:45', disabled = false) {
-  return mount(ProductTimePicker, { props: { modelValue, disabled } });
+  return mount(ProductTimePicker, { props: { modelValue, disabled }, attachTo: document.body });
+}
+
+function mountControlledPicker(initial = '07:45') {
+  const ControlledParent = defineComponent({
+    components: { ProductTimePicker },
+    setup() {
+      const time = ref(initial);
+      return { time };
+    },
+    template: '<ProductTimePicker v-model="time" />',
+  });
+  return mount(ControlledParent, { attachTo: document.body });
 }
 
 describe('ProductTimePicker wall clock', () => {
@@ -13,17 +26,77 @@ describe('ProductTimePicker wall clock', () => {
     expect(wrapper.findAll('input')[1]!.element.value).toBe('45');
     await wrapper.setProps({ modelValue: '23:59' });
     expect(wrapper.get<HTMLInputElement>('input').element.value).toBe('23');
+    expect(wrapper.findAll('input')[1]!.element.value).toBe('59');
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
   });
 
-  it('emits exact padded Hm when editing either part', async () => {
+  it('pads single-digit draft only on blur/commit rather than immediately while typing', async () => {
     const wrapper = mountPicker();
-    await wrapper.get('input').setValue('8');
+    const hour = wrapper.get<HTMLInputElement>('[data-testid="product-time-picker-hour"]');
+    const minute = wrapper.get<HTMLInputElement>('[data-testid="product-time-picker-minute"]');
+
+    await hour.setValue('8');
+    expect(hour.element.value).toBe('8');
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+
+    await hour.trigger('blur');
+    expect(hour.element.value).toBe('08');
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['08:45']);
-    await wrapper.findAll('input')[1]!.setValue('3');
+
+    await wrapper.setProps({ modelValue: '08:45' });
+    await minute.setValue('3');
+    expect(minute.element.value).toBe('3');
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['08:45']);
+
+    await minute.trigger('blur');
+    expect(minute.element.value).toBe('03');
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['08:03']);
-    await wrapper.findAll('input')[1]!.trigger('blur');
-    expect(wrapper.findAll('input')[1]!.element.value).toBe('03');
+    wrapper.unmount();
+  });
+
+  it('allows typing 1 -> 13 and 2 -> 23 with controlled v-model writeback to produce 13:23', async () => {
+    const wrapper = mountControlledPicker('07:45');
+    const hour = wrapper.get<HTMLInputElement>('[data-testid="product-time-picker-hour"]');
+    const minute = wrapper.get<HTMLInputElement>('[data-testid="product-time-picker-minute"]');
+
+    await hour.trigger('focus');
+    await hour.setValue('1');
+    expect(hour.element.value).toBe('1');
+    expect(wrapper.vm.time).toBe('07:45');
+
+    await hour.setValue('13');
+    await nextTick();
+    expect(wrapper.vm.time).toBe('13:45');
+    expect(document.activeElement).toBe(minute.element);
+
+    await minute.setValue('2');
+    expect(minute.element.value).toBe('2');
+    expect(wrapper.vm.time).toBe('13:45');
+
+    await minute.setValue('23');
+    expect(wrapper.vm.time).toBe('13:23');
+    expect(document.activeElement).toBe(minute.element);
+    wrapper.unmount();
+  });
+
+  it('handles 00:00 and 23:59 boundaries, pasting HH:mm, and Enter/commitDraft', async () => {
+    const wrapper = mountControlledPicker('07:45');
+    const hour = wrapper.get<HTMLInputElement>('[data-testid="product-time-picker-hour"]');
+
+    await hour.trigger('paste', {
+      clipboardData: { getData: () => '00:00' },
+    });
+    expect(wrapper.vm.time).toBe('00:00');
+
+    await hour.setValue('23');
+    await wrapper.findAll('input')[1]!.setValue('59');
+    expect(wrapper.vm.time).toBe('23:59');
+
+    await hour.setValue('9');
+    await hour.trigger('keydown', { key: 'Enter' });
+    expect(wrapper.vm.time).toBe('09:59');
+    wrapper.unmount();
   });
 
   it.each(['', '24', '-1', 'ab', '1.5', '123'])('rejects invalid hour draft %j', async (draft) => {
@@ -32,6 +105,7 @@ describe('ProductTimePicker wall clock', () => {
     await wrapper.findAll('input')[1]!.setValue('10');
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
     expect(wrapper.get('input').attributes('aria-invalid')).toBe('true');
+    wrapper.unmount();
   });
 
   it('rejects invalid minutes and second precision', async () => {
@@ -40,6 +114,7 @@ describe('ProductTimePicker wall clock', () => {
       await wrapper.findAll('input')[1]!.setValue(draft);
     }
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
   });
 
   it.each([
@@ -58,6 +133,7 @@ describe('ProductTimePicker wall clock', () => {
       expect(input.element.value).toBe(committed);
       expect(input.attributes('aria-invalid')).toBe('false');
       expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+      wrapper.unmount();
     },
   );
 
@@ -71,6 +147,7 @@ describe('ProductTimePicker wall clock', () => {
     expect(wrapper.get<HTMLInputElement>('input').element.value).toBe('18');
     expect(wrapper.findAll('input')[1]!.element.value).toBe('20');
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
   });
 
   it.each([
@@ -84,6 +161,7 @@ describe('ProductTimePicker wall clock', () => {
       await input.setValue(draft);
       await input.trigger('keydown', { key });
       expect(wrapper.emitted('update:modelValue')).toEqual([[expected]]);
+      wrapper.unmount();
     },
   );
 
@@ -91,16 +169,43 @@ describe('ProductTimePicker wall clock', () => {
     const wrapper = mountPicker('23:59');
     await wrapper.get('input').trigger('keydown', { key: 'ArrowUp' });
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['00:59']);
+    await wrapper.setProps({ modelValue: '00:59' });
     await wrapper.findAll('input')[1]!.trigger('keydown', { key: 'ArrowUp' });
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['00:00']);
+    await wrapper.setProps({ modelValue: '00:00' });
     await wrapper.findAll('input')[1]!.trigger('keydown', { key: 'ArrowDown' });
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['00:59']);
+    wrapper.unmount();
   });
 
-  it('disables editing and stepping', async () => {
+  it('supports ArrowLeft, ArrowRight, and Backspace navigation between segments', async () => {
+    const wrapper = mountControlledPicker('07:45');
+    const hour = wrapper.get<HTMLInputElement>('[data-testid="product-time-picker-hour"]');
+    const minute = wrapper.get<HTMLInputElement>('[data-testid="product-time-picker-minute"]');
+
+    hour.element.focus();
+    hour.element.setSelectionRange(2, 2);
+    await hour.trigger('keydown', { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(minute.element);
+
+    minute.element.setSelectionRange(0, 0);
+    await minute.trigger('keydown', { key: 'ArrowLeft' });
+    expect(document.activeElement).toBe(hour.element);
+
+    await minute.setValue('');
+    await minute.trigger('keydown', { key: 'Backspace' });
+    expect(document.activeElement).toBe(hour.element);
+    wrapper.unmount();
+  });
+
+  it('disables editing, stepping, and pasting', async () => {
     const wrapper = mountPicker('07:45', true);
     expect(wrapper.get('input').attributes('disabled')).toBeDefined();
     await wrapper.get('input').trigger('keydown', { key: 'ArrowUp' });
+    await wrapper.get('input').trigger('paste', {
+      clipboardData: { getData: () => '12:30' },
+    });
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
   });
 });

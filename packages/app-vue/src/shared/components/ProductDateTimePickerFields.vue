@@ -2,9 +2,8 @@
 import { Clock3 } from '@lucide/vue';
 import { useId } from 'vue';
 import type { DateValue } from '@internationalized/date';
-import { Calendar, Input } from '@memoflow/ui-vue-shadcn';
+import { Calendar, SegmentedTimeInput, type SegmentedTimeDraft } from '@memoflow/ui-vue-shadcn';
 
-type ClockPart = 'hour' | 'minute';
 type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 const validationId = useId();
 
@@ -20,21 +19,18 @@ defineProps<{
   returnToTodayLabel: string;
   timeLabel: string;
   timeZoneLabel: string;
-  hourDraft: string;
-  minuteDraft: string;
+  timeValue: string;
+  timeSyncKey: number;
   hourLabel: string;
   minuteLabel: string;
+  disabled?: boolean;
   validationMessage: string;
   previewLabel: string;
 }>();
 const emit = defineEmits<{
   'update:calendarPlaceholder': [DateValue | undefined];
-  'update:hourDraft': [string];
-  'update:minuteDraft': [string];
+  'update:timeDraft': [SegmentedTimeDraft];
   'select-day': [unknown];
-  'normalize-numeric': [ClockPart];
-  'normalize-clock': [ClockPart];
-  'adjust-clock': [ClockPart, number];
 }>();
 </script>
 
@@ -70,39 +66,21 @@ const emit = defineEmits<{
         </p>
       </div>
 
-      <div class="flex shrink-0 items-center gap-1.5" :aria-label="timeLabel">
-        <Input
-          :model-value="hourDraft"
-          @update:model-value="emit('update:hourDraft', String($event))"
-          type="text"
-          inputmode="numeric"
-          maxlength="2"
-          class="h-8 w-11 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-ring/60 focus-visible:ring-2 focus-visible:ring-ring/45"
-          :aria-label="hourLabel"
-          :aria-invalid="Boolean(validationMessage) || undefined"
-          :aria-describedby="validationMessage ? validationId : undefined"
-          @input="emit('normalize-numeric', 'hour')"
-          @blur="emit('normalize-clock', 'hour')"
-          @keydown.up.prevent="emit('adjust-clock', 'hour', 1)"
-          @keydown.down.prevent="emit('adjust-clock', 'hour', -1)"
-        />
-        <span class="text-sm font-medium text-muted-foreground">:</span>
-        <Input
-          :model-value="minuteDraft"
-          @update:model-value="emit('update:minuteDraft', String($event))"
-          type="text"
-          inputmode="numeric"
-          maxlength="2"
-          class="h-8 w-11 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-ring/60 focus-visible:ring-2 focus-visible:ring-ring/45"
-          :aria-label="minuteLabel"
-          :aria-invalid="Boolean(validationMessage) || undefined"
-          :aria-describedby="validationMessage ? validationId : undefined"
-          @input="emit('normalize-numeric', 'minute')"
-          @blur="emit('normalize-clock', 'minute')"
-          @keydown.up.prevent="emit('adjust-clock', 'minute', 1)"
-          @keydown.down.prevent="emit('adjust-clock', 'minute', -1)"
-        />
-      </div>
+      <SegmentedTimeInput
+        class="shrink-0"
+        :model-value="timeValue"
+        :sync-key="timeSyncKey"
+        :restore-invalid-on-blur="false"
+        :label="timeLabel"
+        :hour-label="hourLabel"
+        :minute-label="minuteLabel"
+        :disabled="disabled"
+        :invalid="Boolean(validationMessage)"
+        :aria-describedby="validationMessage ? validationId : undefined"
+        test-id="product-date-time-picker-time"
+        input-class="border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] shadow-none focus-visible:border-ring/60 focus-visible:ring-2 focus-visible:ring-ring/45"
+        @update:draft="emit('update:timeDraft', $event)"
+      />
     </div>
 
     <div class="mt-2 min-h-5 px-1" aria-live="polite">

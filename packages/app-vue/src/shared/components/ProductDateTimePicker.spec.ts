@@ -123,4 +123,57 @@ describe('ProductDateTimePicker', () => {
     expect(document.activeElement).toBe(last);
     wrapper.unmount();
   });
+
+  it('supports sequential 1 -> 13 and 2 -> 23 typing and preserves invalid drafts on blur until fixed or canceled', async () => {
+    const preferences = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...preferences,
+      regional: { ...preferences.regional, timeZone: 'UTC' },
+    });
+    const wrapper = mount(ProductDateTimePicker, {
+      attachTo: document.body,
+      props: {
+        open: true,
+        presentation: 'panel',
+        modelValue: Date.parse('2026-10-16T07:45:00Z'),
+        title: 'Choose time',
+      },
+      global: {
+        plugins: [
+          createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }),
+        ],
+      },
+    });
+    await flushPromises();
+    const hour = wrapper.get<HTMLInputElement>('input[aria-label="Hour"]');
+    const minute = wrapper.get<HTMLInputElement>('input[aria-label="Minute"]');
+    const apply = wrapper.get('footer button:last-child');
+
+    await hour.setValue('24');
+    await hour.trigger('blur');
+    expect(hour.element.value).toBe('24');
+    expect(apply.attributes('disabled')).toBeDefined();
+    expect(wrapper.get('[role="alert"]').text()).toContain('Choose a valid time.');
+
+    await wrapper.setProps({ open: false });
+    await flushPromises();
+    await wrapper.setProps({ open: true });
+    await flushPromises();
+    expect(wrapper.get<HTMLInputElement>('input[aria-label="Hour"]').element.value).toBe('07');
+
+    const reopenedHour = wrapper.get<HTMLInputElement>('input[aria-label="Hour"]');
+    const reopenedMinute = wrapper.get<HTMLInputElement>('input[aria-label="Minute"]');
+    await reopenedHour.setValue('1');
+    expect(reopenedHour.element.value).toBe('1');
+    await reopenedHour.setValue('13');
+    await flushPromises();
+    expect(document.activeElement).toBe(reopenedMinute.element);
+
+    await reopenedMinute.setValue('2');
+    expect(reopenedMinute.element.value).toBe('2');
+    await reopenedMinute.setValue('23');
+    await wrapper.get('footer button:last-child').trigger('click');
+    expect(wrapper.emitted('apply')).toEqual([[Date.parse('2026-10-16T13:23:00Z')]]);
+    wrapper.unmount();
+  });
 });
