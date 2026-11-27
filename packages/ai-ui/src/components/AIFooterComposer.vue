@@ -7,15 +7,9 @@
     <div class="mx-auto flex w-full flex-col gap-2" :class="maxWidthClass">
       <slot name="action-rail" />
 
-      <div
-        class="relative rounded-[24px] border bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,background-color] duration-150 focus-within:bg-[hsl(var(--surface-overlay))]"
-        :class="[
-          density === 'comfortable' ? 'px-4 pb-3 pt-4' : 'px-3 pb-2 pt-3',
-          dragging
-            ? 'border-primary/60 bg-muted/20'
-            : 'border-[hsl(var(--border-strong))] focus-within:border-ring/50',
-        ]"
-        data-testid="ai-composer-surface"
+      <AIFooterComposerSurface
+        :density="density"
+        :dragging="dragging"
         @dragenter.prevent="dragging = true"
         @dragover.prevent="dragging = true"
         @dragleave.prevent="dragging = false"
@@ -67,6 +61,7 @@
               size="icon"
               class="h-6 w-6 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground"
               :aria-label="t('common.remove')"
+              @pointerdown.prevent
               @click="$emit('remove-attachment', attachment.id)"
             >
               <X class="h-3.5 w-3.5" />
@@ -101,6 +96,7 @@
               size="icon"
               class="h-6 w-6 shrink-0 text-muted-foreground hover:bg-muted hover:text-foreground"
               :aria-label="t('common.remove')"
+              @pointerdown.prevent
               @click="$emit('remove-context-entity', entity.entityType, entity.id)"
             >
               <X class="h-3.5 w-3.5" />
@@ -185,8 +181,8 @@
           />
         </div>
 
-        <div class="mt-3 flex min-w-0 items-center gap-2" data-testid="ai-composer-footer-controls">
-          <div class="flex min-w-0 flex-1 items-center" data-testid="ai-composer-attachments">
+        <AIFooterComposerFooterControls>
+          <template #attachments>
             <Button
               variant="ghost"
               size="icon"
@@ -194,89 +190,73 @@
               data-testid="ai-chat-upload-file"
               :title="t('aiAssistant.chatPage.attachments.upload')"
               :aria-label="t('aiAssistant.chatPage.attachments.upload')"
+              @pointerdown.prevent
               @click="openFilePicker"
             >
               <Paperclip class="h-4 w-4" />
             </Button>
-          </div>
-          <div class="flex min-w-0 shrink items-center gap-1.5" data-testid="ai-composer-actions">
-            <div class="flex min-w-0 items-center gap-1" data-testid="ai-composer-options">
-              <slot name="provider-options">
-                <div v-if="!localAgent && modelGroups.length" class="min-w-0">
-                  <Select
-                    :model-value="selectedModelKey"
-                    @update:model-value="$emit('select-model', String($event))"
-                  >
-                    <SelectTrigger
-                      class="h-7 w-auto min-w-0 max-w-[15rem] rounded-md border-0 bg-transparent px-2 text-xs text-[hsl(var(--foreground-subtle))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground focus:ring-0 focus:ring-offset-0"
-                      :aria-label="t('aiAssistant.chatPage.modelSelectorLabel')"
-                      data-testid="ai-chat-model-selector"
-                    >
-                      <Bot class="mr-1.5 size-4 shrink-0" aria-hidden="true" />
-                      <SelectValue :placeholder="t('aiAssistant.chatPage.emptyModels')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup v-for="group in modelGroups" :key="group.providerId">
-                        <SelectLabel>{{ group.providerName }}</SelectLabel>
-                        <SelectItem
-                          v-for="model in group.models"
-                          :key="model.key"
-                          :value="model.key"
-                        >
-                          {{ model.modelName }}
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  v-else-if="!localAgent"
-                  variant="ghost"
-                  class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
-                  data-testid="ai-chat-empty-models"
-                  :title="t('aiAssistant.chatPage.emptyModelsHint')"
-                  @click="$emit('open-settings')"
+          </template>
+          <template #options>
+            <slot name="provider-options">
+              <div v-if="!localAgent && modelGroups.length" class="min-w-0 max-w-[15rem]">
+                <Select
+                  :model-value="selectedModelKey"
+                  @update:model-value="$emit('select-model', String($event))"
                 >
-                  <Settings2 class="h-4 w-4" :class="density === 'icon' ? '' : 'mr-1.5'" />
-                  <span v-if="density !== 'icon'" class="text-xs">
-                    {{ t('aiAssistant.chatPage.emptyModelsInline') }}
-                  </span>
-                </Button>
-              </slot>
-            </div>
-            <Button
-              v-if="loading"
-              variant="outline"
-              size="icon"
-              class="h-8 w-8 shrink-0 rounded-full p-0 shadow-none"
-              data-testid="ai-chat-stop-generating"
-              :title="t('aiAssistant.dialogs.chat.stopGenerating')"
-              :aria-label="t('aiAssistant.dialogs.chat.stopGenerating')"
-              @click="$emit('stop')"
-            >
-              <Square class="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              v-else
-              size="icon"
-              class="h-8 w-8 shrink-0 rounded-full p-0 shadow-none"
-              :disabled="!canSubmit"
-              data-testid="ai-chat-send-message"
-              :title="t('aiAssistant.dialogs.chat.sendMessage')"
-              :aria-label="t('aiAssistant.dialogs.chat.sendMessage')"
-              @click="$emit('send')"
-            >
-              <ArrowUp class="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+                  <SelectTrigger
+                    class="h-7 w-auto min-w-0 max-w-full rounded-md border-0 bg-transparent px-2 text-xs text-[hsl(var(--foreground-subtle))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:ring-1 focus-visible:ring-ring focus:ring-offset-0"
+                    :aria-label="t('aiAssistant.chatPage.modelSelectorLabel')"
+                    data-testid="ai-chat-model-selector"
+                  >
+                    <Bot class="mr-1.5 size-4 shrink-0" aria-hidden="true" />
+                    <SelectValue
+                      class="min-w-0 truncate"
+                      :placeholder="t('aiAssistant.chatPage.emptyModels')"
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup v-for="group in modelGroups" :key="group.providerId">
+                      <SelectLabel>{{ group.providerName }}</SelectLabel>
+                      <SelectItem v-for="model in group.models" :key="model.key" :value="model.key">
+                        {{ model.modelName }}
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                v-else-if="!localAgent"
+                variant="ghost"
+                class="h-7 shrink-0 rounded-md px-2 text-[hsl(var(--foreground-subtle))] hover:bg-[hsl(var(--hover))] hover:text-foreground"
+                data-testid="ai-chat-empty-models"
+                :title="t('aiAssistant.chatPage.emptyModelsHint')"
+                @click="$emit('open-settings')"
+              >
+                <Settings2 class="h-4 w-4" :class="density === 'icon' ? '' : 'mr-1.5'" />
+                <span v-if="density !== 'icon'" class="text-xs">
+                  {{ t('aiAssistant.chatPage.emptyModelsInline') }}
+                </span>
+              </Button>
+            </slot>
+          </template>
+          <AIFooterComposerPrimaryActions
+            :loading="loading"
+            :can-submit="canSubmit"
+            :stop-test-id="'ai-chat-stop-generating'"
+            @send="$emit('send')"
+            @stop="$emit('stop')"
+          />
+        </AIFooterComposerFooterControls>
+      </AIFooterComposerSurface>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref, shallowRef, watch } from 'vue';
+import AIFooterComposerSurface from './AIFooterComposerSurface.vue';
+import AIFooterComposerFooterControls from './AIFooterComposerFooterControls.vue';
+import AIFooterComposerPrimaryActions from './AIFooterComposerPrimaryActions.vue';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { createComposerExtensions, hasAncestor } from './composer/composer-extensions';
 import { collapseShownMarkdownSource } from './composer/composer-markdown-source';
@@ -312,17 +292,7 @@ import {
   mentionKey,
   type ComposerMention,
 } from './composer-editor';
-import {
-  ArrowUp,
-  Bot,
-  FileText,
-  ListChecks,
-  Paperclip,
-  Settings2,
-  Square,
-  Target,
-  X,
-} from '@lucide/vue';
+import { Bot, FileText, ListChecks, Paperclip, Settings2, Target, X } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import {
   Button,
@@ -512,7 +482,7 @@ const editor = useEditor({
   editorProps: {
     attributes: {
       'data-testid': 'ai-chat-composer',
-      class: 'composer-tiptap',
+      class: 'composer-tiptap focus:outline-none',
       role: 'textbox',
       'aria-multiline': 'true',
       'aria-label': t('aiAssistant.dialogs.chat.messagePlaceholder'),

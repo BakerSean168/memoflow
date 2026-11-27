@@ -165,3 +165,40 @@ export const RegistryError: Story = {
     template: '<AISettings />',
   }),
 };
+
+export const WithGovernanceSubmenus: Story = {
+  render: () => ({
+    components: { AISettings },
+    setup() {
+      const snapshot = ref(registrySnapshot([nativeInstance()]));
+      provide(
+        settingUiHost.AI_AGENT_REGISTRY_KEY as symbol,
+        {
+          list: async () => snapshot.value,
+          execute: async () => snapshot.value,
+        } as never,
+      );
+      provide(
+        settingUiHost.AI_LOCAL_AGENT_KEY as symbol,
+        {
+          listConnections: async () => [],
+          cachedCatalogConnection: async () => null,
+          getMcpEndpoint: async () => ({
+            url: 'http://127.0.0.1:4123/mcp',
+            discoveryPath: '~/.memoflow/local-mcp.json',
+          }),
+          listMcpClients: async () => [],
+          listGatewayAudit: async () => [],
+          permissions: async () => ({
+            settings: { preset: 'confirm_each', agentPresets: {}, revision: 1 },
+            rules: [],
+            audit: [],
+          }),
+        } as never,
+      );
+      usePreviewAiFacade();
+      return {};
+    },
+    template: '<AISettings />',
+  }),
+};

@@ -8,6 +8,9 @@ import AIMessagePanel from './AIMessagePanel.vue';
 import { semanticElevationClass } from '@ai-ui-test-host/shared/constants/semantic-elevation';
 import enAI from '@ai-ui-test-host/locales/en-US/aiAssistant';
 import zhAI from '@ai-ui-test-host/locales/zh-CN/aiAssistant';
+import { setItemRunTiming } from '../composables/agentActivity';
+import type { ChatItem } from '../composables/types';
+import { resolveDisclosureRevealScrollDelta } from '../composables/useTimelineScrollAnchoring';
 
 const i18n = createI18n({
   legacy: false,
@@ -489,5 +492,90 @@ describe('Assistant inline tool decisions', () => {
       (wrapper.get('[data-testid="ai-tool-decline"]').element as HTMLButtonElement).disabled,
     ).toBe(true);
     wrapper.unmount();
+  });
+
+  it('aggregates same-run receipts and replies with collapsible Worked for log and user hover copy', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    const receipt: ChatItem = {
+      id: 'receipt-1',
+      role: 'assistant',
+      content: '',
+      status: 'success',
+      approvals: [
+        {
+          toolCallId: 'write-1',
+          toolName: 'routine_create',
+          category: 'edit',
+          risk: 'high',
+          conversationId: 'c',
+          runId: 'run-9',
+          status: 'approved',
+        },
+      ],
+      toolActivities: [{ toolCallId: 'read-1', toolName: 'knowledge_search', state: 'completed' }],
+    };
+    const reply: ChatItem = {
+      id: 'reply-9',
+      role: 'assistant',
+      content: 'All set.',
+      status: 'success',
+      toolActivities: [{ toolCallId: 'write-1', toolName: 'routine_create', state: 'completed' }],
+    };
+    setItemRunTiming(reply, {
+      runId: 'run-9',
+      startedAt: 1_000,
+      completedAt: 4_500,
+      pausedDurationMs: 0,
+      terminalObserved: true,
+    });
+
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          { id: 'u1', role: 'user', content: 'First prompt', status: 'success' },
+          { id: 'u2', role: 'user', content: 'Second prompt', status: 'success' },
+          receipt,
+          reply,
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
+
+    // 2 grouped user messages + 1 aggregated assistant turn = 3 articles
+    expect(wrapper.findAll('article')).toHaveLength(3);
+    expect(wrapper.get('[data-testid="ai-tool-approval"]').text()).toContain('Create a routine');
+    expect(wrapper.get('[data-testid="ai-agent-phase"]').text()).toBe('Worked for 3.5s');
+    expect(wrapper.find('[data-testid="ai-agent-history"]').exists()).toBe(false);
+
+    // Expand turn-fold -> reveals work-toggle -> expand work-toggle -> reveals tool list
+    await wrapper.get('[data-testid="ai-agent-phase"]').trigger('click');
+    await wrapper.get('[data-testid="ai-work-group-toggle"]').trigger('click');
+    const historyItems = wrapper.findAll('[data-testid="ai-tool-history"]');
+    expect(historyItems).toHaveLength(2);
+    expect(historyItems[0]?.text()).toContain('Searching knowledge');
+    expect(historyItems[1]?.text()).toContain('Create a routine');
+
+    // User message hover/focus copy action works
+    const userCopies = wrapper.findAll('[data-testid="ai-user-message-copy"]');
+    expect(userCopies).toHaveLength(2);
+    await userCopies[0]!.trigger('click');
+    expect(writeText).toHaveBeenCalledWith('First prompt');
+    wrapper.unmount();
+  });
+});
+
+// Geometry regression cases from T3's disclosure reveal contract.
+describe('disclosure reading anchor', () => {
+  it('reveals only the hidden portion while keeping the disclosure header visible', () => {
+    expect(resolveDisclosureRevealScrollDelta(80, 580, 0, 500)).toBe(56);
+    expect(resolveDisclosureRevealScrollDelta(200, 530, 0, 500)).toBe(30);
+    expect(resolveDisclosureRevealScrollDelta(10, 800, 0, 500)).toBe(0);
+    expect(resolveDisclosureRevealScrollDelta(80, 450, 0, 500)).toBe(0);
   });
 });

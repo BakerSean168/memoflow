@@ -28,16 +28,16 @@ const profiles = [
 
 const wallClockRoutine = {
   id: 'routine-1',
-  name: '每小时起身活动',
-  description: '久坐提醒：起身走动或做一组拉伸。',
+  name: '睡前准备',
+  description: '开始晚间放松流程，逐步减少刺激性活动。',
   enabled: true,
   trigger: {
     type: 'WallClock',
     timingOwner: 'scheduler',
-    localTime: '09:00',
+    localTime: '23:30',
     timeZone: 'Asia/Shanghai',
     recurrence: {
-      startDate: '2026-11-02',
+      startDate: '2026-11-22',
       frequency: 'daily',
       interval: 1,
       byWeekday: [],
@@ -48,6 +48,40 @@ const wallClockRoutine = {
   version: 3,
   createdAt: '2026-10-20T08:00:00.000Z',
   updatedAt: '2026-11-10T08:00:00.000Z',
+} as unknown as RoutineDefinitionDto;
+
+const weeklyWallClockRoutine = {
+  ...wallClockRoutine,
+  id: 'routine-weekly',
+  name: '工作日晨间复盘',
+  description: '每周一、三、五早上固定时间梳理当天重点。',
+  trigger: {
+    type: 'WallClock',
+    timingOwner: 'scheduler',
+    localTime: '09:00',
+    timeZone: 'Asia/Shanghai',
+    recurrence: {
+      startDate: '2026-11-22',
+      frequency: 'weekly',
+      interval: 1,
+      byWeekday: [1, 3, 5],
+      count: null,
+      until: null,
+    },
+  },
+} as unknown as RoutineDefinitionDto;
+
+const elapsedRoutine = {
+  ...wallClockRoutine,
+  id: 'routine-elapsed',
+  name: '定时站立拉伸',
+  description: '每 50 分钟起身活动一次。',
+  trigger: {
+    type: 'Elapsed',
+    timingOwner: 'scheduler',
+    durationMs: 50 * 60_000,
+    anchor: 'last-satisfied',
+  },
 } as unknown as RoutineDefinitionDto;
 
 const meta = {
@@ -127,4 +161,67 @@ export const Saving: Story = {
     preset: null,
     localRuntimeAvailable: true,
   },
+};
+
+export const EditWeeklyWallClock: Story = {
+  args: {
+    open: true,
+    saving: false,
+    submitError: null,
+    routine: weeklyWallClockRoutine,
+    profiles,
+    membershipProfileIds: ['profile-work'],
+    preset: null,
+    localRuntimeAvailable: true,
+  },
+};
+
+export const PanelWallClock: Story = {
+  args: {
+    open: true,
+    presentation: 'panel',
+    saving: false,
+    submitError: null,
+    routine: weeklyWallClockRoutine,
+    profiles,
+    membershipProfileIds: ['profile-work'],
+    preset: null,
+    localRuntimeAvailable: true,
+  },
+};
+
+export const ElapsedMode: Story = {
+  args: {
+    open: true,
+    saving: false,
+    submitError: null,
+    routine: elapsedRoutine,
+    profiles,
+    membershipProfileIds: [],
+    preset: null,
+    localRuntimeAvailable: true,
+  },
+};
+
+export const NarrowWallClock: Story = {
+  args: {
+    open: true,
+    presentation: 'panel',
+    saving: false,
+    submitError: null,
+    routine: weeklyWallClockRoutine,
+    profiles,
+    membershipProfileIds: ['profile-work'],
+    preset: null,
+    localRuntimeAvailable: true,
+  },
+  render: (args) => ({
+    components: { RoutineEditorDialog },
+    setup() {
+      const open = ref(true);
+      return { args, open };
+    },
+    template:
+      '<div style="width: 375px; height: 780px; position: relative; overflow: hidden; border: 1px solid hsl(var(--border));"><RoutineEditorDialog v-bind="args" v-model:open="open" /></div>',
+  }),
 };

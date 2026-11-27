@@ -37,9 +37,9 @@
     },
     {
       "path": "packages/ai-ui/src/components/AIConversationSidebar.vue",
-      "native": ["button", "input"],
+      "native": ["button"],
       "category": "custom-control",
-      "reason": "Conversation/goal/note rows are the control; the inline rename field needs a native ref for focus and selection."
+      "reason": "Goal and note rows are the control."
     },
     {
       "path": "packages/ai-ui/src/components/AIFooterComposer.vue",

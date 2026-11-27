@@ -20,7 +20,7 @@ import {
   PermissionLocalRepository,
 } from '@memoflow/ai';
 import { LocalAgentWriteScopeSchema, type LocalMcpClientCredential } from '@memoflow/ai-contracts';
-import { ExternalMcpClients } from '@memoflow/setting-ui';
+import { AIActivitySettings, ExternalMcpClients } from '@memoflow/setting-ui';
 import {
   bindSettingUiHost,
   type SettingLocalAgentPort,
@@ -52,6 +52,40 @@ const SettingsDialogShell = defineComponent({
         slots.default?.(),
         h('footer', slots.footer?.()),
       ]);
+  },
+});
+
+const SettingsSection = defineComponent({
+  props: {
+    title: { type: String, default: '' },
+    description: { type: String, default: '' },
+    testId: { type: String, default: '' },
+  },
+  setup(props, { slots }) {
+    return () =>
+      h('section', { 'data-testid': props.testId }, [
+        h('header', [h('h2', props.title), slots.actions?.()]),
+        slots.default?.(),
+      ]);
+  },
+});
+
+const SettingsObjectCard = defineComponent({
+  props: { testId: { type: String, default: '' } },
+  setup(props, { slots }) {
+    return () => h('div', { 'data-testid': props.testId }, slots.default?.());
+  },
+});
+
+const SettingsStatusBlock = defineComponent({
+  props: {
+    kind: { type: String, default: 'info' },
+    title: { type: String, default: '' },
+    description: { type: String, default: '' },
+    testId: { type: String, default: '' },
+  },
+  setup(props) {
+    return () => h('p', { 'data-testid': props.testId }, props.description || props.title);
   },
 });
 
@@ -121,7 +155,12 @@ describe('Local MCP governance settings (#1076 step 5)', () => {
       listGatewayAudit: (limit) => bridge.listGatewayAudit(owner, limit),
     } as unknown as SettingLocalAgentPort;
     bindSettingUiHost({
-      components: { SettingsDialogShell },
+      components: {
+        SettingsDialogShell,
+        SettingsObjectCard,
+        SettingsSection,
+        SettingsStatusBlock,
+      },
       AI_LOCAL_AGENT_KEY: localAgentKey,
     } as unknown as SettingUiHost);
   });
@@ -204,7 +243,7 @@ describe('Local MCP governance settings (#1076 step 5)', () => {
     );
   });
 
-  it('reads audit rows recorded by the host for the external client', async () => {
+  it('keeps tool call audit off ExternalMcpClients and reads host audit rows in AIActivitySettings', async () => {
     const credential = await bridge.createMcpClient(owner, {
       name: 'Audit CLI',
       writeScopes: [],
@@ -214,6 +253,23 @@ describe('Local MCP governance settings (#1076 step 5)', () => {
     );
 
     await mountSection();
+    expect(element('ai-external-mcp-audit')).toBeNull();
+    wrapper?.unmount();
+
+    wrapper = mount(AIActivitySettings, {
+      attachTo: document.body,
+      global: {
+        plugins: [
+          createI18n({
+            legacy: false,
+            locale: 'en-US',
+            messages: productionLocaleMessages,
+          }),
+        ],
+        provide: { [localAgentKey as symbol]: port },
+      },
+    });
+    await settle();
 
     const audit = element('ai-external-mcp-audit');
     expect(audit).not.toBeNull();

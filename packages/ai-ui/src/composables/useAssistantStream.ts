@@ -9,8 +9,16 @@ import { nextTick, ref, shallowRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
+import {
+  isAgentWaiting,
+  reduceRunTimingOnEvent,
+  getItemRunTiming,
+  setItemRunTiming,
+  type ChatRunTiming,
+} from './agentActivity';
 import type {
   AIChatService,
+  ChatItem,
   ChatModelOption,
   ChatToolApproval,
   ChatNativeRequest,
@@ -38,7 +46,8 @@ export function useAssistantStream(input: {
     | 'generateConversationTitle'
     | 'markConversationActivity'
     | 'loadConversationList'
-  >;
+  > &
+    Partial<Pick<ReturnType<typeof useConversationProjection>, 'recordRunTiming'>>;
   composer: ReturnType<typeof useAIComposerContext>;
 }) {
   const { options, chatMessage, composer } = input;
@@ -53,6 +62,7 @@ export function useAssistantStream(input: {
     invalidateRuntimeHistory,
     markConversationActivity,
     loadConversationList,
+    recordRunTiming,
   } = input.conversation;
   const { composerAttachments, clearComposerTurnState } = composer;
   const { t } = useI18n();
@@ -67,6 +77,24 @@ export function useAssistantStream(input: {
   // expires the pending question nor blocks the answer/cancel command.
   const suspendedAskUserRunId = shallowRef<string | null>(null);
   let deferredApprovalHistory: string | null = null;
+  const runTimingsByRunId = new Map<string, ChatRunTiming>();
+
+  function captureEventRunTiming(
+    event: AssistantRuntimeEvent,
+    item: ChatItem,
+    messageId?: string,
+  ): void {
+    if (!event.runId) return;
+    const previous = runTimingsByRunId.get(event.runId) ?? getItemRunTiming(item) ?? undefined;
+    const next = reduceRunTimingOnEvent(previous, event, isAgentWaiting(item));
+    if (runTimingsByRunId.size >= 256 && !runTimingsByRunId.has(event.runId)) {
+      const oldest = runTimingsByRunId.keys().next().value;
+      if (oldest !== undefined) runTimingsByRunId.delete(oldest);
+    }
+    runTimingsByRunId.set(event.runId, next);
+    setItemRunTiming(item, next);
+    recordRunTiming?.(event.conversationId, next, messageId ?? item.id);
+  }
 
   function refreshDeferredApprovalHistory() {
     if (!deferredApprovalHistory) return;
@@ -405,6 +433,7 @@ export function useAssistantStream(input: {
       // Park the run so the eventual composer release neither expires the question
       // nor blocks the answer/cancel command.
       suspendedAskUserRunId.value = event.runId;
+      captureEventRunTiming(event, item);
       return;
     }
     if (event.type === 'assistant.ask_user.resolved') {
@@ -413,6 +442,7 @@ export function useAssistantStream(input: {
       );
       if (request) request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
       if (suspendedAskUserRunId.value === event.runId) suspendedAskUserRunId.value = null;
+      captureEventRunTiming(event, item);
       return;
     }
     if (event.type === 'assistant.request.required') {
@@ -424,6 +454,7 @@ export function useAssistantStream(input: {
           runId: event.runId,
           status: 'pending',
         });
+      captureEventRunTiming(event, item);
       return;
     }
     if (event.type === 'assistant.request.resolved') {
@@ -431,6 +462,7 @@ export function useAssistantStream(input: {
         (value) => value.request.requestId === event.data.requestId,
       );
       if (request) request.status = event.data.resolution === 'answered' ? 'answered' : 'expired';
+      captureEventRunTiming(event, item);
       return;
     }
     if (event.type === 'assistant.activity') {
@@ -474,6 +506,7 @@ export function useAssistantStream(input: {
           runId: event.runId,
           status: 'pending',
         });
+      captureEventRunTiming(event, item);
       return;
     }
     if (event.type === 'assistant.approval.resolved') {
@@ -484,6 +517,7 @@ export function useAssistantStream(input: {
         approval.status = event.data.resolution;
         approval.errorMessage = undefined;
       }
+      captureEventRunTiming(event, item);
       return;
     }
     if (
@@ -499,6 +533,7 @@ export function useAssistantStream(input: {
     }
     if (event.type === 'assistant.run.started') {
       activeRuntimeRunId.value = event.runId;
+      captureEventRunTiming(event, item);
       if (
         runtimeChoice.value.runtimeKind === 'local_agent' &&
         event.data.modelId &&
@@ -526,16 +561,19 @@ export function useAssistantStream(input: {
         target.content = event.data.content || target.content;
         target.status = 'success';
         target.errorMessage = undefined;
+        captureEventRunTiming(event, target, target.id);
       }
       return;
     }
     if (event.type === 'assistant.run.cancelled') {
+      captureEventRunTiming(event, item);
       markGeneratingAssistantAborted();
       return;
     }
     if (event.type === 'assistant.run.failed') {
       const target = chatTimeline.value.find((item) => item.id === assistantDraftId);
       if (target) {
+        captureEventRunTiming(event, target);
         target.status = 'error';
         target.errorMessage = getAIErrorMessage(
           event.data,

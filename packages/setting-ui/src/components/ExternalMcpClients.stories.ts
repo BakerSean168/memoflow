@@ -3,7 +3,6 @@ import { provide } from 'vue';
 import { screen, userEvent, waitFor } from 'storybook/test';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import type {
-  LocalGatewayAuditRecord,
   LocalMcpClient,
   LocalMcpClientCredential,
   LocalMcpEndpoint,
@@ -37,37 +36,6 @@ const clients: LocalMcpClient[] = [
   },
 ];
 
-const audit: LocalGatewayAuditRecord[] = [
-  {
-    id: 'audit-1',
-    version: '1',
-    at: now - 600_000,
-    connectionId: 'client-codex',
-    origin: 'client',
-    tool: 'tasks.update',
-    effect: 'write',
-    scopeDecision: 'allowed',
-    outcome: 'updated 1 task',
-    durationMs: 42,
-    requestId: 'req-0001',
-    traceId: 'trace-0001',
-  },
-  {
-    id: 'audit-2',
-    version: '1',
-    at: now - 480_000,
-    connectionId: 'client-editor',
-    origin: 'client',
-    tool: 'goals.delete',
-    effect: 'write',
-    scopeDecision: 'denied',
-    outcome: 'read-only client',
-    durationMs: 3,
-    requestId: 'req-0002',
-    traceId: 'trace-0002',
-  },
-];
-
 /** Demo credential: an obviously unusable token, never a real secret. */
 const demoCredential: LocalMcpClientCredential = {
   client: {
@@ -84,7 +52,6 @@ const demoCredential: LocalMcpClientCredential = {
 
 type PortOptions = {
   clients?: LocalMcpClient[];
-  audit?: LocalGatewayAuditRecord[];
   endpoint?: LocalMcpEndpoint | null;
   endpointError?: string;
   create?: () => Promise<LocalMcpClientCredential>;
@@ -104,7 +71,6 @@ function renderSection(options: PortOptions = {}) {
             return options.endpoint === undefined ? endpoint : options.endpoint;
           },
           listMcpClients: async () => options.clients ?? clients,
-          listGatewayAudit: async () => options.audit ?? audit,
           createMcpClient: options.create ?? (async () => demoCredential),
           revokeMcpClient: async (id: string) => ({
             ...clients[0]!,
@@ -129,14 +95,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Connected endpoint, two active clients and the recent tool audit. */
+/** Connected endpoint and active clients, with technical discovery path collapsed by default. */
 export const ConnectedClients: Story = {
   render: () => renderSection(),
 };
 
 /** No client has been issued yet: the section keeps the endpoint and an empty list. */
 export const NoClients: Story = {
-  render: () => renderSection({ clients: [], audit: [] }),
+  render: () => renderSection({ clients: [] }),
 };
 
 /** Loopback endpoint failed to bind; client management stays visible and the error is actionable. */

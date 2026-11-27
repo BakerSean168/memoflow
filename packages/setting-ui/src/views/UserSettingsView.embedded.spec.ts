@@ -185,6 +185,58 @@ describe('UserSettingsView embedded mode', () => {
     storeSpy.mockRestore();
   });
 
+  it('shows the AI subpage breadcrumb, honors ai-permissions deep link, and resets subpage and scroll on switch', async () => {
+    const AISection = defineComponent({
+      props: ['page', 'activityTab'],
+      emits: ['update:page', 'update:activityTab'],
+      setup(props, { emit }) {
+        return () =>
+          h('div', [
+            h('span', { 'data-testid': 'ai-page-prop' }, props.page),
+            h(
+              'button',
+              { 'data-testid': 'open-ai-mcp', onClick: () => emit('update:page', 'mcp-clients') },
+              'MCP',
+            ),
+          ]);
+      },
+    });
+    const { wrapper, storeSpy } = await mountView(
+      '/settings',
+      { initialTab: 'ai-permissions' },
+      { AISettings: AISection },
+    );
+
+    expect(wrapper.get('nav').attributes('data-active')).toBe('ai');
+    expect(wrapper.get('[data-testid="ai-page-prop"]').text()).toBe('permissions');
+    expect(wrapper.get('[data-testid="settings-breadcrumb-current"]').text()).toBe('AI');
+    expect(wrapper.get('[data-testid="settings-breadcrumb-subpage"]').text()).toBe(
+      'AI permissions',
+    );
+
+    const scrollEl = wrapper.get('[data-testid="settings-content-scroll"]').element as HTMLElement;
+    scrollEl.scrollTop = 180;
+
+    await wrapper.get('[data-testid="open-ai-mcp"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="settings-breadcrumb-subpage"]').text()).toBe(
+      'External MCP clients',
+    );
+    expect(scrollEl.scrollTop).toBe(0);
+
+    await wrapper.get('[data-testid="settings-tab-shortcuts"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.find('[data-testid="settings-breadcrumb-subpage"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="settings-tab-ai"]').trigger('click');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="ai-page-prop"]').text()).toBe('overview');
+    expect(wrapper.find('[data-testid="settings-breadcrumb-subpage"]').exists()).toBe(false);
+
+    wrapper.unmount();
+    storeSpy.mockRestore();
+  });
+
   it('restores only the active section, and only after the confirmation', async () => {
     const resetAction = vi.fn(async () => undefined);
     // A section that owns a default registers its own mutation with the shell.

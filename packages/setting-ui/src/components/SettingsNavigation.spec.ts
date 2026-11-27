@@ -78,5 +78,11 @@ describe('SettingsNavigation', () => {
     expect(wrapper.emitted('select')).toEqual([['shortcuts']]);
     expect((search.element as HTMLInputElement).value).toBe('');
     expect(wrapper.findAll('[data-testid^="settings-tab-"]')).toHaveLength(items.length);
+
+    // Top-level AI entry remains directly searchable and selectable.
+    await search.setValue('ai');
+    expect(wrapper.findAll('[data-testid^="settings-tab-"]')).toHaveLength(1);
+    await wrapper.get('[data-testid="settings-tab-ai"]').trigger('click');
+    expect(wrapper.emitted('select')?.[1]).toEqual(['ai']);
   });
 });

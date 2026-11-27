@@ -8,6 +8,8 @@ export { useAITaskWorkflow } from './useAITaskWorkflow';
 export { useAIKnowledgeCapture } from './useAIKnowledgeCapture';
 export { useAIModelSelection } from './useAIModelSelection';
 export { useAIWorkflowPersistence } from './useAIWorkflowPersistence';
+export { createSidebarListMotion, useSidebarListMotion } from './sidebarListMotion';
+export { resolveSidebarRowStatus } from './useDurableConversationAttention';
 export type {
   AIChatService,
   ChatItem,

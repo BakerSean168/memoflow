@@ -183,6 +183,13 @@ describe('RoutineEditorDialog Product controls', () => {
       false,
       'zh-CN',
     );
+    const chips = testId('routine-property-chips');
+    expect(chips.find('[data-testid="routine-local-time-chip"]').text()).toBe('07:45');
+    expect(chips.find('[data-testid="routine-frequency-chip"]').text()).toBe('每天');
+    expect(document.querySelector('[data-testid="routine-local-time-hour"]')).toBeNull();
+    expect(document.querySelector('[data-testid="routine-trigger-configuration"]')).toBeNull();
+
+    await openChip('routine-local-time-chip');
     expect(testId('routine-local-time-hour').attributes('aria-label')).toBe('小时');
     expect(testId('routine-local-time-minute').attributes('aria-label')).toBe('分钟');
     expect(testId('routine-time-zone').attributes('aria-label')).toBe('时区');
@@ -198,16 +205,25 @@ describe('RoutineEditorDialog Product controls', () => {
 
   it('saves an existing zone override, Hm and Ymd unchanged', async () => {
     const wrapper = await openEditor(wallClock);
-    expect(testId('routine-local-time-hour').element).toHaveProperty('value', '07');
-    expect(testId('routine-local-time-minute').element).toHaveProperty('value', '45');
+    expect(testId('routine-local-time-chip').text()).toBe('07:45');
+    expect(testId('routine-frequency-chip').text()).toBe('Daily');
     expect(testId('routine-time-zone').text()).toContain('America/New_York');
     expect(await submit(wrapper)).toEqual(wallClock);
   });
 
   it('emits exact selected time/date/zone and retains day-only date precision', async () => {
     const wrapper = await openEditor(wallClock);
-    await testId('routine-local-time-hour').setValue('18');
-    await testId('routine-local-time-minute').setValue('20');
+    await openChip('routine-local-time-chip');
+    await testId('routine-local-time-hour').setValue('1');
+    expect(testId('routine-local-time-hour').element).toHaveProperty('value', '1');
+    await testId('routine-local-time-hour').setValue('13');
+    await flushPromises();
+    expect(document.activeElement).toBe(testId('routine-local-time-minute').element);
+    await testId('routine-local-time-minute').setValue('2');
+    expect(testId('routine-local-time-minute').element).toHaveProperty('value', '2');
+    await testId('routine-local-time-minute').setValue('23');
+    expect(testId('routine-local-time-chip').text()).toBe('13:23');
+
     await openChip('routine-start-date');
     expect(document.querySelector('[data-testid="routine-start-date-precision-month"]')).toBeNull();
     await testId('routine-start-date-query').setValue('2026/11/03');
@@ -220,7 +236,7 @@ describe('RoutineEditorDialog Product controls', () => {
     await element('[data-zone-id="Asia/Tokyo"]').trigger('click');
     expect(await submit(wrapper)).toEqual({
       ...wallClock,
-      localTime: '18:20',
+      localTime: '13:23',
       timeZone: 'Asia/Tokyo',
       recurrence: { ...wallClock.recurrence, startDate: '2026-11-03' },
     });
@@ -228,19 +244,97 @@ describe('RoutineEditorDialog Product controls', () => {
 
   it('keeps invalid Hm drafts from changing the persisted value', async () => {
     const wrapper = await openEditor(wallClock);
+    await openChip('routine-local-time-chip');
     await testId('routine-local-time-hour').setValue('24');
     await testId('routine-local-time-hour').trigger('blur');
     expect(testId('routine-local-time-hour').element).toHaveProperty('value', '07');
     expect(await submit(wrapper)).toEqual(wallClock);
   });
 
-  it('keeps recurrence interval at its minimum through keyboard stepping and typed input', async () => {
-    const wrapper = await openEditor(wallClock);
+  it('keeps recurrence interval at its minimum and formats weekly/interval chip summaries', async () => {
+    const wrapper = await openEditor(wallClock, false, 'zh-CN');
+    await openChip('routine-frequency-chip');
     const input = element('[data-testid="routine-recurrenceInterval"] input');
     expect(input.attributes('aria-valuemin')).toBe('1');
     await input.trigger('keydown', { key: 'ArrowDown' });
     await editNumber('recurrenceInterval', '0');
-    expect(await submit(wrapper)).toEqual(wallClock);
+    expect(testId('routine-frequency-chip').text()).toBe('每天');
+
+    await editNumber('recurrenceInterval', '2');
+    expect(testId('routine-frequency-chip').text()).toBe('每 2 天');
+
+    await editNumber('recurrenceInterval', '1');
+    await testId('routine-frequency-option-weekly').trigger('click');
+    await testId('routine-weekday-1').trigger('click');
+    await testId('routine-weekday-3').trigger('click');
+    await testId('routine-weekday-5').trigger('click');
+    await flushPromises();
+    expect(testId('routine-frequency-chip').text()).toBe('每周一、三、五');
+    expect(await submit(wrapper)).toEqual({
+      ...wallClock,
+      recurrence: {
+        ...wallClock.recurrence,
+        frequency: 'weekly',
+        interval: 1,
+        byWeekday: [1, 3, 5],
+      },
+    });
+  });
+
+  it('supports panel presentation and single-digit time commit when closing the time popover', async () => {
+    vi.spyOn(Intl, 'supportedValuesOf').mockReturnValue(['Asia/Shanghai', 'America/New_York']);
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'Asia/Shanghai' },
+    });
+    const wrapper = mount(RoutineEditorDialog, {
+      props: {
+        open: true,
+        presentation: 'panel',
+        profiles: [],
+        routine: {
+          id: 'routine-panel',
+          name: 'Evening',
+          description: null,
+          enabled: true,
+          trigger: {
+            ...wallClock,
+            recurrence: {
+              ...wallClock.recurrence,
+              frequency: 'weekly',
+              interval: 2,
+              byWeekday: [1, 3, 5],
+            },
+          },
+          version: 1,
+          createdAt: '2026-10-01T00:00:00.000Z',
+          updatedAt: '2026-10-01T00:00:00.000Z',
+        },
+      },
+      global: {
+        plugins: [
+          createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }),
+        ],
+      },
+      attachTo: document.body,
+    });
+    wrappers.push(wrapper);
+    await flushPromises();
+    expect(
+      element('[data-testid="routine-editor-dialog"][data-editor-presentation="pane"]').exists(),
+    ).toBe(true);
+    expect(testId('routine-frequency-chip').text()).toBe('Every 2 week(s) · Mon, Wed, Fri');
+
+    await openChip('routine-local-time-chip');
+    await testId('routine-local-time-hour').setValue('9');
+    await testId('routine-local-time-hour').trigger('keydown', { key: 'Escape' });
+    await flushPromises();
+    expect(testId('routine-local-time-chip').text()).toBe('09:45');
+    expect(await submit(wrapper)).toMatchObject({
+      localTime: '09:45',
+      recurrence: { frequency: 'weekly', interval: 2, byWeekday: [1, 3, 5] },
+    });
   });
 
   it.each(['last-satisfied', 'routine-activation', 'profile-activation'] as const)(
@@ -354,12 +448,10 @@ describe('RoutineEditorDialog Product controls', () => {
 
   it('blocks edits and saving while busy', async () => {
     const wrapper = await openEditor(wallClock, true);
-    expect(testId('routine-local-time-hour').attributes('disabled')).toBeDefined();
+    expect(testId('routine-local-time-chip').attributes('disabled')).toBeDefined();
     expect(testId('routine-start-date').attributes('disabled')).toBeDefined();
+    expect(testId('routine-frequency-chip').attributes('disabled')).toBeDefined();
     expect(testId('routine-time-zone').attributes('disabled')).toBeDefined();
-    expect(
-      element('[data-testid="routine-recurrenceInterval"] input').attributes('disabled'),
-    ).toBeDefined();
     expect(await submit(wrapper)).toBeUndefined();
   });
 });

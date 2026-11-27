@@ -12,6 +12,7 @@ import { aiUiHost } from '../ai-ui-host';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { getAIErrorMessage } from './error';
+import { setItemRunTiming, type ChatRunTiming } from './agentActivity';
 import type { AIChatService, ChatItem, ConversationSummary, ChatModelOption } from './types';
 
 import type { UseAIChatSessionOptions } from './useAIChatSession';
@@ -63,6 +64,47 @@ export function useConversationProjection(input: {
   let listGeneration = 0;
   let mutationRevision = 0;
   const versions = new Map<string, number>();
+  const runTimingsByConversation = new Map<
+    string,
+    {
+      byRunId: Map<string, ChatRunTiming>;
+      byMessageId: Map<string, ChatRunTiming>;
+    }
+  >();
+
+  function getConversationTimingBucket(conversationId: string) {
+    let bucket = runTimingsByConversation.get(conversationId);
+    if (!bucket) {
+      if (runTimingsByConversation.size >= 100) {
+        const oldest = runTimingsByConversation.keys().next().value;
+        if (oldest !== undefined) runTimingsByConversation.delete(oldest);
+      }
+      bucket = { byRunId: new Map(), byMessageId: new Map() };
+      runTimingsByConversation.set(conversationId, bucket);
+    }
+    return bucket;
+  }
+
+  function recordRunTiming(
+    conversationId: string,
+    timing: ChatRunTiming,
+    messageId?: string,
+  ): void {
+    if (!conversationId || !timing.runId) return;
+    const bucket = getConversationTimingBucket(conversationId);
+    if (bucket.byRunId.size >= 256 && !bucket.byRunId.has(timing.runId)) {
+      const oldest = bucket.byRunId.keys().next().value;
+      if (oldest !== undefined) bucket.byRunId.delete(oldest);
+    }
+    bucket.byRunId.set(timing.runId, timing);
+    if (messageId) {
+      if (bucket.byMessageId.size >= 256 && !bucket.byMessageId.has(messageId)) {
+        const oldest = bucket.byMessageId.keys().next().value;
+        if (oldest !== undefined) bucket.byMessageId.delete(oldest);
+      }
+      bucket.byMessageId.set(messageId, timing);
+    }
+  }
   const streamController = new AbortController();
   let listRequest: Promise<boolean> | null = null;
   const pendingListChanges = new Map<
@@ -226,6 +268,7 @@ export function useConversationProjection(input: {
       toolActivities?: unknown;
       approvalReceipt?: unknown;
       runOutcome?: unknown;
+      runTiming?: unknown;
       localAgentSource?: unknown;
     },
     index: number,
@@ -254,22 +297,26 @@ export function useConversationProjection(input: {
     const runOutcome = AssistantRuntimeMessageViewSchema.shape.runOutcome.safeParse(
       item.runOutcome,
     ).data;
+    const dtoRunTiming = AssistantRuntimeMessageViewSchema.shape.runTiming.safeParse(
+      item.runTiming,
+    ).data;
     const toolActivities = AssistantRuntimeMessageViewSchema.shape.toolActivities.safeParse(
       item.toolActivities,
     ).data;
     const nativeActivities = LocalAgentActivitySchema.array()
       .max(256)
       .safeParse(item.nativeActivities).data;
+    const localAgentSource = AssistantRuntimeMessageViewSchema.shape.localAgentSource.safeParse(
+      item.localAgentSource,
+    ).data;
     const activities = [...(toolActivities ?? []), ...(nativeActivities ?? [])];
-    return {
+    const normalized: ChatItem = {
       id: item.id ? String(item.id) : `message-${index}`,
       role: normalizeChatRole(item.role),
       content: typeof item.content === 'string' ? item.content : '',
       ...(attachments.length ? { attachments } : {}),
       nativeActivities,
-      localAgentSource: AssistantRuntimeMessageViewSchema.shape.localAgentSource.safeParse(
-        item.localAgentSource,
-      ).data,
+      localAgentSource,
       toolActivities,
       ...(approvalReceipt
         ? {
@@ -301,6 +348,31 @@ export function useConversationProjection(input: {
               ? 'interrupted'
               : 'success',
     };
+    if (normalized.role === 'assistant') {
+      const runId = localAgentSource?.runId ?? runOutcome?.runId ?? approvalReceipt?.runId;
+      if (dtoRunTiming) {
+        const timing: ChatRunTiming = {
+          runId: dtoRunTiming.runId,
+          startedAt: dtoRunTiming.startedAt ?? null,
+          completedAt: dtoRunTiming.completedAt ?? null,
+          pausedDurationMs: dtoRunTiming.pausedDurationMs ?? 0,
+          terminalObserved: dtoRunTiming.completedAt != null,
+        };
+        setItemRunTiming(normalized, timing);
+        if (chatConversationId.value) {
+          recordRunTiming(chatConversationId.value, timing, normalized.id);
+        }
+      } else if (chatConversationId.value) {
+        const bucket = runTimingsByConversation.get(chatConversationId.value);
+        const cached =
+          (runId ? bucket?.byRunId.get(runId) : undefined) ??
+          bucket?.byMessageId.get(normalized.id);
+        if (cached) {
+          setItemRunTiming(normalized, cached);
+        }
+      }
+    }
+    return normalized;
   }
 
   function updateLastActiveConversation(id: string) {
@@ -814,5 +886,6 @@ export function useConversationProjection(input: {
     changeArchivePage,
     ensureConversationCreated,
     normalizeChatItem,
+    recordRunTiming,
   };
 }

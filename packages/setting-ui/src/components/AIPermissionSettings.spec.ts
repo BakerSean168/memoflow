@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
@@ -5,9 +6,11 @@ import type { PermissionCommand, PermissionSnapshot } from '@memoflow/ai-contrac
 import { Select } from '@memoflow/ui-vue-shadcn';
 import { settingUiHost } from '../setting-ui-host';
 import { productionLocaleMessages } from '@setting-ui-test-host/locales/production-messages';
+import { SERVER_STATE_IDENTITY_SCOPE_KEY } from '@setting-ui-test-host/platform/server-state';
 import AIPermissionSettings from './AIPermissionSettings.vue';
 
 function setup(extraRules: PermissionSnapshot['rules'] = []) {
+  const identityScope = ref('profile-a');
   let state: PermissionSnapshot = {
     settings: { preset: 'confirm_each', agentPresets: {}, revision: 1 },
     rules: [
@@ -22,7 +25,21 @@ function setup(extraRules: PermissionSnapshot['rules'] = []) {
       },
       ...extraRules,
     ],
-    audit: [],
+    audit: [
+      {
+        id: 'audit-1',
+        occurredAt: 2000,
+        agentId: 'codex',
+        conversationId: null,
+        operationId: 'op-inline-excluded',
+        object: 'task',
+        action: 'update',
+        decision: 'ask',
+        decidedBy: 'preset',
+        ruleId: null,
+        execution: 'succeeded',
+      },
+    ],
   };
   const permissions = vi.fn(async (command: PermissionCommand) => {
     if (command.action === 'settings') state = { ...state, settings: command.settings };
@@ -35,10 +52,11 @@ function setup(extraRules: PermissionSnapshot['rules'] = []) {
       plugins: [createI18n({ legacy: false, locale: 'zh-CN', messages: productionLocaleMessages })],
       provide: {
         [settingUiHost.AI_LOCAL_AGENT_KEY as symbol]: { permissions },
+        [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => identityScope.value,
       },
     },
   });
-  return { wrapper, permissions };
+  return { wrapper, permissions, identityScope };
 }
 describe('AI permissions integrated under AI Provider settings', () => {
   it('shows three modes with a single, clear global read/write summary', async () => {
@@ -133,6 +151,61 @@ describe('AI permissions integrated under AI Provider settings', () => {
       ruleId: 'legacy-denial',
     });
     expect(wrapper.find('[data-testid="ai-permission-revoke-legacy-denial"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('keeps high-risk confirmation visible, hides inline activity list, and emits open-activity', async () => {
+    const { wrapper } = setup();
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-permission-activity"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('op-inline-excluded');
+    const bulkDetails = wrapper.get('[data-testid="ai-permission-bulk-settings"]');
+    expect((bulkDetails.element as HTMLDetailsElement).open).toBe(false);
+    const highRisk = wrapper.get('[data-testid="ai-permission-high-risk"]');
+    expect(highRisk.text()).toContain('永久删除');
+    expect(highRisk.text()).toContain('AI 无法修改权限设置');
+    await wrapper.get('[data-testid="ai-permission-open-activity"]').trigger('click');
+    expect(wrapper.emitted('open-activity')).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it('discards stale snapshot responses after identity switches and shows error when snapshot fails', async () => {
+    let resolveProfileA!: (snapshot: PermissionSnapshot) => void;
+    const identityScope = ref('profile-a');
+    const permissions = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<PermissionSnapshot>((resolve) => {
+            resolveProfileA = resolve;
+          }),
+      )
+      .mockRejectedValueOnce(new Error('permission load failed'));
+    const wrapper = mount(AIPermissionSettings, {
+      global: {
+        plugins: [
+          createI18n({ legacy: false, locale: 'zh-CN', messages: productionLocaleMessages }),
+        ],
+        provide: {
+          [settingUiHost.AI_LOCAL_AGENT_KEY as symbol]: { permissions },
+          [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => identityScope.value,
+        },
+      },
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-permissions-loading"]').exists()).toBe(true);
+
+    identityScope.value = 'profile-b';
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-permissions-error"]').exists()).toBe(true);
+
+    resolveProfileA({
+      settings: { preset: 'full_auto', agentPresets: {}, revision: 1 },
+      rules: [],
+      audit: [],
+    });
+    await flushPromises();
+    expect(wrapper.find('[data-testid="ai-permission-current-preset"]').exists()).toBe(false);
     wrapper.unmount();
   });
 });

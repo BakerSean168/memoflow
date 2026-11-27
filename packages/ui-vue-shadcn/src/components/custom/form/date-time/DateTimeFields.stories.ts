@@ -5,6 +5,7 @@ import DateField from './DateField.vue';
 import DateTimeField from './DateTimeField.vue';
 import DurationField from './DurationField.vue';
 import ReminderOffsetField from './ReminderOffsetField.vue';
+import SegmentedTimeInput from './SegmentedTimeInput.vue';
 import TimeField from './TimeField.vue';
 
 const meta: Meta<typeof DateTimeField> = {
@@ -85,5 +86,64 @@ export const NarrowPanel: Story = {
       return { value: ref({ date: null, time: null, allDay: false }) };
     },
     template: '<div class="w-[240px] p-3"><DateTimeField v-model="value" /></div>',
+  }),
+};
+
+export const SegmentedTimeHm: Story = {
+  render: () => ({
+    components: { SegmentedTimeInput },
+    setup() {
+      const value = ref('09:30');
+      return { value };
+    },
+    template: `
+      <div class="flex max-w-xs items-center gap-3 p-4">
+        <SegmentedTimeInput v-model="value" label="Routine time" />
+        <span class="text-xs tabular-nums text-muted-foreground">{{ value }}</span>
+      </div>
+    `,
+  }),
+};
+
+export const SegmentedTimeWithSeconds: Story = {
+  render: () => ({
+    components: { SegmentedTimeInput },
+    setup() {
+      const value = ref('13:23:45');
+      return { value };
+    },
+    template: `
+      <div class="flex max-w-xs items-center gap-3 p-4">
+        <SegmentedTimeInput v-model="value" with-seconds label="Exact time" />
+        <span class="text-xs tabular-nums text-muted-foreground">{{ value }}</span>
+      </div>
+    `,
+  }),
+};
+
+export const SegmentedTimeDisabled: Story = {
+  render: () => ({
+    components: { SegmentedTimeInput },
+    setup() {
+      return { value: ref('23:59') };
+    },
+    template: '<div class="max-w-xs p-4"><SegmentedTimeInput v-model="value" disabled /></div>',
+  }),
+};
+
+export const SegmentedTimeInvalid: Story = {
+  render: () => ({
+    components: { SegmentedTimeInput },
+    setup() {
+      return { value: ref('09:30') };
+    },
+    template: `
+      <div class="max-w-xs space-y-1.5 p-4">
+        <SegmentedTimeInput v-model="value" invalid aria-describedby="segmented-time-error" />
+        <p id="segmented-time-error" class="text-xs text-destructive" role="alert">
+          Choose a valid time
+        </p>
+      </div>
+    `,
   }),
 };

@@ -69,6 +69,7 @@ const meta = {
         'shortcuts',
         'appearance',
         'ai',
+        'ai-permissions',
         'notifications',
         'account',
         'data',
