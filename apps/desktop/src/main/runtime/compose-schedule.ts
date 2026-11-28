@@ -33,6 +33,11 @@ export interface ComposeScheduleDesktopDependencies {
   readonly schedulerRepositories: SchedulerPowerSyncRepositories;
   readonly handlerRegistry: ScheduledInvocationHandlerRegistry;
   readonly schedulerRuntimeContributions?: SchedulerRuntimeContributionsInput;
+  /**
+   * Whether this Profile has a cloud Scheduler peer. Without one (guest or
+   * never-synced Profile) the local host executes every execution domain.
+   */
+  readonly hasCloudExecutor?: () => boolean | Promise<boolean>;
   readonly shouldExecuteIdentity?: (identityId: string) => boolean | Promise<boolean>;
 }
 
@@ -66,6 +71,7 @@ export function composeSchedule(
     // executed by the API Scheduler only, so the synced copy here is never
     // claimed a second time on this host.
     executionDomain: 'local',
+    hasPeerExecutor: dependencies.hasCloudExecutor,
     shouldExecuteIdentity: dependencies.shouldExecuteIdentity,
   });
 

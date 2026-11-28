@@ -208,6 +208,30 @@ describe('ScheduledInvocationQueue canonical runtime', () => {
     queue.stop();
   });
 
+  it('keeps executing cloud-domain work on a local host with no cloud peer', async () => {
+    const timer = new FakeTimer(1_000);
+    const item = invocation({
+      runAt: 1_000 as ScheduledInvocation['runAt'],
+      observability: { name: 'Routine', tags: ['routine', 'execution-domain:cloud'] },
+    });
+    const repo = repository([item]);
+    const handler = { execute: vi.fn().mockResolvedValue({ status: 'succeeded' as const }) };
+    const queue = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: handler,
+      timer,
+      executionDomain: 'local',
+      hasPeerExecutor: async () => false,
+    });
+
+    await queue.start();
+    timer.tick(0);
+    await vi.waitFor(() => expect(repo.completeAttempt).toHaveBeenCalledTimes(1));
+    expect(repo.claimAndStart).toHaveBeenCalledTimes(1);
+    expect(handler.execute).toHaveBeenCalledTimes(1);
+    queue.stop();
+  });
+
   it('executes a cloud-stamped invocation on exactly one of two hosts (#1125)', async () => {
     const item = invocation({
       runAt: 1_000 as ScheduledInvocation['runAt'],

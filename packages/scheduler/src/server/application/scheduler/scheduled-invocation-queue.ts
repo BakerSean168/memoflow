@@ -49,6 +49,12 @@ export interface ScheduledInvocationRuntimeOptions {
    * stamped domain matches; `undefined` disables the gate (test hosts).
    */
   readonly executionDomain?: SchedulerExecutionDomain;
+  /**
+   * Whether another host can execute this identity's cloud-domain work. A
+   * `local` host without a cloud peer (guest or never-synced profile) owns
+   * every domain, so its durable work still runs with no cloud session.
+   */
+  readonly hasPeerExecutor?: () => boolean | Promise<boolean>;
   readonly shouldExecuteIdentity?: (identityId: string) => boolean | Promise<boolean>;
 }
 
@@ -123,11 +129,16 @@ export class ScheduledInvocationQueue {
     try {
       // 单一执行者：只认领属于本宿主执行域的 invocation。云端域的工作由 API
       // Scheduler 执行，桌面域的工作由桌面执行；两端不会同时认领同一条。
+      // 没有云端同侪的本地宿主（访客/未同步 Profile）仍拥有全部执行域。
       if (
         this.options.executionDomain !== undefined &&
         item.executionDomain !== this.options.executionDomain
       ) {
-        return;
+        const localOwnsEveryDomain =
+          this.options.executionDomain === 'local' &&
+          this.options.hasPeerExecutor !== undefined &&
+          !(await this.options.hasPeerExecutor());
+        if (!localOwnsEveryDomain) return;
       }
       if (
         this.options.shouldExecuteIdentity &&

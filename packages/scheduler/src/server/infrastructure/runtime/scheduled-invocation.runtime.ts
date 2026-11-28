@@ -26,6 +26,8 @@ export interface ScheduledInvocationRuntimeDependencies {
   readonly claimTtlMs?: number;
   /** Execution domain of this host; defaults to the cloud Scheduler. */
   readonly executionDomain?: SchedulerExecutionDomain;
+  /** Whether a peer host exists that can execute cloud-domain work. */
+  readonly hasPeerExecutor?: () => boolean | Promise<boolean>;
   readonly shouldExecuteIdentity?: (identityId: string) => boolean | Promise<boolean>;
 }
 
@@ -45,6 +47,7 @@ export function createScheduledInvocationRuntimeContribution(
     workerId: deps.workerId,
     claimTtlMs: deps.claimTtlMs,
     executionDomain: deps.executionDomain ?? DEFAULT_SCHEDULER_EXECUTION_DOMAIN,
+    hasPeerExecutor: deps.hasPeerExecutor,
     shouldExecuteIdentity: deps.shouldExecuteIdentity,
   });
   const leaseRetryIntervalMs = Math.max(250, deps.leaseRetryIntervalMs ?? 5_000);
