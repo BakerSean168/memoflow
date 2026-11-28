@@ -434,14 +434,22 @@ function failureCodeOf(cause: unknown) {
   }
   return 'UNKNOWN';
 }
-/** Structured runtime evidence for the next reproduction on the failing platform. */
+/**
+ * Structured runtime evidence for the next reproduction on the failing platform.
+ * Fields are inlined into the message: Chromium collapses extra `console` arguments
+ * to `[object Object]` before the renderer log reaches Main.
+ */
 function reportLinkFailures(failures: KnowledgeLinkFailure[]) {
   if (!failures.length) return;
-  console.warn('[knowledge-business-links] business link read failed', {
-    bindingId: snapshot.value?.binding.id,
-    documents: notes.value.length,
-    failures,
-  });
+  const detail = failures
+    .map((failure) => {
+      const subject = failure.documentId ?? failure.subjectId;
+      return `${failure.stage}:${failure.code}${subject ? `:${subject}` : ''}`;
+    })
+    .join(',');
+  console.warn(
+    `[knowledge-business-links] business link read failed binding=${snapshot.value?.binding.id ?? 'none'} documents=${notes.value.length} failures=${detail}`,
+  );
 }
 /** Re-read business links alone; the note list and Git status stay untouched. */
 async function retryLinks() {
