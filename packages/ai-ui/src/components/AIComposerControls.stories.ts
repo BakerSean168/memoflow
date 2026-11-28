@@ -141,6 +141,13 @@ export const ModelPickerOpen: Story = {
     await waitFor(() => expect(page.getAllByTestId('ai-model-picker-option')).toHaveLength(2));
     await expect(page.getByTestId('ai-model-picker-footer')).toBeVisible();
     await expect(page.getByTestId('ai-model-picker-permissions')).toBeVisible();
+    // T3 keeps the docked picker open after a model pick; the check follows the
+    // name while the jump shortcut stays at the row end.
+    const selectedRow = page.getAllByTestId('ai-model-picker-option')[0]!;
+    await expect(within(selectedRow).getByTestId('ai-model-picker-check')).toBeVisible();
+    await expect(within(selectedRow).getByTestId('ai-model-picker-shortcut')).toBeVisible();
+    await userEvent.click(selectedRow);
+    await expect(page.getByTestId('ai-model-picker')).toBeVisible();
   },
 };
 
