@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { InvocationAttempt } from '../invocation-attempt';
+import { deriveInvocationAttemptId } from '../invocation-attempt-id';
 
 describe('InvocationAttempt', () => {
   it('starts with explicit execution ownership and an unfinished timeout placeholder', () => {
@@ -41,11 +42,40 @@ describe('InvocationAttempt', () => {
       startedAt: 200,
     }).toState();
 
-    expect(attempt.id).toEqual(expect.any(String));
+    expect(attempt.id).toBe(deriveInvocationAttemptId('invocation-1', 1));
     expect(attempt.workerId).toBeNull();
     expect(attempt.claimToken).toBeNull();
     expect(attempt.fencingToken).toBeNull();
     expect(attempt.createdAt).toBe(200);
+  });
+
+  it('derives one stable attempt id from (invocationId, attemptNumber) across writing hosts', () => {
+    // #1125: the API host and the Desktop host each started attempt 1 for the
+    // same invocation. They must produce the identical row identity so the
+    // natural unique key converges instead of duplicating.
+    const server = InvocationAttempt.start({
+      identityId: 'identity-1',
+      invocationId: 'invocation-1',
+      attemptNumber: 1,
+      startedAt: 100,
+      workerId: 'api-worker',
+      claimToken: 'server-claim',
+      fencingToken: 1,
+    }).toState();
+    const desktop = InvocationAttempt.start({
+      identityId: 'identity-1',
+      invocationId: 'invocation-1',
+      attemptNumber: 1,
+      startedAt: 150,
+      workerId: 'desktop-worker',
+      claimToken: 'desktop-claim',
+      fencingToken: 1,
+    }).toState();
+
+    expect(server.id).toEqual(desktop.id);
+    expect(server.id).toEqual(expect.stringMatching(/^invocation-attempt:[0-9a-f]{64}$/));
+    expect(deriveInvocationAttemptId('invocation-1', 2)).not.toEqual(server.id);
+    expect(deriveInvocationAttemptId('invocation-2', 1)).not.toEqual(server.id);
   });
 
   it.each([0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])(

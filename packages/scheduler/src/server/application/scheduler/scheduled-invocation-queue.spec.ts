@@ -184,4 +184,110 @@ describe('ScheduledInvocationQueue canonical runtime', () => {
     expect(handler.execute).not.toHaveBeenCalled();
     queue.stop();
   });
+
+  it('never claims work stamped to another execution domain', async () => {
+    const timer = new FakeTimer(1_000);
+    const item = invocation({
+      runAt: 1_000 as ScheduledInvocation['runAt'],
+      observability: { name: 'Routine', tags: ['routine', 'execution-domain:cloud'] },
+    });
+    const repo = repository([item]);
+    const handler = { execute: vi.fn() };
+    const queue = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: handler,
+      timer,
+      executionDomain: 'local',
+    });
+
+    await queue.start();
+    timer.tick(0);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(repo.claimAndStart).not.toHaveBeenCalled();
+    expect(handler.execute).not.toHaveBeenCalled();
+    queue.stop();
+  });
+
+  it('keeps executing cloud-domain work on a local host with no cloud peer', async () => {
+    const timer = new FakeTimer(1_000);
+    const item = invocation({
+      runAt: 1_000 as ScheduledInvocation['runAt'],
+      observability: { name: 'Routine', tags: ['routine', 'execution-domain:cloud'] },
+    });
+    const repo = repository([item]);
+    const handler = { execute: vi.fn().mockResolvedValue({ status: 'succeeded' as const }) };
+    const queue = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: handler,
+      timer,
+      executionDomain: 'local',
+      hasPeerExecutor: async () => false,
+    });
+
+    await queue.start();
+    timer.tick(0);
+    await vi.waitFor(() => expect(repo.completeAttempt).toHaveBeenCalledTimes(1));
+    expect(repo.claimAndStart).toHaveBeenCalledTimes(1);
+    expect(handler.execute).toHaveBeenCalledTimes(1);
+    queue.stop();
+  });
+
+  it('executes a cloud-stamped invocation on exactly one of two hosts (#1125)', async () => {
+    const item = invocation({
+      runAt: 1_000 as ScheduledInvocation['runAt'],
+      observability: { name: 'Routine', tags: ['routine', 'execution-domain:cloud'] },
+    });
+    let status: 'pending' | 'running' = 'pending';
+    const claimAndStart = vi.fn(async () => {
+      if (status !== 'pending') return null;
+      status = 'running';
+      return claim(item, 1);
+    });
+    const repo = {
+      recoverExpiredClaims: vi.fn().mockResolvedValue(0),
+      findRunnable: vi.fn().mockResolvedValue([item]),
+      claimAndStart,
+      completeAttempt: vi.fn().mockResolvedValue(true),
+    } as unknown as IScheduledInvocationRepository & {
+      claimAndStart: ReturnType<typeof vi.fn>;
+      completeAttempt: ReturnType<typeof vi.fn>;
+    };
+    const executedOn: string[] = [];
+    const cloudTimer = new FakeTimer(1_000);
+    const desktopTimer = new FakeTimer(1_000);
+    const cloud = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: {
+        execute: vi.fn(async () => {
+          executedOn.push('cloud');
+          return { status: 'succeeded' as const };
+        }),
+      },
+      timer: cloudTimer,
+      executionDomain: 'cloud',
+    });
+    const desktop = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: {
+        execute: vi.fn(async () => {
+          executedOn.push('local');
+          return { status: 'succeeded' as const };
+        }),
+      },
+      timer: desktopTimer,
+      executionDomain: 'local',
+    });
+
+    await cloud.start();
+    await desktop.start();
+    cloudTimer.tick(0);
+    desktopTimer.tick(0);
+    await vi.waitFor(() => expect(repo.completeAttempt).toHaveBeenCalledTimes(1));
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(claimAndStart).toHaveBeenCalledTimes(1);
+    expect(executedOn).toEqual(['cloud']);
+    cloud.stop();
+    desktop.stop();
+  });
 });

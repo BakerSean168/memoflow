@@ -1,5 +1,9 @@
 import { createLogger } from '@memoflow/utils/logger';
 import type { ScheduledInvocationContext, ScheduledHandlerResult } from '../../../scheduling';
+import {
+  DEFAULT_SCHEDULER_EXECUTION_DOMAIN,
+  type SchedulerExecutionDomain,
+} from '../../../scheduling';
 import { ScheduledInvocationQueue } from '../../application/scheduler/scheduled-invocation-queue';
 import type { IScheduledInvocationRepository } from '../../domain/repositories/i-scheduled-invocation-repository';
 import { SCHEDULE_LEASE_KEY } from '../lease/schedule-lease-coordinator';
@@ -20,6 +24,10 @@ export interface ScheduledInvocationRuntimeDependencies {
   readonly rescanIntervalMs?: number;
   readonly workerId?: string;
   readonly claimTtlMs?: number;
+  /** Execution domain of this host; defaults to the cloud Scheduler. */
+  readonly executionDomain?: SchedulerExecutionDomain;
+  /** Whether a peer host exists that can execute cloud-domain work. */
+  readonly hasPeerExecutor?: () => boolean | Promise<boolean>;
   readonly shouldExecuteIdentity?: (identityId: string) => boolean | Promise<boolean>;
 }
 
@@ -38,6 +46,8 @@ export function createScheduledInvocationRuntimeContribution(
     handlerRegistry: deps.handlerRegistry,
     workerId: deps.workerId,
     claimTtlMs: deps.claimTtlMs,
+    executionDomain: deps.executionDomain ?? DEFAULT_SCHEDULER_EXECUTION_DOMAIN,
+    hasPeerExecutor: deps.hasPeerExecutor,
     shouldExecuteIdentity: deps.shouldExecuteIdentity,
   });
   const leaseRetryIntervalMs = Math.max(250, deps.leaseRetryIntervalMs ?? 5_000);

@@ -403,6 +403,15 @@ async function registerBusinessModules(
     calendarRepositories: calendarRepositorySet,
     schedulerRepositories: schedulerRepositorySet,
     handlerRegistry: scheduleOrchestrationModule.handlerRegistry,
+    // A Profile with no cloud access token has no cloud Scheduler peer, so the
+    // local scheduler host stays the executor for every execution domain.
+    hasCloudExecutor: async () => {
+      try {
+        return (await getCloudAccessToken()) !== null;
+      } catch {
+        return false;
+      }
+    },
     shouldExecuteIdentity: (candidateIdentityId) => {
       const identityId = mainRuntime?.profileRuntimeManager.getCurrentIdentityId() ?? null;
       return identityId !== null && candidateIdentityId === identityId;

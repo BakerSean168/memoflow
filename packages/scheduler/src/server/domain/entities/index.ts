@@ -6,3 +6,4 @@ export {
 export type { ScheduledInvocationState } from './scheduled-invocation';
 export { InvocationAttempt } from './invocation-attempt';
 export type { InvocationAttemptState } from './invocation-attempt';
+export { deriveInvocationAttemptId } from './invocation-attempt-id';

@@ -14,6 +14,8 @@ import {
   assertSchedulingOwner,
   assertUniqueSchedulingKeys,
   buildSchedulingOwnerKey,
+  withDefaultSchedulerExecutionDomain,
+  withDefaultSchedulerExecutionDomainTags,
 } from '../../../scheduling';
 import { ScheduledInvocation } from '../../domain/entities/scheduled-invocation';
 import type { IScheduledInvocationRepository } from '../../domain/repositories/i-scheduled-invocation-repository';
@@ -110,7 +112,8 @@ function stateFingerprint(invocation: ScheduledInvocationState): string {
     timeoutMs: invocation.timeoutMs,
     observability: {
       ...(invocation.observability.name === null ? {} : { name: invocation.observability.name }),
-      tags: invocation.observability.tags,
+      // 存量行可能早于执行域契约写入；归一化后再比较，避免「无标签」被误判为语义变更。
+      tags: withDefaultSchedulerExecutionDomainTags(invocation.observability.tags),
     },
   });
 }
@@ -208,8 +211,11 @@ export class ScheduledInvocationSchedulingAdapter implements SchedulingPort {
 
   private async reconcileInternal(
     owner: SchedulingOwner,
-    desired: readonly ScheduledIntent[],
+    requested: readonly ScheduledIntent[],
   ): Promise<SchedulingReconcileReceipt> {
+    // 执行域在指纹与持久化之前统一补齐：两端投影同一意图必须得到同一 tags，
+    // 否则 reconcile 会在「有标签/无标签」之间来回改写。
+    const desired = requested.map(withDefaultSchedulerExecutionDomain);
     const operationId = this.operationIdFactory();
     const startedAt = this.now();
     try {

@@ -3,12 +3,18 @@ import type { IScheduleTimer } from '@memoflow/patterns/scheduler';
 import { NodeTimer } from '@memoflow/patterns/scheduler';
 import type { IScheduledInvocationRepository } from '../../domain/repositories/i-scheduled-invocation-repository';
 import type { ScheduledInvocation } from '@memoflow/schedule-contracts';
+import {
+  DEFAULT_SCHEDULER_EXECUTION_DOMAIN,
+  resolveSchedulerExecutionDomain,
+  type SchedulerExecutionDomain,
+} from '../../../scheduling';
 import { generateUUID } from '@memoflow/utils/shared';
 
 interface InvocationQueueItem {
   taskId: string;
   nextRunAt: number;
   identityId: string;
+  executionDomain: SchedulerExecutionDomain;
 }
 
 export interface ScheduledInvocationRuntimeOptions {
@@ -38,6 +44,17 @@ export interface ScheduledInvocationRuntimeOptions {
   readonly timer?: IScheduleTimer;
   readonly workerId?: string;
   readonly claimTtlMs?: number;
+  /**
+   * Execution domain of this host. A host only claims invocations whose
+   * stamped domain matches; `undefined` disables the gate (test hosts).
+   */
+  readonly executionDomain?: SchedulerExecutionDomain;
+  /**
+   * Whether another host can execute this identity's cloud-domain work. A
+   * `local` host without a cloud peer (guest or never-synced profile) owns
+   * every domain, so its durable work still runs with no cloud session.
+   */
+  readonly hasPeerExecutor?: () => boolean | Promise<boolean>;
   readonly shouldExecuteIdentity?: (identityId: string) => boolean | Promise<boolean>;
 }
 
@@ -84,6 +101,9 @@ export class ScheduledInvocationQueue {
       taskId: invocation.id,
       nextRunAt: dueAt,
       identityId: invocation.identityId,
+      executionDomain:
+        resolveSchedulerExecutionDomain(invocation.observability.tags) ??
+        DEFAULT_SCHEDULER_EXECUTION_DOMAIN,
     });
     if (this.running && !this.executing) this.schedule();
   }
@@ -107,6 +127,19 @@ export class ScheduledInvocationQueue {
     if (!item) return this.schedule();
     this.executing = true;
     try {
+      // 单一执行者：只认领属于本宿主执行域的 invocation。云端域的工作由 API
+      // Scheduler 执行，桌面域的工作由桌面执行；两端不会同时认领同一条。
+      // 没有云端同侪的本地宿主（访客/未同步 Profile）仍拥有全部执行域。
+      if (
+        this.options.executionDomain !== undefined &&
+        item.executionDomain !== this.options.executionDomain
+      ) {
+        const localOwnsEveryDomain =
+          this.options.executionDomain === 'local' &&
+          this.options.hasPeerExecutor !== undefined &&
+          !(await this.options.hasPeerExecutor());
+        if (!localOwnsEveryDomain) return;
+      }
       if (
         this.options.shouldExecuteIdentity &&
         !(await this.options.shouldExecuteIdentity(item.identityId))
