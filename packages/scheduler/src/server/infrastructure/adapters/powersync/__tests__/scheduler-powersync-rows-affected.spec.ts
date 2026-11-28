@@ -7,6 +7,7 @@ import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PowerSyncScheduledInvocationRepository } from '../scheduled-invocation-powersync.repository';
 import { PowerSyncInvocationAttemptRepository } from '../invocation-attempt-powersync.repository';
+import { deriveInvocationAttemptId } from '../../../../domain/entities/invocation-attempt-id';
 import { createScheduleLeasePowerSyncRepository } from '../../../lease/schedule-lease.repository';
 
 let db: PowerSyncDatabase;
@@ -248,6 +249,38 @@ describe('scheduler stored-state guards on real PowerSync (#709)', () => {
       attemptNumber: 2,
     });
   });
+  it('claims attempt 1 with the deterministic id shared by both hosts (#1125)', async () => {
+    const claimed = await repo.claimAndStart(claimInput);
+    expect(claimed?.attempt.id).toBe(deriveInvocationAttemptId('inv', 1));
+    expect(await attempts()).toEqual([
+      expect.objectContaining({
+        id: deriveInvocationAttemptId('inv', 1),
+        attempt_number: 1,
+      }),
+    ]);
+  });
+
+  it('converges to one attempt row when a lagging host replays attempt 1 (#1125)', async () => {
+    // 云端宿主已执行并写入 attempt 1（确定性 id）。
+    await repo.claimAndStart(claimInput);
+    // 桌面宿主此刻仍持有同步滞后的 pending 副本，误以为这一轮还没发生。
+    await db.execute(
+      `UPDATE scheduled_invocations SET status = 'pending', attempt_count = 0, claim_token = NULL, claim_expires_at = NULL, fencing_token = 0 WHERE id = 'inv'`,
+    );
+
+    await expect(
+      repo.claimAndStart({ ...claimInput, claimToken: 'desktop-claim' }),
+    ).resolves.toBeNull();
+
+    expect(await attempts()).toHaveLength(1);
+    expect(await attempts()).toEqual([
+      expect.objectContaining({
+        id: deriveInvocationAttemptId('inv', 1),
+        claim_token: 'claim',
+      }),
+    ]);
+  });
+
   it('proves schedule_leases is a real table and preserves renewal ownership', async () => {
     const lease = createScheduleLeasePowerSyncRepository(db);
     const request = {

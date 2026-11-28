@@ -62,6 +62,10 @@ export function composeSchedule(
     repository: dependencies.schedulerRepositories.scheduledInvocationRepository,
     handlerRegistry: dependencies.handlerRegistry,
     leaseCoordinator: dependencies.schedulerRepositories.leaseCoordinator,
+    // Desktop is the `local` execution domain: cloud-stamped invocations are
+    // executed by the API Scheduler only, so the synced copy here is never
+    // claimed a second time on this host.
+    executionDomain: 'local',
     shouldExecuteIdentity: dependencies.shouldExecuteIdentity,
   });
 

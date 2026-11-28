@@ -181,7 +181,10 @@ describe('ScheduledInvocationSchedulingAdapter', () => {
       status: 'pending',
       sourceRevision: 2,
       payload: { occurrenceId: 'occurrence-1', label: 'updated' },
-      observability: { name: 'Routine Updated', tags: ['routine'] },
+      observability: {
+        name: 'Routine Updated',
+        tags: ['routine', 'execution-domain:cloud'],
+      },
     });
   });
 
@@ -244,5 +247,35 @@ describe('ScheduledInvocationSchedulingAdapter', () => {
       },
     });
     expect(fixture.current()[0]?.status).toBe('succeeded');
+  });
+
+  it('stamps the default cloud execution domain once and never flaps on re-reconcile', async () => {
+    const owner = { identityId: 'identity-1', type: 'routine.routine', id: 'routine-1' };
+    const fixture = createRepository([]);
+    const port = createScheduledInvocationSchedulingPort(fixture.repository, {
+      now: () => 1_800_000_006_000,
+      operationIdFactory: () => 'operation:execution-domain',
+    });
+
+    await port.reconcile(owner, [makeIntent(owner)]);
+    expect(fixture.current()[0]?.observability.tags).toEqual(['routine', 'execution-domain:cloud']);
+
+    const second = await port.reconcile(owner, [makeIntent(owner)]);
+    expect(second).toMatchObject({ createdCount: 0, updatedCount: 0, unchangedCount: 1 });
+  });
+
+  it('preserves a projector-declared local execution domain', async () => {
+    const owner = { identityId: 'identity-1', type: 'routine.routine', id: 'routine-1' };
+    const fixture = createRepository([]);
+    const port = createScheduledInvocationSchedulingPort(fixture.repository, {
+      now: () => 1_800_000_007_000,
+      operationIdFactory: () => 'operation:execution-domain-local',
+    });
+
+    await port.reconcile(owner, [
+      makeIntent(owner, { observability: { name: 'Routine', tags: ['execution-domain:local'] } }),
+    ]);
+
+    expect(fixture.current()[0]?.observability.tags).toEqual(['execution-domain:local']);
   });
 });

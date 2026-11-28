@@ -16,7 +16,7 @@ import {
   PrismaInvocationAttemptMapper,
   PrismaScheduledInvocationMapper,
 } from './mappers/prisma-scheduled-invocation.mapper';
-import { generateUUID } from '@memoflow/utils/shared';
+import { deriveInvocationAttemptId } from '../../../domain/entities/invocation-attempt-id';
 
 type InvocationDb = Pick<
   PrismaClient,
@@ -186,7 +186,7 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
     const row = await this.db.scheduledInvocation.findUnique({ where: { id: input.invocationId } });
     if (!row) return null;
     const attempt: InvocationAttemptContract = {
-      id: generateUUID(),
+      id: deriveInvocationAttemptId(row.id, row.attemptCount),
       identityId: row.identityId,
       invocationId: row.id,
       attemptNumber: row.attemptCount,
@@ -202,10 +202,15 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
       fencingToken: row.fencingToken,
       createdAt: input.now,
     };
-    await this.db.invocationAttempt.create({
-      data: PrismaInvocationAttemptMapper.toCreate(
-        attempt,
-      ) as Prisma.InvocationAttemptUncheckedCreateInput,
+    // 同一 (invocationId, attemptNumber) 的 id 是确定性的：若另一宿主已先落地
+    // 这一轮的 attempt，本端只保留既有行，不产生第二条记录。
+    await this.db.invocationAttempt.createMany({
+      data: [
+        PrismaInvocationAttemptMapper.toCreate(
+          attempt,
+        ) as Prisma.InvocationAttemptUncheckedCreateInput,
+      ],
+      skipDuplicates: true,
     });
     return { invocation: PrismaScheduledInvocationMapper.toDomain(row), attempt };
   }

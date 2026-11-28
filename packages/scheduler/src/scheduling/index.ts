@@ -16,6 +16,14 @@ export type {
 } from './contracts';
 export { buildSchedulingKey, buildSchedulingOwnerKey } from './key';
 export {
+  DEFAULT_SCHEDULER_EXECUTION_DOMAIN,
+  resolveSchedulerExecutionDomain,
+  schedulerExecutionDomainTag,
+  withDefaultSchedulerExecutionDomain,
+  withDefaultSchedulerExecutionDomainTags,
+} from './execution-domain';
+export type { SchedulerExecutionDomain } from './execution-domain';
+export {
   DuplicateSchedulingKeyError,
   assertHandlerKey,
   assertPayloadVersion,

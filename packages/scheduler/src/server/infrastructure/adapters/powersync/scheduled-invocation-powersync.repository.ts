@@ -11,12 +11,12 @@ import type {
   ScheduledInvocationCompleteInput,
 } from '../../../domain/repositories/i-scheduled-invocation-repository';
 import { InvocationAttempt as InvocationAttemptEntity } from '../../../domain/entities/invocation-attempt';
+import { deriveInvocationAttemptId } from '../../../domain/entities/invocation-attempt-id';
 import {
   PowerSyncInvocationAttemptMapper,
   PowerSyncScheduledInvocationMapper,
   type PowerSyncScheduledInvocationRow,
 } from './mappers/powersync-scheduled-invocation.mapper';
-import { generateUUID } from '@memoflow/utils/shared';
 
 export class PowerSyncScheduledInvocationRepository implements IScheduledInvocationRepository {
   constructor(
@@ -196,8 +196,8 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
     workerId?: string | null;
   }): Promise<ScheduledInvocationClaim | null> {
     if (!this.transaction) return this.withTransaction((repo) => repo.claimAndStart(input));
-    const eligible = await this.q.getOptional<{ id: string }>(
-      `SELECT id FROM scheduled_invocations WHERE id = ? AND identity_id = ? AND ((status = 'pending' AND run_at <= ?) OR (status = 'retry_wait' AND next_attempt_at <= ?))`,
+    const eligible = await this.q.getOptional<{ id: string; attempt_count: number }>(
+      `SELECT id, attempt_count FROM scheduled_invocations WHERE id = ? AND identity_id = ? AND ((status = 'pending' AND run_at <= ?) OR (status = 'retry_wait' AND next_attempt_at <= ?))`,
       [
         input.invocationId,
         input.identityId,
@@ -206,6 +206,14 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
       ],
     );
     if (!eligible) return null;
+    // 同一逻辑 attempt 的 id 由 (invocationId, attemptNumber) 确定性派生。
+    // 若该行已通过同步落地（另一宿主已执行过这一轮），本轮认领必须放弃，
+    // 而不是无条件插入一条新 attempt —— 这正是双端各执行一次的入口。
+    const alreadyRecorded = await this.q.getOptional<{ id: string }>(
+      'SELECT id FROM invocation_attempts WHERE id = ? LIMIT 1',
+      [deriveInvocationAttemptId(input.invocationId, eligible.attempt_count + 1)],
+    );
+    if (alreadyRecorded) return null;
     await this.q.execute(
       `UPDATE scheduled_invocations SET status = 'running', attempt_count = attempt_count + 1, next_attempt_at = NULL, claim_token = ?, claim_expires_at = ?, fencing_token = fencing_token + 1 WHERE id = ? AND identity_id = ? AND ((status = 'pending' AND run_at <= ?) OR (status = 'retry_wait' AND next_attempt_at <= ?))`,
       [
@@ -229,7 +237,6 @@ export class PowerSyncScheduledInvocationRepository implements IScheduledInvocat
       workerId: input.workerId,
       claimToken: input.claimToken,
       fencingToken: row.fencing_token,
-      id: generateUUID(),
     });
     const a = PowerSyncInvocationAttemptMapper.toRow(attempt.toState());
     await this.q.execute(

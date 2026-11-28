@@ -2,7 +2,7 @@ import type {
   InvocationAttempt as InvocationAttemptContract,
   InvocationAttemptOutcome,
 } from '@memoflow/schedule-contracts';
-import { generateUUID } from '@memoflow/utils/shared';
+import { deriveInvocationAttemptId } from './invocation-attempt-id';
 
 export type InvocationAttemptState = InvocationAttemptContract;
 
@@ -24,7 +24,7 @@ export class InvocationAttempt {
       throw new TypeError('attemptNumber must be a positive safe integer.');
     }
     return new InvocationAttempt({
-      id: input.id ?? generateUUID(),
+      id: input.id ?? deriveInvocationAttemptId(input.invocationId, input.attemptNumber),
       identityId: input.identityId,
       invocationId: input.invocationId,
       attemptNumber: input.attemptNumber,
