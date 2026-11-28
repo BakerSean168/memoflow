@@ -282,3 +282,149 @@ it('preserves an archive coalesced with a title patch without carrying the stale
     data: { status: 'Archived', updatedAt },
   });
 });
+
+describe('generic PUT natural-key convergence (#1125)', () => {
+  const attemptData = {
+    invocation_id: 'invocation-1',
+    attempt_number: 2,
+    started_at: '2026-11-18T04:48:00.000Z',
+    outcome: 'succeeded',
+  };
+
+  function attemptDelegate(existingId: string | null) {
+    return {
+      findFirst: vi.fn(async () => (existingId ? { id: existingId } : null)),
+      upsert: vi.fn(async () => undefined),
+      update: vi.fn(async () => undefined),
+      deleteMany: vi.fn(async () => ({ count: 0 })),
+    };
+  }
+
+  function scheduleDelegate() {
+    return {
+      upsert: vi.fn(async () => undefined),
+      update: vi.fn(async () => undefined),
+      deleteMany: vi.fn(async () => ({ count: 0 })),
+    };
+  }
+
+  it('merges an attempt with a different id onto the existing natural-key row', async () => {
+    const invocationAttempt = attemptDelegate('server-attempt');
+    const db = {
+      $transaction: async <T>(
+        work: (tx: { invocationAttempt: typeof invocationAttempt }) => Promise<T>,
+      ) => work({ invocationAttempt }),
+    };
+
+    await executeCrudBatch(db, 'identity-1', [
+      {
+        ops: [{ op: 'PUT', type: 'invocation_attempts', id: 'client-attempt', data: attemptData }],
+      },
+    ]);
+
+    expect(invocationAttempt.findFirst).toHaveBeenCalledWith({
+      where: { identityId: 'identity-1', invocationId: 'invocation-1', attemptNumber: 2 },
+      select: { id: true },
+    });
+    expect(invocationAttempt.update).toHaveBeenCalledWith({
+      where: { id: 'server-attempt' },
+      data: expect.objectContaining({
+        identityId: 'identity-1',
+        invocationId: 'invocation-1',
+        attemptNumber: 2,
+        outcome: 'succeeded',
+      }),
+    });
+    expect(invocationAttempt.update.mock.calls[0]?.[0].data).not.toHaveProperty('id');
+    expect(invocationAttempt.upsert).not.toHaveBeenCalled();
+  });
+
+  it('replays a converged PUT without creating a duplicate row', async () => {
+    const invocationAttempt = attemptDelegate('server-attempt');
+    const db = {
+      $transaction: async <T>(
+        work: (tx: { invocationAttempt: typeof invocationAttempt }) => Promise<T>,
+      ) => work({ invocationAttempt }),
+    };
+    const batch = [
+      {
+        ops: [
+          {
+            op: 'PUT' as const,
+            type: 'invocation_attempts',
+            id: 'client-attempt',
+            data: attemptData,
+          },
+        ],
+      },
+    ];
+
+    await executeCrudBatch(db, 'identity-1', batch);
+    await executeCrudBatch(db, 'identity-1', batch);
+
+    expect(invocationAttempt.upsert).not.toHaveBeenCalled();
+    expect(invocationAttempt.update).toHaveBeenCalledTimes(2);
+  });
+
+  it('isolates a poison operation and keeps applying the rest of the batch', async () => {
+    const invocationAttempt = attemptDelegate(null);
+    invocationAttempt.upsert.mockRejectedValue(
+      Object.assign(new Error('Unique constraint failed'), { code: 'P2002' }),
+    );
+    const schedule = scheduleDelegate();
+    const db = {
+      $transaction: async <T>(
+        work: (tx: {
+          invocationAttempt: typeof invocationAttempt;
+          schedule: typeof schedule;
+        }) => Promise<T>,
+      ) => work({ invocationAttempt, schedule }),
+    };
+
+    await executeCrudBatch(db, 'identity-1', [
+      {
+        ops: [
+          { op: 'PUT', type: 'invocation_attempts', id: 'attempt-1', data: attemptData },
+          {
+            op: 'PUT',
+            type: 'schedules',
+            id: 'schedule-1',
+            data: { title: 'survives', range_kind: 'Timed' },
+          },
+        ],
+      },
+    ]);
+
+    expect(schedule.upsert).toHaveBeenCalledWith({
+      where: { id: 'schedule-1' },
+      create: expect.objectContaining({ identityId: 'identity-1', title: 'survives' }),
+      update: expect.objectContaining({ identityId: 'identity-1', title: 'survives' }),
+    });
+  });
+
+  it('still rejects the batch for transient infrastructure errors', async () => {
+    const schedule = scheduleDelegate();
+    schedule.upsert.mockRejectedValue(
+      Object.assign(new Error('Timed out fetching a connection'), { code: 'P2024' }),
+    );
+    const db = {
+      $transaction: async <T>(work: (tx: { schedule: typeof schedule }) => Promise<T>) =>
+        work({ schedule }),
+    };
+
+    await expect(
+      executeCrudBatch(db, 'identity-1', [
+        {
+          ops: [
+            {
+              op: 'PUT',
+              type: 'schedules',
+              id: 'schedule-1',
+              data: { title: 'retry me', range_kind: 'Timed' },
+            },
+          ],
+        },
+      ]),
+    ).rejects.toMatchObject({ code: 'P2024' });
+  });
+});

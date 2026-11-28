@@ -103,7 +103,22 @@ describe('PowerSyncApiModule profile snapshot routes', () => {
     const response = await request(app)
       .put('/api/v1/powersync/crud')
       .send({
-        transactions: [{ ops: [] }],
+        transactions: [
+          {
+            ops: [
+              {
+                op: 'PUT',
+                type: 'user_preference_records',
+                id: 'pref-1',
+                data: {
+                  namespace: 'presentation',
+                  payload: JSON.stringify({ theme: 'dark', language: 'zh-CN' }),
+                  revision: 0,
+                },
+              },
+            ],
+          },
+        ],
       });
     expect(response.status).toBe(409);
     expect(response.body).toMatchObject({
@@ -139,7 +154,20 @@ describe('PowerSyncApiModule profile snapshot routes', () => {
     const app = await createTestApp(db);
     const response = await request(app)
       .put('/api/v1/powersync/crud')
-      .send({ transactions: [{ ops: [] }] });
+      .send({
+        transactions: [
+          {
+            ops: [
+              {
+                op: 'PATCH',
+                type: 'goals',
+                id: 'goal-1',
+                data: { version: 2 },
+              },
+            ],
+          },
+        ],
+      });
     expect(response.status).toBe(409);
     expect(response.body).toMatchObject({
       ok: false,
