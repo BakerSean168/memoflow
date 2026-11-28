@@ -554,6 +554,8 @@ async function retryNaturalKeyMerge(
       return mergeIntoNaturalKeyRow(delegate, operation.type, operation.id, record);
     });
   } catch (error) {
+    // A transient failure while retrying must still reach the client.
+    if (!isPoisonOperationError(error)) throw error;
     logger.warn('PowerSync CRUD natural-key merge retry failed', {
       identityId,
       table: operation.type,
