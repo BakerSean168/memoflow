@@ -69,6 +69,60 @@ function importMarkerPath(dataRoot: string, profileId: string) {
 }
 
 describe('DesktopCloudSignInService', () => {
+  it('adopts a browser session without persisting it when remember is off', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(json(sessionResponse));
+    const { service, sessions, runtime } = setup(fetchImpl);
+    const result = await service.adoptBrowserToken(
+      'browser-desktop-token',
+      false,
+      new AbortController().signal,
+    );
+    expect(result).toEqual({ ok: true, data: { profileId: cloudProfileId } });
+    expect(sessions.save).toHaveBeenCalledWith(
+      cloudProfileId,
+      expect.objectContaining({ token: 'browser-desktop-token' }),
+      { persist: false },
+    );
+    expect(runtime.openProfile).toHaveBeenCalledWith(cloudProfileId);
+  });
+
+  it('revokes a browser handoff cancelled during session resolution', async () => {
+    const controller = new AbortController();
+    const fetchImpl = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        controller.abort();
+        return json(sessionResponse);
+      })
+      .mockResolvedValue(json({}));
+    const { service, runtime, sessions } = setup(fetchImpl);
+    expect(
+      await service.adoptBrowserToken('cancelled-token', true, controller.signal),
+    ).toMatchObject({ ok: false, error: { code: 'SIGN_IN_CANCELLED' } });
+    expect(runtime.registerCloudProfile).not.toHaveBeenCalled();
+    expect(sessions.save).not.toHaveBeenCalled();
+    expect(fetchImpl).toHaveBeenLastCalledWith(
+      'https://api.memo.test/api/auth/sign-out',
+      expect.objectContaining({
+        headers: expect.objectContaining({ authorization: 'Bearer cancelled-token' }),
+      }),
+    );
+  });
+
+  it('rolls back session persistence if the owning process closes before profile activation', async () => {
+    const controller = new AbortController();
+    const fetchImpl = vi.fn().mockResolvedValue(json(sessionResponse));
+    const { service, runtime, sessions } = setup(fetchImpl);
+    sessions.save.mockImplementationOnce(async () => {
+      controller.abort();
+    });
+    expect(
+      await service.adoptBrowserToken('abandoned-token', true, controller.signal),
+    ).toMatchObject({ ok: false, error: { code: 'SIGN_IN_CANCELLED' } });
+    expect(sessions.remove).toHaveBeenCalledWith(cloudProfileId);
+    expect(runtime.openProfile).not.toHaveBeenCalled();
+  });
+
   it('signs in, registers or finds the Profile and persists the session when remembered', async () => {
     const fetchImpl = vi
       .fn()

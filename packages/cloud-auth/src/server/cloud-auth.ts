@@ -1,3 +1,4 @@
+import { desktopSignInPlugin } from './desktop-sign-in.js';
 import { randomUUID } from 'node:crypto';
 import { accountSecurityPlugin } from './account-security.js';
 import type { PrismaClient } from '@memoflow/database';
@@ -238,6 +239,7 @@ export function createCloudAuth(
     },
     plugins: [
       bearer(),
+      desktopSignInPlugin(),
       accountSecurityPlugin(options.database, options.emailDelivery, options.secret),
       deviceAuthorization({
         expiresIn: '10m',

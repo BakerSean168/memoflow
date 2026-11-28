@@ -1,35 +1,13 @@
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { z } from 'zod';
+import { DesktopGithubSignInAttemptSchema } from '@memoflow/cloud-auth-contracts';
 import { CloudAuthChannels } from '@memoflow/desktop-contracts';
 import { translateResultError } from '../utils/translate-result-error';
 import type { DesktopProfilesSharedContext } from './useDesktopProfiles';
 
 /** The signed-in Profile the main process opened for the identity window. */
 export const openedProfileSchema = z.object({ profileId: z.string().min(1) });
-/**
- * The device-authorization attempt snapshot. Only the fields the identity
- * window reacts to are read; the rest of the shape belongs to the workspace
- * cloud-connection dialog.
- */
-const signInAttemptSchema = z.object({
-  attemptId: z.string(),
-  status: z.enum([
-    'requesting_code',
-    'awaiting_authorization',
-    'connecting_profile',
-    'connected',
-    'denied',
-    'expired',
-    'cancelled',
-    'failed',
-  ]),
-  result: z.object({ targetProfileId: z.string(), activation: z.string() }).nullable(),
-  userCode: z.string(),
-  verificationUrl: z.string(),
-  error: z.object({ code: z.string(), message: z.string() }).nullable(),
-});
-
 const GITHUB_POLL_INTERVAL_MS = 1_500;
 
 /** Catalog actions the cloud sign-in composable calls into. */
@@ -37,19 +15,24 @@ export interface DesktopProfileCloudSignInCross {
   enterOpenedProfile: () => Promise<boolean>;
 }
 
-/** Cloud sign-in: email/password and the GitHub device-authorization attempt. */
+/** Cloud sign-in: email/password and the GitHub browser authorization. */
 export function useDesktopProfileCloudSignIn(
   ctx: DesktopProfilesSharedContext,
   cross: DesktopProfileCloudSignInCross,
 ) {
   const { t, invokeScoped, accessView, loginRemember } = ctx;
 
-  // Sign-in state: cloud email/password, and the GitHub device attempt.
+  // Sign-in state: cloud email/password, and the GitHub browser attempt.
   const loginEmail = ref('');
   const loginPassword = ref('');
   const signInBusy = ref(false);
   const githubPending = ref(false);
-  const githubUserCode = ref('');
+  const githubStarting = ref(false);
+  const githubConnecting = ref(false);
+  const githubBrowserOpened = ref(false);
+  const githubActionBusy = ref(false);
+  let githubGeneration = 0;
+  let githubExpiresAt = 0;
   const githubAttemptId = ref<string | null>(null);
   let githubPollTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -70,7 +53,7 @@ export function useDesktopProfileCloudSignIn(
   }
 
   async function signInWithPassword(): Promise<void> {
-    if (signInBusy.value) return;
+    if (signInBusy.value || githubPending.value || githubStarting.value) return;
     const email = loginEmail.value.trim();
     if (!email || !loginPassword.value) {
       toast.error(t('auth.validation.passwordRequired'));
@@ -96,24 +79,62 @@ export function useDesktopProfileCloudSignIn(
     await invokeScoped(CloudAuthChannels.FORGOT_PASSWORD, z.unknown(), { scope: 'auth' });
   }
 
-  /**
-   * GitHub sign-in reuses the device-authorization page, which already offers
-   * GitHub. The main process starts an attempt without an origin Profile and
-   * commits the same register-and-open path the password form uses.
-   */
   async function signInWithGithub(): Promise<void> {
-    if (githubPending.value || signInBusy.value) return;
-    const started = await invokeScoped(
-      CloudAuthChannels.GITHUB_SIGN_IN_BEGIN,
-      signInAttemptSchema,
+    if (githubPending.value || githubStarting.value || signInBusy.value) return;
+    const generation = ++githubGeneration;
+    githubStarting.value = true;
+    try {
+      const started = await invokeScoped(
+        CloudAuthChannels.GITHUB_SIGN_IN_BEGIN,
+        DesktopGithubSignInAttemptSchema,
+        { scope: 'auth' },
+        { remember: loginRemember.value },
+      );
+      if (!started) return;
+      if (generation !== githubGeneration) {
+        await invokeScoped(
+          CloudAuthChannels.GITHUB_SIGN_IN_CANCEL,
+          z.unknown(),
+          { scope: 'auth', silent: true },
+          { attemptId: started.data.attemptId },
+        );
+        return;
+      }
+      githubAttemptId.value = started.data.attemptId;
+      githubExpiresAt = Date.parse(started.data.expiresAt);
+      githubBrowserOpened.value = started.data.browserOpened;
+      githubPending.value = true;
+      scheduleGithubPoll();
+    } finally {
+      if (generation === githubGeneration) githubStarting.value = false;
+    }
+  }
+
+  async function reopenGithubBrowser(): Promise<void> {
+    if (!githubAttemptId.value || githubActionBusy.value) return;
+    githubActionBusy.value = true;
+    try {
+      const result = await invokeScoped(
+        CloudAuthChannels.GITHUB_SIGN_IN_REOPEN,
+        DesktopGithubSignInAttemptSchema,
+        { scope: 'auth' },
+        { attemptId: githubAttemptId.value },
+      );
+      if (result) githubBrowserOpened.value = result.data.browserOpened;
+    } finally {
+      githubActionBusy.value = false;
+    }
+  }
+
+  async function copyGithubLink(): Promise<void> {
+    if (!githubAttemptId.value) return;
+    const result = await invokeScoped(
+      CloudAuthChannels.GITHUB_SIGN_IN_COPY_LINK,
+      z.unknown(),
       { scope: 'auth' },
-      { remember: loginRemember.value },
+      { attemptId: githubAttemptId.value },
     );
-    if (!started) return;
-    githubAttemptId.value = started.data.attemptId;
-    githubUserCode.value = started.data.userCode;
-    githubPending.value = true;
-    scheduleGithubPoll();
+    if (result) toast.success(t('auth.profileAccess.githubLinkCopied'));
   }
 
   function scheduleGithubPoll(): void {
@@ -127,18 +148,26 @@ export function useDesktopProfileCloudSignIn(
     const attemptId = githubAttemptId.value;
     if (!attemptId || !githubPending.value) return;
     const status = await invokeScoped(
-      CloudAuthChannels.CLOUD_CONNECTION_STATUS,
-      signInAttemptSchema,
+      CloudAuthChannels.GITHUB_SIGN_IN_STATUS,
+      DesktopGithubSignInAttemptSchema,
       { scope: 'auth', silent: true },
       { attemptId },
     );
     if (!githubPending.value || githubAttemptId.value !== attemptId) return;
     if (!status) {
+      if (Date.now() >= githubExpiresAt) {
+        githubPending.value = false;
+        githubAttemptId.value = null;
+        toast.error(t('auth.errors.GITHUB_SIGN_IN_EXPIRED'));
+        return;
+      }
       // A transport hiccup is not a verdict: keep the waiting state and retry.
       scheduleGithubPoll();
       return;
     }
     const attempt = status.data;
+    githubConnecting.value = attempt.status === 'connecting_profile';
+    githubBrowserOpened.value = attempt.browserOpened;
     if (attempt.status === 'connected' && attempt.result) {
       githubPending.value = false;
       githubAttemptId.value = null;
@@ -159,18 +188,23 @@ export function useDesktopProfileCloudSignIn(
   }
 
   async function cancelGithubSignIn(): Promise<void> {
+    if (githubConnecting.value) return;
     const attemptId = githubAttemptId.value;
-    stopGithubPolling();
-    githubPending.value = false;
-    githubUserCode.value = '';
-    githubAttemptId.value = null;
-    if (attemptId)
-      await invokeScoped(
-        CloudAuthChannels.CLOUD_CONNECTION_CANCEL,
+    ++githubGeneration;
+    githubStarting.value = false;
+    if (attemptId) {
+      const cancelled = await invokeScoped(
+        CloudAuthChannels.GITHUB_SIGN_IN_CANCEL,
         z.unknown(),
-        { scope: 'auth', silent: true },
+        { scope: 'auth' },
         { attemptId },
       );
+      if (!cancelled) return;
+    }
+    stopGithubPolling();
+    githubPending.value = false;
+    githubConnecting.value = false;
+    githubAttemptId.value = null;
   }
 
   function stopGithubPolling(): void {
@@ -185,7 +219,12 @@ export function useDesktopProfileCloudSignIn(
     loginPassword,
     signInBusy,
     githubPending,
-    githubUserCode,
+    githubStarting,
+    githubConnecting,
+    githubBrowserOpened,
+    githubActionBusy,
+    reopenGithubBrowser,
+    copyGithubLink,
     enterLoginState,
     resetSignInState,
     signInWithPassword,

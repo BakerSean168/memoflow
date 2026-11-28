@@ -91,17 +91,36 @@ export const DesktopCloudRegistrationSchema = z
   })
   .strict();
 
-export const DesktopCloudGithubSignInSchema = z.object({ remember: z.boolean() }).strict();
-export type DesktopCloudCredentialSignIn = z.infer<typeof DesktopCloudCredentialSignInSchema>;
-export type DesktopCloudRegistration = z.infer<typeof DesktopCloudRegistrationSchema>;
-export type DesktopCloudGithubSignIn = z.infer<typeof DesktopCloudGithubSignInSchema>;
-
 /**
  * The Profile the main process registered or found and opened for the new
  * session.
  */
 export const DesktopCloudSignInResultSchema = z.object({ profileId: z.string().min(1) }).strict();
 export type DesktopCloudSignInResult = z.infer<typeof DesktopCloudSignInResultSchema>;
+
+/** Public browser-login state; no provider tokens, PKCE verifier or callback URL. */
+export const DesktopGithubSignInAttemptSchema = z.object({
+  attemptId: z.string().uuid(),
+  status: z.enum([
+    'awaiting_authorization',
+    'connecting_profile',
+    'connected',
+    'denied',
+    'expired',
+    'cancelled',
+    'failed',
+  ]),
+  result: DesktopCloudSignInResultSchema.nullable(),
+  expiresAt: z.string().datetime(),
+  browserOpened: z.boolean(),
+  error: z.object({ code: z.string(), message: z.string() }).nullable(),
+});
+export type DesktopGithubSignInAttempt = z.infer<typeof DesktopGithubSignInAttemptSchema>;
+
+export const DesktopCloudGithubSignInSchema = z.object({ remember: z.boolean() }).strict();
+export type DesktopCloudCredentialSignIn = z.infer<typeof DesktopCloudCredentialSignInSchema>;
+export type DesktopCloudRegistration = z.infer<typeof DesktopCloudRegistrationSchema>;
+export type DesktopCloudGithubSignIn = z.infer<typeof DesktopCloudGithubSignInSchema>;
 
 export interface DesktopCloudConnectionResult {
   targetProfileId: string;
@@ -110,10 +129,7 @@ export interface DesktopCloudConnectionResult {
 
 export interface DesktopCloudConnectionAttempt {
   attemptId: string;
-  /**
-   * The Profile the attempt is anchored to. `null` for a source-less attempt
-   * started from the identity window, where no Profile is open yet.
-   */
+  /** The source Profile for the cloud connection attempt. */
   originProfileId: string | null;
   result: DesktopCloudConnectionResult | null;
   userCode: string;

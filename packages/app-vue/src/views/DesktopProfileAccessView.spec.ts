@@ -45,6 +45,7 @@ function profile(overrides: Partial<ProfileSummary> = {}): ProfileSummary {
 
 function mountView(
   options: {
+    githubBrowserOpened?: boolean;
     hasCredential?: boolean;
     remembered?: boolean;
     activeProfileId?: string | null;
@@ -110,8 +111,8 @@ function mountView(
         attemptId: '11111111-1111-4111-8111-111111111111',
         status: 'awaiting_authorization',
         result: null,
-        userCode: 'ABCD-1234',
-        verificationUrl: 'https://memo.example/auth/device?user_code=ABCD-1234',
+        browserOpened: options.githubBrowserOpened ?? true,
+        expiresAt: '2030-01-01T00:00:00.000Z',
         error: null,
       });
     return ok(undefined);
@@ -458,13 +459,68 @@ describe('DesktopProfileAccessView', () => {
     expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN, {
       remember: true,
     });
-    expect(element('desktop-profile-github-waiting')!.textContent).toContain('ABCD-1234');
+    expect(element('desktop-profile-github-waiting')!.textContent).toContain('Reopen browser');
+    expect(element('desktop-profile-github-waiting')!.textContent).not.toContain('ABCD-1234');
 
     element('desktop-profile-github-cancel')!.click();
     await flushPromises();
-    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.CLOUD_CONNECTION_CANCEL, {
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.GITHUB_SIGN_IN_CANCEL, {
       attemptId: '11111111-1111-4111-8111-111111111111',
     });
+    expect(element('desktop-profile-github-waiting')).toBeNull();
+  });
+
+  it('offers retry and copy when opening the system browser fails', async () => {
+    const { wrapper, invoke } = mountView({ attachTo: document.body, githubBrowserOpened: false });
+    cleanups.push(() => wrapper.unmount());
+    await flushPromises();
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-github-signin')!.click();
+    await flushPromises();
+    expect(element('desktop-profile-github-waiting')!.textContent).toContain(
+      'Could not open your browser',
+    );
+    element('desktop-profile-github-copy')!.click();
+    await flushPromises();
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.GITHUB_SIGN_IN_COPY_LINK, {
+      attemptId: '11111111-1111-4111-8111-111111111111',
+    });
+    element('desktop-profile-github-reopen')!.click();
+    await flushPromises();
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.GITHUB_SIGN_IN_REOPEN, {
+      attemptId: '11111111-1111-4111-8111-111111111111',
+    });
+  });
+
+  it('enters the opened Profile automatically after browser authorization', async () => {
+    vi.useFakeTimers();
+    const { wrapper, invoke } = mountView({ attachTo: document.body });
+    cleanups.push(() => {
+      wrapper.unmount();
+      vi.useRealTimers();
+    });
+    await flushPromises();
+    element('desktop-profile-create-local')!.click();
+    await flushPromises();
+    element('desktop-profile-github-signin')!.click();
+    await flushPromises();
+    invoke.mockResolvedValueOnce(
+      ok({
+        attemptId: '11111111-1111-4111-8111-111111111111',
+        status: 'connected',
+        result: { profileId: 'profile-2' },
+        browserOpened: true,
+        expiresAt: '2030-01-01T00:00:00.000Z',
+        error: null,
+      }) as never,
+    );
+    await vi.advanceTimersByTimeAsync(1500);
+    await flushPromises();
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.GITHUB_SIGN_IN_STATUS, {
+      attemptId: '11111111-1111-4111-8111-111111111111',
+    });
+    expect(invoke).toHaveBeenCalledWith(WindowChannels.TRANSITION_TO_MAIN);
     expect(element('desktop-profile-github-waiting')).toBeNull();
   });
 
@@ -482,7 +538,7 @@ describe('DesktopProfileAccessView', () => {
     element('desktop-profile-back-to-select')!.click();
     await flushPromises();
 
-    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.CLOUD_CONNECTION_CANCEL, {
+    expect(invoke).toHaveBeenCalledWith(CloudAuthChannels.GITHUB_SIGN_IN_CANCEL, {
       attemptId: '11111111-1111-4111-8111-111111111111',
     });
     expect(element('desktop-profile-access')).not.toBeNull();

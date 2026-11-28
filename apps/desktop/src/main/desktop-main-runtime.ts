@@ -17,6 +17,7 @@ import type { WindowManager } from './lifecycle/window-manager';
 import type { NotificationPort, ExternalEditorPort } from './capabilities/ports';
 import type { DesktopFeaturesRuntime } from './desktop-features';
 import { createLogger } from '@memoflow/utils/logger';
+import type { GithubSignInCoordinator } from './profile/github-sign-in-coordinator';
 import type { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { DesktopUpdateDiagnosticsService } from './modules/desktop-update/application/desktop-update-diagnostics';
 import type { DesktopUpdateCoordinator } from './modules/desktop-update/application/desktop-update-coordinator';
@@ -33,6 +34,7 @@ const logger = createLogger('DesktopMainRuntime');
 export class DesktopMainRuntime {
   private _notification: NotificationPort | null = null;
   private _desktopFeaturesRuntime: DesktopFeaturesRuntime | null = null;
+  private _githubSignInCoordinator: GithubSignInCoordinator | null = null;
   private _deviceAuthCoordinator: DeviceAuthCoordinator | null = null;
   private _desktopUpdateIpcDisposer: (() => void) | null = null;
 
@@ -79,6 +81,10 @@ export class DesktopMainRuntime {
     this._deviceAuthCoordinator = coordinator;
   }
 
+  setGithubSignInCoordinator(coordinator: GithubSignInCoordinator): void {
+    this._githubSignInCoordinator = coordinator;
+  }
+
   setDesktopUpdateIpcDisposer(dispose: () => void): void {
     this._desktopUpdateIpcDisposer?.();
     this._desktopUpdateIpcDisposer = dispose;
@@ -97,6 +103,8 @@ export class DesktopMainRuntime {
     });
 
     this._deviceAuthCoordinator?.dispose();
+    this._githubSignInCoordinator?.dispose();
+    this._githubSignInCoordinator = null;
     this._deviceAuthCoordinator = null;
 
     // Renderer transport is no longer useful once shutdown begins, even when

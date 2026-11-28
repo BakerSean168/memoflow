@@ -162,7 +162,12 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     loginRemember,
     signInBusy: cloud.signInBusy,
     githubPending: cloud.githubPending,
-    githubUserCode: cloud.githubUserCode,
+    githubStarting: cloud.githubStarting,
+    githubConnecting: cloud.githubConnecting,
+    githubBrowserOpened: cloud.githubBrowserOpened,
+    githubActionBusy: cloud.githubActionBusy,
+    reopenGithubBrowser: cloud.reopenGithubBrowser,
+    copyGithubLink: cloud.copyGithubLink,
     registerMode: registration.registerMode,
     registerEmail: registration.registerEmail,
     registerName: registration.registerName,
@@ -190,6 +195,9 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
     createLocalAccount: catalog.createLocalAccount,
     renameProfile: catalog.renameProfile,
     removeProfile: catalog.removeProfile,
-    disposeAuth: cloud.stopGithubPolling,
+    disposeAuth: () => {
+      cloud.stopGithubPolling();
+      void cloud.cancelGithubSignIn();
+    },
   };
 }

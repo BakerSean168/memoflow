@@ -38,7 +38,7 @@ MemoFlow 不再使用一个“登录状态”同时表示本地数据访问、�
 - 邮箱密码注册和登录；
 - 邮箱验证链接；
 - 密码重置链接和密码修改；
-- GitHub OAuth（Web）；
+- GitHub OAuth（Web 和 Desktop 系统浏览器授权）；
 - session 创建、查询、撤销和过期；
 - Web cookie transport；
 - Desktop bearer transport。
@@ -47,7 +47,11 @@ Better Auth user ID 直接作为 MemoFlow 云端 `Account.id` 和业务 `identit
 
 Web GitHub 登录与 GitHub Knowledge Repository 授权是两套独立权限。登录 OAuth 只证明身份；仓库连接继续使用 Repository 模块的 GitHub App installation/token。
 
-Desktop 当前只提供已经闭环的邮箱认证。GitHub 登录不暴露 Desktop IPC；未来只有在实现安全的 app protocol 或 loopback callback 后才能开放。
+Desktop GitHub 登录直接打开系统浏览器进入 GitHub OAuth，不经过设备授权码或连接确认页。主进程在 `127.0.0.1` 的临时端口监听回调，以随机 state 绑定本次请求；认证服务只向本机回调交付有效期一分钟的单次凭证，兑换时校验 PKCE。兑换会创建独立于浏览器的桌面 session，bearer token 和 PKCE verifier 不进入 URL 或 renderer。登录、取消及十分钟超时都会关闭本机监听；浏览器打开失败时提供重新打开和复制链接。
+
+浏览器必须与 Desktop 位于同一台机器。开发版与发行版使用相同协议，不依赖安装应用协议；GitHub 的 provider callback 仍指向认证服务，不能配置为桌面临时端口。Desktop 的 API origin 必须与本次浏览器认证服务一致。登录生产账号需要连接已部署该协议的生产认证服务，本地认证数据库不会共享生产身份或数据。
+
+“添加云端账号”的通用连接授权仍使用设备授权流程，并保留网页端明确确认，与身份窗口的 GitHub 登录分开。
 
 ## 3. Desktop Profile Access
 

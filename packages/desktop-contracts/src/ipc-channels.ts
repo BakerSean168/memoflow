@@ -139,8 +139,12 @@ export const CloudAuthChannels = {
   SIGN_UP: 'cloud-auth:sign-up',
   /** Opens the Web password-recovery page in the system browser. */
   FORGOT_PASSWORD: 'cloud-auth:forgot-password',
-  /** GitHub sign-in through the device authorization page, without a Profile. */
+  /** GitHub sign-in through the system browser, without a Profile. */
   GITHUB_SIGN_IN_BEGIN: 'cloud-auth:github-sign-in:begin',
+  GITHUB_SIGN_IN_STATUS: 'cloud-auth:github-sign-in:status',
+  GITHUB_SIGN_IN_CANCEL: 'cloud-auth:github-sign-in:cancel',
+  GITHUB_SIGN_IN_REOPEN: 'cloud-auth:github-sign-in:reopen',
+  GITHUB_SIGN_IN_COPY_LINK: 'cloud-auth:github-sign-in:copy-link',
   CLOUD_CONNECTION_BEGIN: 'cloud-auth:connection:begin',
   CLOUD_CONNECTION_CURRENT: 'cloud-auth:connection:current',
   CLOUD_CONNECTION_STATUS: 'cloud-auth:connection:status',

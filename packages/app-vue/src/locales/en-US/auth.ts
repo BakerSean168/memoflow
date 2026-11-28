@@ -63,6 +63,13 @@ export default {
     githubSignIn: 'Continue with GitHub',
     githubWaiting:
       'Complete the GitHub authorization in your browser; this window continues automatically.',
+    githubOpening: 'Opening browser…',
+    githubConnecting: 'Authorized. Completing sign-in…',
+    githubBrowserFailed:
+      'Could not open your browser. Retry or copy the link and open it in a browser on this computer.',
+    githubReopen: 'Reopen browser',
+    githubCopyLink: 'Copy sign-in link',
+    githubLinkCopied: 'Sign-in link copied. Open it in a browser on this computer.',
     githubFailed: 'GitHub sign-in failed. Please try again.',
     backToSelect: 'Back to account selection',
     noAccount: 'No account yet?',
@@ -116,6 +123,15 @@ export default {
     passwordMismatch: 'Passwords do not match',
   },
   errors: {
+    GITHUB_SIGN_IN_DENIED: 'GitHub authorization was not completed. Please retry.',
+    GITHUB_SIGN_IN_EXPIRED: 'Sign-in expired. Please start again.',
+    GITHUB_SIGN_IN_FAILED: 'Could not complete GitHub sign-in. Please retry.',
+    EXTERNAL_OPEN_FAILED: 'Could not open your browser. Retry or copy the sign-in link.',
+    DESKTOP_CALLBACK_FAILED: 'Could not start the local sign-in callback. Please retry.',
+    SIGN_IN_BUSY: 'Sign-in is in progress. Please wait.',
+    SIGN_IN_ATTEMPT_NOT_FOUND: 'Sign-in request no longer exists. Please retry.',
+    CLIPBOARD_FAILED: 'Could not copy the sign-in link. Please retry.',
+
     BAD_REQUEST: 'The authentication request is invalid.',
     CONFLICT: 'The account already exists or this operation conflicts with existing data.',
     FORBIDDEN: 'This account cannot perform the requested action.',
