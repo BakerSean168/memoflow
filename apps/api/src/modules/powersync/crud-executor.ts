@@ -99,6 +99,10 @@ function buildNaturalKeyWhere(
   const fields = NATURAL_KEY_BY_TABLE[tableName];
   if (!fields) return null;
   const where: Record<string, unknown> = {};
+  // Tenant scope always participates in the lookup, even when the database
+  // constraint does not include identityId. A conflicting row owned by another
+  // identity must never be updated by this upload.
+  if (typeof record.identityId === 'string') where.identityId = record.identityId;
   for (const field of fields) {
     const value = record[field];
     // A nullable component (e.g. goal_records.sourceType) cannot participate

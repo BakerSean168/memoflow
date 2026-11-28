@@ -323,7 +323,7 @@ describe('generic PUT natural-key convergence (#1125)', () => {
     ]);
 
     expect(invocationAttempt.findFirst).toHaveBeenCalledWith({
-      where: { invocationId: 'invocation-1', attemptNumber: 2 },
+      where: { identityId: 'identity-1', invocationId: 'invocation-1', attemptNumber: 2 },
       select: { id: true },
     });
     expect(invocationAttempt.update).toHaveBeenCalledWith({
