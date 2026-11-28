@@ -54,6 +54,37 @@ export function isUniqueConstraintError(err: unknown): boolean {
   return isPrismaError(err) && err.code === 'P2002';
 }
 
+/**
+ * Prisma codes that describe a permanently invalid client row (the same
+ * payload will fail forever) rather than a transient infrastructure failure.
+ * Batch upload paths use this to isolate one poisoned row without retrying the
+ * whole batch; connection/pool/transaction codes (P1xxx, P2024, P2028) are
+ * deliberately absent so they stay fatal. See #1125.
+ */
+const PERMANENT_DATA_ERROR_CODES: ReadonlySet<string> = new Set([
+  'P2000', // value too long for column
+  'P2002', // unique constraint (unresolved natural/other unique key)
+  'P2003', // foreign key constraint
+  'P2004', // database constraint failed
+  'P2005', // stored value invalid for column type
+  'P2006', // provided value invalid
+  'P2007', // data validation error
+  'P2011', // null constraint violation
+  'P2012', // missing required value
+  'P2013', // missing required argument
+  'P2014', // relation violation
+  'P2023', // inconsistent column data
+  'P2025', // required record not found (e.g. replay of a delete)
+]);
+
+/**
+ * Check whether an unknown value is a Prisma failure caused by permanently
+ * invalid data (constraint or validation) instead of a transient fault.
+ */
+export function isPermanentDataError(err: unknown): boolean {
+  return isPrismaError(err) && PERMANENT_DATA_ERROR_CODES.has(err.code);
+}
+
 // ============================================================================
 // Mapping
 // ============================================================================

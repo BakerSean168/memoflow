@@ -7,7 +7,11 @@ import { createHash } from 'node:crypto';
  * them to Postgres via Prisma inside a transaction.
  */
 
-import { isPrismaError } from '@memoflow/utils/errors';
+import {
+  isPermanentDataError,
+  isPrismaError,
+  isUniqueConstraintError,
+} from '@memoflow/utils/errors';
 import { createLogger } from '@memoflow/utils/logger';
 import { normalizeCrudData } from './crud-normalization.js';
 import {
@@ -53,29 +57,6 @@ const NATURAL_KEY_BY_TABLE: Readonly<Record<string, readonly string[]>> = {
   routine_preferences: ['identityId'],
   routine_interactions: ['identityId', 'idempotencyKey'],
 };
-
-/**
- * Prisma error codes that describe a permanently invalid client row (the same
- * upload will fail forever) rather than a transient infrastructure failure.
- * Only these are isolated per operation so one poisoned row cannot block the
- * rest of the upload batch (#1125). Connection/pool/transaction codes
- * (P1xxx, P2024, P2028) stay fatal: the client must retry the whole batch.
- */
-const POISON_PRISMA_ERROR_CODES: ReadonlySet<string> = new Set([
-  'P2000', // value too long for column
-  'P2002', // unique constraint (unresolved natural/other unique key)
-  'P2003', // foreign key constraint
-  'P2004', // database constraint failed
-  'P2005', // stored value invalid for column type
-  'P2006', // provided value invalid
-  'P2007', // data validation error
-  'P2011', // null constraint violation
-  'P2012', // missing required value
-  'P2013', // missing required argument
-  'P2014', // relation violation
-  'P2023', // inconsistent column data
-  'P2025', // required record not found (e.g. replay of a delete)
-]);
 
 function buildPutRecord(
   tableName: string,
@@ -153,12 +134,19 @@ async function mergeIntoNaturalKeyRow(
   return true;
 }
 
+/**
+ * A poisoned operation is a permanently invalid client row (constraint or
+ * validation failure). Only these are isolated per operation so one bad row
+ * cannot block the rest of the upload batch (#1125). Connection/pool/
+ * transaction failures stay fatal: the client must retry the whole batch.
+ * The Prisma code vocabulary lives in the shared error mapper (ADR-049).
+ */
 function isPoisonOperationError(error: unknown): boolean {
   // ADR-125 conflicts and preference CAS conflicts are deliberate signals that
   // must reach the client as 409; they are never silenced by batch isolation.
   if (error instanceof PowerSyncRowVersionConflictError) return false;
   if (error instanceof PowerSyncPreferenceConflictError) return false;
-  return isPrismaError(error) && POISON_PRISMA_ERROR_CODES.has(error.code);
+  return isPermanentDataError(error);
 }
 
 export interface CrudTransaction {
@@ -203,9 +191,10 @@ export interface CrudBatchHooks {
 }
 
 /**
- * Apply a batch of CRUD transactions. Each operation runs in its own Prisma
- * transaction so a permanently bad row is isolated instead of rejecting the
- * whole batch (#1125); the `onRoutineScheduleChanged` hooks fire after commit.
+ * Apply a batch of CRUD transactions. The batch commits atomically unless a
+ * permanently bad row is detected; that row is then isolated so the remaining
+ * operations still land (#1125). The `onRoutineScheduleChanged` hooks fire
+ * after the write phase.
  */
 export async function executeCrudBatch(
   db: CrudTransactionDatabase,
@@ -480,9 +469,7 @@ export async function executeCrudBatch(
   const operations = transactions.flatMap(
     (transaction) => transaction.ops || transaction.crud || [],
   );
-  for (const op of operations) {
-    await executeCrudOperationWithIsolation(db, identityId, op, executeCrudOperation);
-  }
+  await executeBatchAtomically(db, identityId, operations, executeCrudOperation);
 
   if (dirtyAllRoutines && db.routineDefinition) {
     const rows = await db.routineDefinition.findMany({
@@ -504,6 +491,36 @@ export async function executeCrudBatch(
 type OperationExecutor = (tx: CrudDelegateContainer, operation: CrudOperation) => Promise<void>;
 
 /**
+ * Applies the whole upload in one transaction first, so a deliberate conflict
+ * (ADR-125 row version, preference revision/canonical CAS) or a transient
+ * infrastructure failure rolls back every sibling operation and reaches the
+ * client as a single 409/5xx. Only when the batch fails because of a
+ * permanently invalid row do we replay each operation in its own transaction,
+ * isolating the poison row so the rest of the batch still lands (#1125).
+ */
+async function executeBatchAtomically(
+  db: CrudTransactionDatabase,
+  identityId: string,
+  operations: CrudOperation[],
+  execute: OperationExecutor,
+): Promise<void> {
+  if (operations.length === 0) return;
+  try {
+    await db.$transaction(async (tx) => {
+      for (const operation of operations) await execute(tx, operation);
+    });
+    return;
+  } catch (error) {
+    // Conflicts and transient faults fail the batch as a unit; nothing was
+    // committed, so there is no partial upload to reconcile.
+    if (!isPoisonOperationError(error)) throw error;
+  }
+  for (const operation of operations) {
+    await executeCrudOperationWithIsolation(db, identityId, operation, execute);
+  }
+}
+
+/**
  * Applies one upload operation in its own transaction so that a poisoned row
  * (a permanent constraint/validation failure) cannot roll back the rest of the
  * batch. Transient failures and deliberate ADR-125 conflicts still fail the
@@ -521,7 +538,7 @@ async function executeCrudOperationWithIsolation(
   } catch (error) {
     // The pre-flight natural-key lookup can still race a concurrent insert.
     // The failed transaction is aborted, so resolve the conflict in a fresh one.
-    if (isPrismaError(error) && error.code === 'P2002') {
+    if (isUniqueConstraintError(error)) {
       const merged = await retryNaturalKeyMerge(db, identityId, operation);
       if (merged) return;
     }
