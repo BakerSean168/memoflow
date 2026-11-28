@@ -237,13 +237,38 @@ describe('identity-scoped read-only model catalog', () => {
   });
 
   it('opening the picker re-reads presented entries and only fills missing ones', async () => {
-    const { catalog, native, refreshProviderModels, scope } = setup();
+    const { catalog, native, refreshProviderModels, registry, snapshot, scope } = setup();
     await catalog.refresh();
     native.cachedCatalogConnection.mockClear();
     refreshProviderModels.mockClear();
-    await catalog.ensureLoaded();
+    const registryRead = deferred<AgentRegistrySnapshot>();
+    registry.list.mockReturnValueOnce(registryRead.promise);
+
+    const opening = catalog.ensureLoaded();
+    // T3 renders the presented directory immediately while its open refresh is
+    // still in flight, so a cached list never flips into a loading state.
+    expect(catalog.loading.value).toBe(false);
+    expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
+    registryRead.resolve(snapshot);
+    await opening;
+
     expect(native.cachedCatalogConnection).not.toHaveBeenCalled();
     expect(refreshProviderModels).not.toHaveBeenCalled();
+    expect(catalog.loading.value).toBe(false);
+    expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
+    scope.stop();
+  });
+
+  it('keeps the presented catalog when an open background read fails', async () => {
+    const { catalog, registry, scope } = setup();
+    await catalog.refresh();
+    registry.list.mockRejectedValueOnce(new Error('registry offline'));
+    await catalog.ensureLoaded();
+    expect(catalog.loading.value).toBe(false);
+    expect(catalog.entries.value.work).toMatchObject({
+      status: 'ready',
+      models: [{ modelId: 'work-model' }],
+    });
     expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
     scope.stop();
   });

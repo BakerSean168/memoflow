@@ -727,6 +727,36 @@ describe('integrated picker configuration', () => {
     wrapper.unmount();
   });
 
+  it('keeps the picker open with the check beside the model name and the shortcut at the row end', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    const rows = wrapper.findAll('[data-testid="ai-model-picker-option"]');
+    const first = rows[0]!;
+    const check = first.get('[data-testid="ai-model-picker-check"]');
+    const shortcut = first.get('[data-testid="ai-model-picker-shortcut"]');
+    // T3 ModelListRow puts CheckIcon inside the name cell, while the jump label
+    // lives in the shrink-0 trailing group so selecting never moves it.
+    expect(check.element.closest('[data-testid="ai-model-picker-model-main"]')).not.toBeNull();
+    expect(
+      check.element.closest('[data-testid="ai-model-picker-model-main"]')?.nextElementSibling,
+    ).toBe(shortcut.element);
+    expect(first.html().indexOf('ai-model-picker-check')).toBeLessThan(
+      first.html().indexOf('ai-model-picker-shortcut'),
+    );
+
+    await rows[1]!.trigger('click');
+    expect(wrapper.emitted('selectModel')).toEqual([[models[1]!.key, 'agent:mastra']]);
+    // Committing a native model sets the composer's loading flag. T3 keeps the
+    // cached rows selectable, so focus stays inside the popup and it stays open.
+    await wrapper.setProps({ loading: true, selectedModelKey: models[1]!.key });
+    await nextTick();
+    expect(wrapper.find('[data-testid="ai-model-picker"]').exists()).toBe(true);
+    const committed = wrapper.findAll('[data-testid="ai-model-picker-option"]')[1]!;
+    expect(committed.attributes('disabled')).toBeUndefined();
+    expect(committed.find('[data-testid="ai-model-picker-check"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
   it('offers four icon segments, previews on hover/focus, and emits a session choice', async () => {
     const wrapper = setup({ native: true, permissionMode: 'full-access' });
     expect(wrapper.get('[data-testid="ai-model-picker-permissions"]').text()).toContain('完全访问');

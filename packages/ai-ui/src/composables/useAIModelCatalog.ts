@@ -99,6 +99,8 @@ interface RefreshOptions {
   fresh?: boolean;
   /** Only discover entries that were never presented or previously failed. */
   onlyMissing?: boolean;
+  /** Re-read snapshots behind a presented catalog without a blocking loading state. */
+  background?: boolean;
 }
 const REVALIDATE_INTERVAL_MS = 5 * 60_000;
 
@@ -279,7 +281,10 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
       return refresh(refreshOptions);
     }
     if (!options.registry) return;
-    loading.value = true;
+    // T3 refreshes on open without hiding the cached list. A presented catalog
+    // therefore keeps `loading` false while its background read is in flight.
+    const background = refreshOptions.background === true && snapshot.value !== null;
+    if (!background) loading.value = true;
     // T3-style stale-while-refresh: retain the exact Profile's previous
     // verified view while the new Registry is read. A changed instance
     // revision/connection will be invalidated below, never sent to the native
@@ -437,8 +442,15 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
       );
     } catch {
       if (current(request, identity)) {
-        snapshot.value = null;
-        rawEntries.value = {};
+        // A failed background read leaves the cached directory in place; only
+        // the first, blocking read falls back to an empty catalog.
+        if (background) {
+          snapshot.value = previousSnapshot;
+          rawEntries.value = previousEntries;
+        } else {
+          snapshot.value = null;
+          rawEntries.value = {};
+        }
       }
     } finally {
       if (current(request, identity)) loading.value = false;
@@ -446,9 +458,9 @@ export function useAIModelCatalog(options: Options, state = createAIModelCatalog
     scheduleRevalidation();
   }
 
-  /** Opening a picker reads what is already presented and only fills gaps. */
+  /** Opening a picker renders the presented directory immediately and only fills gaps. */
   function ensureLoaded() {
-    return refresh({ onlyMissing: true });
+    return refresh({ onlyMissing: true, background: true });
   }
 
   function scheduleRevalidation() {
