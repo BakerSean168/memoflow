@@ -267,9 +267,7 @@ const permissionPreview = computed(
 watch(permissionMenuOpen, () => {
   previewPermission.value = null;
 });
-const canAdjustBrowsed = computed(
-  () => browsedModelCommitted.value && !props.disabled && !props.loading,
-);
+const canAdjustBrowsed = computed(() => browsedModelCommitted.value && !props.disabled);
 
 function chooseTrait(kind: keyof LocalAgentModelOptions, value?: string) {
   if (!canAdjustBrowsed.value) return;
@@ -300,9 +298,11 @@ function selectPermission(mode: AIChatPermissionMode) {
   if (props.disabled || mode === permissionValue.value) return;
   emit('permission', mode);
 }
+// T3 keeps cached rows selectable while a catalog refresh or a model commit
+// is in flight. Disabling the clicked row drops focus, which closes the
+// popover as an outside interaction, so only genuine blocks disable a row.
 const canChooseModel = (model: ComposerModel) =>
   !props.disabled &&
-  !props.loading &&
   (!props.catalog ||
     Object.values(props.catalog).some(
       (entry) =>
@@ -666,23 +666,32 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
                         "
                         class="mt-0.5 size-3.5"
                       />
-                      <span class="min-w-0 flex-1">
-                        <span class="block truncate text-xs font-medium text-foreground">{{
-                          model.modelName
-                        }}</span>
+                      <span class="min-w-0 flex-1" data-testid="ai-model-picker-model-main">
+                        <span class="flex min-w-0 items-center gap-1.5">
+                          <span class="min-w-0 truncate text-xs font-medium text-foreground">{{
+                            model.modelName
+                          }}</span>
+                          <Check
+                            v-if="
+                              selectedAgentId === model.agentKey && selectedModelKey === model.key
+                            "
+                            class="size-3.5 shrink-0 text-primary"
+                            aria-hidden="true"
+                            data-testid="ai-model-picker-check"
+                          />
+                        </span>
                         <span class="mt-0.5 block truncate text-[10px] text-muted-foreground">
                           {{ instanceName(agents.find((agent) => agent.id === model.agentKey)!) }}
                           ·
                           {{ model.providerName }}
                         </span>
                       </span>
-                      <kbd v-if="index < 9" class="mt-0.5 shrink-0 text-[9px] text-muted-foreground"
+                      <kbd
+                        v-if="index < 9"
+                        class="mt-0.5 shrink-0 text-[9px] text-muted-foreground"
+                        data-testid="ai-model-picker-shortcut"
                         >Ctrl+{{ index + 1 }}</kbd
                       >
-                      <Check
-                        v-if="selectedAgentId === model.agentKey && selectedModelKey === model.key"
-                        class="mt-0.5 size-3.5 shrink-0 text-primary"
-                      />
                     </button>
                     <LockKeyhole
                       v-if="
@@ -749,7 +758,7 @@ watch([activeSection, search, () => enabledAgents.value.length], () => {
               :model="browsedModel"
               :reasoning-efforts="browsedModel?.reasoningEfforts"
               :selected-effort="browsedEffort"
-              :disabled="disabled || Boolean(loading)"
+              :disabled="disabled"
               :locked-hint="lockedTraitsHint"
               @model-option="chooseTrait"
             />
