@@ -738,10 +738,14 @@ test('local account copy preview persists across restart and waits for local con
   let app: ElectronApplication | null = null;
   try {
     app = await launchDesktop(userData, cloud.origin);
+    // The system browser is the only path that completes browser sign-in: it
+    // must follow the authorization redirect back to the desktop callback.
     await app.evaluate(({ shell }) =>
       Object.defineProperty(shell, 'openExternal', {
         configurable: true,
-        value: async () => undefined,
+        value: async (url: string) => {
+          void fetch(url).catch(() => undefined);
+        },
       }),
     );
     await registerLocalProfile(app, await app.firstWindow());
@@ -749,10 +753,14 @@ test('local account copy preview persists across restart and waits for local con
     // explicitly remembered. Exercise that permission through the password UI.
     await app.close();
     app = await launchDesktop(userData, cloud.origin);
+    // The system browser is the only path that completes browser sign-in: it
+    // must follow the authorization redirect back to the desktop callback.
     await app.evaluate(({ shell }) =>
       Object.defineProperty(shell, 'openExternal', {
         configurable: true,
-        value: async () => undefined,
+        value: async (url: string) => {
+          void fetch(url).catch(() => undefined);
+        },
       }),
     );
     const guest = await unlockLocalProfile(app, await app.firstWindow(), undefined, true);
