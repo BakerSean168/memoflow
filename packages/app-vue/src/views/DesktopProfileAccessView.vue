@@ -34,7 +34,12 @@ const {
   loginRemember,
   signInBusy,
   githubPending,
-  githubUserCode,
+  githubStarting,
+  githubConnecting,
+  githubBrowserOpened,
+  githubActionBusy,
+  reopenGithubBrowser,
+  copyGithubLink,
   registerMode,
   registerEmail,
   registerName,
@@ -197,7 +202,7 @@ watch(
           type="submit"
           class="w-full bg-linear-to-r from-brand-gold-from via-brand-gold-via to-brand-gold-to text-brand-gold-foreground hover:brightness-105"
           data-testid="desktop-profile-login-submit"
-          :disabled="signInBusy || !loginEmail || !loginPassword"
+          :disabled="signInBusy || githubPending || githubStarting || !loginEmail || !loginPassword"
           >{{ t('auth.profileAccess.signInAction') }}</Button
         >
       </form>
@@ -210,16 +215,40 @@ watch(
         data-testid="desktop-profile-github-waiting"
       >
         <p class="text-xs leading-relaxed text-foreground/70">
-          {{ t('auth.profileAccess.githubWaiting') }}
+          {{
+            t(
+              githubConnecting
+                ? 'auth.profileAccess.githubConnecting'
+                : githubBrowserOpened
+                  ? 'auth.profileAccess.githubWaiting'
+                  : 'auth.profileAccess.githubBrowserFailed',
+            )
+          }}
         </p>
-        <p v-if="githubUserCode" class="font-mono text-sm tracking-[0.2em] text-foreground/90">
-          {{ githubUserCode }}
-        </p>
+        <div v-if="!githubConnecting" class="flex justify-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            :disabled="githubActionBusy"
+            data-testid="desktop-profile-github-reopen"
+            @click="reopenGithubBrowser"
+          >
+            {{ t('auth.profileAccess.githubReopen') }}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            data-testid="desktop-profile-github-copy"
+            @click="copyGithubLink"
+            >{{ t('auth.profileAccess.githubCopyLink') }}</Button
+          >
+        </div>
         <Button
           type="button"
           variant="ghost"
           class="w-full"
           data-testid="desktop-profile-github-cancel"
+          :disabled="githubConnecting"
           @click="cancelGithubSignIn"
           >{{ t('common.cancel') }}</Button
         >
@@ -230,7 +259,7 @@ watch(
         variant="outline"
         class="flex w-full items-center justify-center gap-2 border-white/15 bg-white/5 text-foreground/90 hover:bg-white/10"
         data-testid="desktop-profile-github-signin"
-        :disabled="signInBusy"
+        :disabled="signInBusy || githubStarting"
         @click="signInWithGithub"
       >
         <!-- Lucide 1.x dropped brand glyphs; the GitHub mark is inlined here. -->
@@ -245,7 +274,9 @@ watch(
             d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
           />
         </svg>
-        {{ t('auth.profileAccess.githubSignIn') }}
+        {{
+          t(githubStarting ? 'auth.profileAccess.githubOpening' : 'auth.profileAccess.githubSignIn')
+        }}
       </Button>
 
       <Button
@@ -265,6 +296,7 @@ watch(
           variant="link"
           class="flex h-auto items-center gap-1 p-0 font-normal hover:text-foreground/90 hover:no-underline"
           data-testid="desktop-profile-back-to-select"
+          :disabled="githubConnecting || githubStarting"
           @click="backToSelect"
         >
           <ArrowLeft class="h-3.5 w-3.5" aria-hidden="true" />
@@ -275,6 +307,7 @@ watch(
           variant="link"
           class="h-auto p-0 font-normal hover:text-foreground/90 hover:no-underline"
           data-testid="desktop-profile-go-register"
+          :disabled="githubPending || githubStarting"
           @click="enterRegisterState('cloud')"
         >
           {{ t('auth.profileAccess.noAccount') }}
@@ -393,6 +426,7 @@ watch(
           variant="link"
           class="flex h-auto items-center gap-1 p-0 font-normal hover:text-foreground/90 hover:no-underline"
           data-testid="desktop-profile-back-to-select"
+          :disabled="githubConnecting || githubStarting"
           @click="backToSelect"
         >
           <ArrowLeft class="h-3.5 w-3.5" aria-hidden="true" />

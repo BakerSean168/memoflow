@@ -15,7 +15,6 @@ import { getApiBaseUrl } from '../utils/api-config';
 import { desktopClientUserAgent } from '../utils/desktop-client-identity';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DesktopCloudConnectionService } from './desktop-cloud-connection-service';
-import type { DesktopCloudSignInService } from './desktop-cloud-sign-in-service';
 
 const logger = createLogger('DeviceAuthCoordinator');
 const DESKTOP_CLIENT_ID = 'memoflow-desktop';
@@ -50,13 +49,8 @@ interface DeviceAuthErrorPayload {
 
 interface InternalAttempt {
   attemptId: string;
-  /**
-   * The Profile the attempt is anchored to. `null` means a source-less attempt
-   * started from the identity window, where no Profile is open yet; it is
-   * owned by the window that started it and adopts its Profile on success.
-   */
-  profileId: string | null;
-  profileGeneration: number | null;
+  profileId: string;
+  profileGeneration: number;
   request: DesktopCloudConnectionRequest;
   result: DesktopCloudConnectionResult | null;
   deviceCode: string;
@@ -66,7 +60,6 @@ interface InternalAttempt {
   pollIntervalMs: number;
   status: DesktopCloudConnectionStatus;
   error: ResultError | null;
-  remember: boolean;
   abortController: AbortController;
 }
 
@@ -76,8 +69,6 @@ export interface DeviceAuthCoordinatorOptions {
   sleep?: (milliseconds: number, signal: AbortSignal) => Promise<void>;
   now?: () => number;
   random?: () => number;
-  /** Adopts a source-less attempt's session once the browser authorizes it. */
-  signIn?: Pick<DesktopCloudSignInService, 'adopt'>;
 }
 
 function defaultSleep(milliseconds: number, signal: AbortSignal): Promise<void> {
@@ -104,14 +95,11 @@ export class DeviceAuthCoordinator {
   private beginGeneration = 0;
   private readonly attempts = new Map<string, InternalAttempt>();
   private readonly profileAttempts = new Map<string, string>();
-  /** The one source-less attempt the identity window may have in flight. */
-  private profilelessAttemptId: string | null = null;
   private readonly fetchImpl: typeof fetch;
   private readonly openExternal: (url: string) => Promise<unknown>;
   private readonly sleep: (milliseconds: number, signal: AbortSignal) => Promise<void>;
   private readonly now: () => number;
   private readonly random: () => number;
-  private readonly signIn: Pick<DesktopCloudSignInService, 'adopt'> | null;
 
   constructor(
     private readonly runtime: DesktopProfileRuntimeManager,
@@ -123,7 +111,6 @@ export class DeviceAuthCoordinator {
     this.sleep = options.sleep ?? defaultSleep;
     this.now = options.now ?? Date.now;
     this.random = options.random ?? Math.random;
-    this.signIn = options.signIn ?? null;
   }
 
   async begin(
@@ -145,47 +132,14 @@ export class DeviceAuthCoordinator {
       profileId,
       profileGeneration,
       request,
-      remember: false,
     });
-  }
-
-  /**
-   * Start a device authorization without an origin Profile. The identity window
-   * uses this for GitHub sign-in: no Profile is open yet, so the attempt cannot
-   * be anchored to one. On success the attempt registers or finds the Profile
-   * for the authorized cloud account and opens it, exactly like the password
-   * form. Anchored attempts (including reauthenticate) keep their existing
-   * origin and identity checks.
-   */
-  async beginWithoutProfile(
-    input: { remember: boolean } = { remember: true },
-  ): Promise<Result<DesktopCloudConnectionAttempt>> {
-    if (!this.signIn)
-      return fail({ code: 'CLOUD_CONNECTION_UNAVAILABLE', message: '云端登录尚未初始化' });
-    if (this.profilelessAttemptId) {
-      const existing = this.attempts.get(this.profilelessAttemptId);
-      if (existing && !TERMINAL_STATUSES.includes(existing.status))
-        return ok(this.toSnapshot(existing));
-      this.profilelessAttemptId = null;
-    }
-    const generation = ++this.beginGeneration;
-    const started = await this.startAttempt({
-      generation,
-      profileId: null,
-      profileGeneration: null,
-      request: { intent: 'add_account' },
-      remember: input.remember,
-    });
-    if (started.ok) this.profilelessAttemptId = started.data.attemptId;
-    return started;
   }
 
   private async startAttempt(input: {
     generation: number;
-    profileId: string | null;
-    profileGeneration: number | null;
+    profileId: string;
+    profileGeneration: number;
     request: DesktopCloudConnectionRequest;
-    remember: boolean;
   }): Promise<Result<DesktopCloudConnectionAttempt>> {
     try {
       const response = await this.fetchImpl(`${authOrigin()}/api/auth/device/code`, {
@@ -229,18 +183,20 @@ export class DeviceAuthCoordinator {
         pollIntervalMs: payload.interval * 1_000,
         status: 'awaiting_authorization',
         error: null,
-        remember: input.remember,
         abortController: new AbortController(),
       };
       this.attempts.set(attempt.attemptId, attempt);
       if (attempt.profileId) this.profileAttempts.set(attempt.profileId, attempt.attemptId);
 
-      await this.openExternal(attempt.verificationUrl).catch((error) => {
+      await this.openExternal(attempt.verificationUrl).catch(() => {
         logger.warn('Failed to open device authorization in the system browser', {
           attemptId: attempt.attemptId,
           profileId: attempt.profileId,
-          error,
         });
+        attempt.error = {
+          code: 'EXTERNAL_OPEN_FAILED',
+          message: '无法打开系统浏览器，请复制授权链接在浏览器中打开',
+        };
       });
       void this.poll(attempt).catch((error) => {
         if (attempt.status === 'cancelled') return;
@@ -262,9 +218,7 @@ export class DeviceAuthCoordinator {
     }
   }
 
-  /** A source-less attempt has no origin Profile to fall out of. */
-  private originStillValid(profileId: string | null, profileGeneration: number | null): boolean {
-    if (profileId === null) return true;
+  private originStillValid(profileId: string, profileGeneration: number): boolean {
     return (
       this.runtime.getActiveProfileId() === profileId &&
       this.runtime.getProfileGeneration() === profileGeneration
@@ -373,6 +327,7 @@ export class DeviceAuthCoordinator {
           return;
         }
         attempt.status = 'connecting_profile';
+        attempt.error = null;
         let auth: CloudAuthResponse | null;
         try {
           auth = await this.resolveAuthResponse(token, attempt.abortController.signal);
@@ -395,17 +350,6 @@ export class DeviceAuthCoordinator {
         ) {
           await this.connection.revoke(token);
           attempt.status = this.now() >= attempt.expiresAt ? 'expired' : 'cancelled';
-          return;
-        }
-        if (attempt.profileId === null) {
-          const adopted = await this.signIn!.adopt(auth, token, attempt.remember);
-          if (!adopted.ok) {
-            attempt.status = attempt.abortController.signal.aborted ? 'cancelled' : 'failed';
-            attempt.error = adopted.error;
-            return;
-          }
-          attempt.result = { targetProfileId: adopted.data.profileId, activation: 'active' };
-          attempt.status = 'connected';
           return;
         }
         const connected = await this.connection.connect(
@@ -492,8 +436,6 @@ export class DeviceAuthCoordinator {
   private getCurrentProfileAttempt(attemptId: string): InternalAttempt | null {
     const attempt = this.attempts.get(attemptId);
     if (!attempt) return null;
-    // A source-less attempt belongs to the identity window, not to a Profile.
-    if (attempt.profileId === null) return attempt;
     return this.runtime.getActiveProfileId() === attempt.profileId ||
       (attempt.status === 'connected' &&
         this.runtime.getActiveProfileId() === attempt.result?.targetProfileId)
@@ -506,7 +448,6 @@ export class DeviceAuthCoordinator {
     if (!attempt) return;
     attempt.abortController.abort();
     attempt.deviceCode = '';
-    if (this.profilelessAttemptId === attemptId) this.profilelessAttemptId = null;
     if (!TERMINAL_STATUSES.includes(attempt.status)) {
       attempt.status = 'cancelled';
     }

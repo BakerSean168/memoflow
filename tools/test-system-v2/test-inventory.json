@@ -1896,6 +1896,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/profile/github-sign-in-coordinator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/profile/identity-reset.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6367,6 +6375,14 @@
     },
     {
       "path": "packages/cloud-auth/src/server/cloud-auth.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/cloud-auth/src/server/desktop-sign-in.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/cloud-auth/vitest.config.ts"
@@ -14001,7 +14017,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 112
+      "fileCount": 113
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14106,7 +14122,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 13
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -15159,7 +15175,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1250,
+    "unit": 1252,
     "integration": 63,
     "smoke": 3,
     "boundary-ipc": 7,

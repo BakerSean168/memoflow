@@ -368,3 +368,5 @@ export const session = {
     clearCache: vi.fn(async () => undefined),
   })),
 };
+
+export const clipboard = { writeText: vi.fn() };

@@ -1,3 +1,4 @@
+import type { GithubSignInCoordinator } from './github-sign-in-coordinator';
 import { ipcMain } from 'electron';
 import {
   AccountSecurityRequestSchema,
@@ -53,6 +54,7 @@ export function registerCloudAuthIpc(
   cloudChecks: Pick<DesktopCloudConnectionManager, 'clearSession'>,
   cloudConnection?: DeviceAuthCoordinator,
   signIn?: DesktopCloudSignInService,
+  githubSignIn?: GithubSignInCoordinator,
 ): void {
   ipcMain.handle(CloudAuthChannels.ACCOUNT_SECURITY, async (_event, input: unknown) => {
     const parsed = AccountSecurityRequestSchema.safeParse(input);
@@ -203,13 +205,46 @@ export function registerCloudAuthIpc(
       : fail({ code: 'CLOUD_AUTH_UNAVAILABLE', message: '云端登录尚未初始化' }),
   );
 
-  ipcMain.handle(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN, async (_event, input: unknown) => {
+  let detachGithubOwner: (() => void) | null = null;
+  ipcMain.handle(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN, async (event, input: unknown) => {
     const parsed = DesktopCloudGithubSignInSchema.safeParse(input);
     if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '登录信息无效' });
-    return cloudConnection
-      ? cloudConnection.beginWithoutProfile(parsed.data)
-      : fail({ code: 'CLOUD_CONNECTION_UNAVAILABLE', message: '云端连接尚未初始化' });
+    if (!githubSignIn)
+      return fail({ code: 'CLOUD_CONNECTION_UNAVAILABLE', message: '云端登录尚未初始化' });
+    const started = await githubSignIn.begin(parsed.data);
+    if (started.ok && event.sender) {
+      const id = started.data.attemptId;
+      detachGithubOwner?.();
+      const abandon = () => {
+        const current = githubSignIn.getStatus(id);
+        // Opening the signed-in Profile closes the identity window itself.
+        if (current.ok && current.data.status === 'awaiting_authorization') githubSignIn.dispose();
+      };
+      detachGithubOwner = () => event.sender.removeListener('destroyed', abandon);
+      if (event.sender.isDestroyed()) abandon();
+      else event.sender.once('destroyed', abandon);
+    }
+    return started;
   });
+
+  for (const channel of [
+    CloudAuthChannels.GITHUB_SIGN_IN_STATUS,
+    CloudAuthChannels.GITHUB_SIGN_IN_CANCEL,
+    CloudAuthChannels.GITHUB_SIGN_IN_REOPEN,
+    CloudAuthChannels.GITHUB_SIGN_IN_COPY_LINK,
+  ]) {
+    ipcMain.handle(channel, async (_event, input: unknown) => {
+      const parsed = DesktopCloudAttemptRequestSchema.safeParse(input);
+      if (!parsed.success) return fail({ code: 'INVALID_REQUEST', message: '登录请求 ID 无效' });
+      if (!githubSignIn)
+        return fail({ code: 'CLOUD_CONNECTION_UNAVAILABLE', message: '云端登录尚未初始化' });
+      const id = parsed.data.attemptId;
+      if (channel === CloudAuthChannels.GITHUB_SIGN_IN_STATUS) return githubSignIn.getStatus(id);
+      if (channel === CloudAuthChannels.GITHUB_SIGN_IN_CANCEL) return githubSignIn.cancel(id);
+      if (channel === CloudAuthChannels.GITHUB_SIGN_IN_REOPEN) return githubSignIn.reopen(id);
+      return githubSignIn.copyLink(id);
+    });
+  }
 
   ipcMain.handle(CloudAuthChannels.CLOUD_CONNECTION_BEGIN, async (_event, input: unknown) => {
     const parsed = DesktopCloudConnectionRequestSchema.safeParse(input);

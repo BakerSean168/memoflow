@@ -117,6 +117,18 @@ async function startCloudAuthFixture(
       return;
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/auth/desktop-sign-in/github') {
+      const callback = new URL(url.searchParams.get('redirect_uri')!);
+      callback.searchParams.set('state', url.searchParams.get('state')!);
+      callback.searchParams.set('code', 'c'.repeat(43));
+      response.writeHead(302, { location: callback.toString() });
+      response.end();
+      return;
+    }
+    if (request.method === 'POST' && url.pathname === '/api/auth/desktop-sign-in/exchange') {
+      send(200, { token: `desktop-e2e-${authenticatedIdentityId}` });
+      return;
+    }
     if (request.method === 'POST' && url.pathname === '/api/auth/device/code') {
       send(200, {
         device_code: 'main-process-only-device-secret',
@@ -400,7 +412,7 @@ test('local account works offline, keeps its profile across restart and signs ou
   }
 });
 
-test('device authorization opens an independent cloud Profile and preserves the source local account', async () => {
+test('browser GitHub sign-in opens an independent cloud Profile and preserves the source local account', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-profiles-e2e-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
   const cloud = await startCloudAuthFixture();
@@ -429,7 +441,9 @@ test('device authorization opens an independent cloud Profile and preserves the 
     await electronApp.evaluate(({ shell }) => {
       Object.defineProperty(shell, 'openExternal', {
         configurable: true,
-        value: async () => undefined,
+        value: async (url: string) => {
+          void fetch(url).catch(() => undefined);
+        },
       });
     });
     const loginGate = await electronApp.firstWindow();

@@ -134,6 +134,7 @@ import { CloudSessionStore } from './profile/cloud-session-store';
 import { DesktopCloudConnectionManager } from './profile/desktop-cloud-connection-manager';
 import { DesktopCloudConnectionService } from './profile/desktop-cloud-connection-service';
 import { DesktopCloudSignInService } from './profile/desktop-cloud-sign-in-service';
+import { GithubSignInCoordinator } from './profile/github-sign-in-coordinator';
 import { DeviceAuthCoordinator } from './profile/device-auth-coordinator';
 import type { PowerSyncDatabase } from '@powersync/node';
 import { getCurrentSyncHealth, refreshSyncHealth, subscribeSyncHealth } from './database/powersync';
@@ -871,8 +872,9 @@ async function initializeShellRuntime(): Promise<void> {
   const deviceAuthCoordinator = new DeviceAuthCoordinator(
     profileRuntimeManager,
     cloudConnectionService,
-    { signIn: cloudSignInService },
   );
+
+  const githubSignInCoordinator = new GithubSignInCoordinator(cloudSignInService);
 
   // Desktop Update is a process/Shell capability. Compose it before any
   // Profile is activated and never pass Profile/Window dependencies into it.
@@ -927,6 +929,7 @@ async function initializeShellRuntime(): Promise<void> {
     desktopUpdateDiagnostics,
   );
   mainRuntime.setDeviceAuthCoordinator(deviceAuthCoordinator);
+  mainRuntime.setGithubSignInCoordinator(githubSignInCoordinator);
 
   const desktopUpdateSnapshot = await desktopUpdateShell.coordinator.initialize();
   const desktopUpdateIpc = registerDesktopUpdateIpc({
@@ -958,6 +961,7 @@ async function initializeShellRuntime(): Promise<void> {
     cloudConnectionManager,
     deviceAuthCoordinator,
     cloudSignInService,
+    githubSignInCoordinator,
   );
   registerExternalAgentIpc({
     runtime: profileRuntimeManager,

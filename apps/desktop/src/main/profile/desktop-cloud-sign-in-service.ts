@@ -88,7 +88,7 @@ export class DesktopCloudSignInService {
   }
 
   /**
-   * The device-authorization flow (including its GitHub button) ends here too:
+   * Cloud connection flows end here too:
    * a resolved cloud identity is registered or found and its Profile opened.
    */
   adopt(
@@ -106,6 +106,28 @@ export class DesktopCloudSignInService {
         expiresAt: auth.session.expiresAt,
       },
       remember,
+    );
+  }
+
+  async adoptBrowserToken(
+    token: string,
+    remember: boolean,
+    signal: AbortSignal,
+  ): Promise<Result<DesktopCloudSignInResult>> {
+    const session = await this.readSession(token);
+    if (!session.ok || signal.aborted) {
+      await this.revoke(token);
+      return session.ok ? fail({ code: 'SIGN_IN_CANCELLED', message: '登录已取消' }) : session;
+    }
+    return this.adoptSession(
+      {
+        token,
+        sessionId: session.data.session.id,
+        account: session.data.account,
+        expiresAt: session.data.session.expiresAt,
+      },
+      remember,
+      signal,
     );
   }
 
@@ -149,7 +171,13 @@ export class DesktopCloudSignInService {
   private async adoptSession(
     stored: StoredCloudSession,
     remember: boolean,
+    signal?: AbortSignal,
   ): Promise<Result<DesktopCloudSignInResult>> {
+    const cancelled = () => fail({ code: 'SIGN_IN_CANCELLED', message: '登录已取消' });
+    if (signal?.aborted) {
+      await this.revoke(stored.token);
+      return cancelled();
+    }
     let profileId: string;
     let isNewTarget = false;
     try {
@@ -173,6 +201,11 @@ export class DesktopCloudSignInService {
       });
     }
 
+    if (signal?.aborted) {
+      await this.revoke(stored.token);
+      return cancelled();
+    }
+
     // "Remember me" is the disk copy. A failure to write it is not a silent
     // downgrade: the login is rolled back so the user can retry without it.
     try {
@@ -185,6 +218,12 @@ export class DesktopCloudSignInService {
         message: '无法保存登录状态，请检查本机安全存储后重试',
         cause,
       });
+    }
+
+    if (signal?.aborted) {
+      await this.sessions.remove(profileId);
+      await this.revoke(stored.token);
+      return cancelled();
     }
 
     // A newly adopted cloud Profile gets the same one-shot import invitation
@@ -204,6 +243,12 @@ export class DesktopCloudSignInService {
           reason: cause instanceof Error ? cause.message : 'unknown',
         });
       }
+    }
+
+    if (signal?.aborted) {
+      await this.sessions.remove(profileId);
+      await this.revoke(stored.token);
+      return cancelled();
     }
 
     try {

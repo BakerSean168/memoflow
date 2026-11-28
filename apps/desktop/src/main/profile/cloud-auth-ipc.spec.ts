@@ -1,3 +1,4 @@
+import { EventEmitter } from 'node:events';
 import { ipcMain } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CloudAuthChannels } from '@memoflow/desktop-contracts';
@@ -41,9 +42,6 @@ function registerFixture() {
   };
   const cloudConnection = {
     begin: vi.fn().mockResolvedValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
-    beginWithoutProfile: vi
-      .fn()
-      .mockResolvedValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
     getCurrent: vi.fn().mockReturnValue(ok(null)),
     getStatus: vi.fn().mockReturnValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
     cancel: vi.fn().mockReturnValue(ok(undefined)),
@@ -54,6 +52,14 @@ function registerFixture() {
     signIn: vi.fn().mockResolvedValue(ok({ profileId: 'profile-cloud' })),
     signUp: vi.fn().mockResolvedValue(ok({ profileId: 'profile-cloud' })),
     openPasswordRecovery: vi.fn().mockResolvedValue(ok(undefined)),
+  };
+  const githubSignIn = {
+    dispose: vi.fn(),
+    begin: vi.fn().mockResolvedValue(ok({ attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32' })),
+    getStatus: vi.fn().mockReturnValue(ok(null)),
+    cancel: vi.fn().mockReturnValue(ok(undefined)),
+    reopen: vi.fn().mockResolvedValue(ok(null)),
+    copyLink: vi.fn().mockReturnValue(ok(undefined)),
   };
   registerCloudAuthIpc(
     registry as never,
@@ -69,8 +75,9 @@ function registerFixture() {
     },
     cloudConnection as never,
     signIn as never,
+    githubSignIn as never,
   );
-  return { handlers, runtime, sessions, cloudConnection, signIn };
+  return { handlers, runtime, sessions, cloudConnection, signIn, githubSignIn };
 }
 
 describe('registerCloudAuthIpc', () => {
@@ -92,6 +99,10 @@ describe('registerCloudAuthIpc', () => {
       'SIGN_UP',
       'FORGOT_PASSWORD',
       'GITHUB_SIGN_IN_BEGIN',
+      'GITHUB_SIGN_IN_STATUS',
+      'GITHUB_SIGN_IN_CANCEL',
+      'GITHUB_SIGN_IN_REOPEN',
+      'GITHUB_SIGN_IN_COPY_LINK',
       'CLOUD_CONNECTION_BEGIN',
       'CLOUD_CONNECTION_CURRENT',
       'CLOUD_CONNECTION_STATUS',
@@ -291,13 +302,47 @@ describe('registerCloudAuthIpc', () => {
   });
 
   it('starts the GitHub attempt without an origin Profile and opens the recovery page', async () => {
-    const { handlers, cloudConnection, signIn } = registerFixture();
+    const { handlers, githubSignIn, signIn } = registerFixture();
 
     await handlers.get(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN)?.({}, { remember: false } as never);
-    expect(cloudConnection.beginWithoutProfile).toHaveBeenCalledWith({ remember: false });
+    expect(githubSignIn.begin).toHaveBeenCalledWith({ remember: false });
 
     await handlers.get(CloudAuthChannels.FORGOT_PASSWORD)?.({});
     expect(signIn.openPasswordRecovery).toHaveBeenCalled();
+  });
+
+  it('abandons browser login when its identity window closes, while allowing profile activation to close it', async () => {
+    const { handlers, githubSignIn } = registerFixture();
+    const sender = Object.assign(new EventEmitter(), { isDestroyed: () => false });
+    await handlers.get(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN)?.({ sender }, {
+      remember: true,
+    } as never);
+    githubSignIn.getStatus.mockReturnValue(ok({ status: 'awaiting_authorization' }) as never);
+    sender.emit('destroyed');
+    expect(githubSignIn.dispose).toHaveBeenCalledTimes(1);
+    await handlers.get(CloudAuthChannels.GITHUB_SIGN_IN_BEGIN)?.({ sender }, {
+      remember: true,
+    } as never);
+    githubSignIn.getStatus.mockReturnValue(ok({ status: 'connecting_profile' }) as never);
+    sender.emit('destroyed');
+    expect(githubSignIn.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    CloudAuthChannels.GITHUB_SIGN_IN_REOPEN,
+    CloudAuthChannels.GITHUB_SIGN_IN_COPY_LINK,
+    CloudAuthChannels.GITHUB_SIGN_IN_CANCEL,
+    CloudAuthChannels.GITHUB_SIGN_IN_STATUS,
+  ])('rejects arbitrary browser targets supplied over %s', async (channel) => {
+    const { handlers, githubSignIn } = registerFixture();
+    expect(
+      await handlers.get(channel)?.({}, {
+        attemptId: '8c7e083e-1b4c-42e6-901f-979d9a7b8b32',
+        url: 'https://evil.test',
+      } as never),
+    ).toMatchObject({ ok: false, error: { code: 'INVALID_REQUEST' } });
+    expect(githubSignIn.reopen).not.toHaveBeenCalled();
+    expect(githubSignIn.copyLink).not.toHaveBeenCalled();
   });
 
   it('never returns a remembered session while the local runtime is locked', async () => {
